@@ -51,48 +51,48 @@ class TabataEngineImpl(
                 while (isPaused && isActive) {
                     delay(PAUSE_CHECK_MS)
                 }
-                if (!isActive) break
 
-                val now = clock.currentTimeMillis()
-                val elapsed = now - startTime - totalPausedMs
-                val phaseDuration = if (phase == TabataPhase.Work) config.workMillis else config.restMillis
-                val phaseEnd = phaseStartElapsed + phaseDuration
-                val remainingInPhase = (phaseEnd - elapsed).coerceAtLeast(0L)
+                if (isActive) {
+                    val now = clock.currentTimeMillis()
+                    val elapsed = now - startTime - totalPausedMs
+                    val phaseDuration = if (phase == TabataPhase.Work) config.workMillis else config.restMillis
+                    val phaseEnd = phaseStartElapsed + phaseDuration
+                    val remainingInPhase = (phaseEnd - elapsed).coerceAtLeast(0L)
 
-                _events.emit(
-                    TabataEvent.Tick(
-                        phase = phase,
-                        remainingInPhaseMillis = remainingInPhase,
-                        elapsedMillis = elapsed,
+                    _events.emit(
+                        TabataEvent.Tick(
+                            phase = phase,
+                            remainingInPhaseMillis = remainingInPhase,
+                            elapsedMillis = elapsed,
+                        )
                     )
-                )
 
-                if (elapsed >= phaseEnd) {
-                    // Phase complete — advance the accumulated phase clock.
-                    phaseStartElapsed += phaseDuration
+                    if (elapsed >= phaseEnd) {
+                        // Phase complete — advance the accumulated phase clock.
+                        phaseStartElapsed += phaseDuration
 
-                    // Check for workout completion BEFORE starting the next phase.
-                    if (phaseStartElapsed >= config.totalDurationMillis) {
-                        _events.emit(TabataEvent.WorkoutCompleted)
-                        return@launch
-                    }
+                        // Check for workout completion BEFORE starting the next phase.
+                        if (phaseStartElapsed >= config.totalDurationMillis) {
+                            _events.emit(TabataEvent.WorkoutCompleted)
+                            return@launch
+                        }
 
-                    // Switch phase and announce it.
-                    phase = if (phase == TabataPhase.Work) TabataPhase.Rest else TabataPhase.Work
-                    if (phase == TabataPhase.Work) {
-                        _events.emit(TabataEvent.WorkStarted)
+                        // Switch phase and announce it.
+                        phase = if (phase == TabataPhase.Work) TabataPhase.Rest else TabataPhase.Work
+                        if (phase == TabataPhase.Work) {
+                            _events.emit(TabataEvent.WorkStarted)
+                        } else {
+                            _events.emit(TabataEvent.RestStarted)
+                        }
                     } else {
-                        _events.emit(TabataEvent.RestStarted)
+                        // Sleep until the earlier of the next UI tick or the end of this phase.
+                        val absolutePhaseEnd = startTime + totalPausedMs + phaseEnd
+                        val nextUiTick = now + TICK_MS
+                        val sleepUntil = minOf(absolutePhaseEnd, nextUiTick)
+                        val sleepMs = (sleepUntil - clock.currentTimeMillis()).coerceAtLeast(0L)
+                        if (sleepMs > 0) delay(sleepMs)
                     }
-                    continue
                 }
-
-                // Sleep until the earlier of the next UI tick or the end of this phase.
-                val absolutePhaseEnd = startTime + totalPausedMs + phaseEnd
-                val nextUiTick = now + TICK_MS
-                val sleepUntil = minOf(absolutePhaseEnd, nextUiTick)
-                val sleepMs = (sleepUntil - clock.currentTimeMillis()).coerceAtLeast(0L)
-                if (sleepMs > 0) delay(sleepMs)
             }
         }
     }
