@@ -12,35 +12,35 @@ import javax.inject.Inject
  */
 class ToneAudioPlayer @Inject constructor() : AudioPlayer {
 
+    @Volatile
     private var toneGenerator: ToneGenerator? = createGenerator()
 
     override fun playIntervalBeep() {
-        ensureGenerator()
-        toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, BEEP_DURATION_MS)
+        ensureGenerator()?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, BEEP_DURATION_MS)
     }
 
     override fun playCompletionSound() {
-        ensureGenerator()
-        toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE, COMPLETION_DURATION_MS)
+        ensureGenerator()?.startTone(ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE, COMPLETION_DURATION_MS)
     }
 
     override fun playWorkStartBeep() {
-        ensureGenerator()
-        toneGenerator?.startTone(ToneGenerator.TONE_CDMA_HIGH_SS, BEEP_DURATION_MS)
+        ensureGenerator()?.startTone(ToneGenerator.TONE_CDMA_HIGH_SS, BEEP_DURATION_MS)
     }
 
     override fun playRestStartBeep() {
-        ensureGenerator()
-        toneGenerator?.startTone(ToneGenerator.TONE_CDMA_LOW_SS, BEEP_DURATION_MS)
+        ensureGenerator()?.startTone(ToneGenerator.TONE_CDMA_LOW_SS, BEEP_DURATION_MS)
     }
 
+    @Synchronized
     override fun release() {
         toneGenerator?.release()
         toneGenerator = null
     }
 
-    private fun ensureGenerator() {
+    @Synchronized
+    private fun ensureGenerator(): ToneGenerator? {
         if (toneGenerator == null) toneGenerator = createGenerator()
+        return toneGenerator
     }
 
     private fun createGenerator(): ToneGenerator? = runCatching {
