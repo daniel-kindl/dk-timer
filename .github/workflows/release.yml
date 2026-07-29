@@ -28,15 +28,106 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Validate SemVer tag and version consistency
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF_NAME}"
+
+          # 1. Tag must be strict SemVer MAJOR.MINOR.PATCH (https://semver.org/)
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag '$TAG' is not valid SemVer (expected vMAJOR.MINOR.PATCH, see https://semver.org/)"
+            exit 1
+          fi
+
+          NEW_VERSION="${TAG#v}"
+          IFS='.' read -r NEW_MAJOR NEW_MINOR NEW_PATCH <<< "$NEW_VERSION"
+
+          # 2. Tag must match versionName in app/build.gradle.kts
+          BUILD_VERSION=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
+          if [[ "$BUILD_VERSION" != "$NEW_VERSION" ]]; then
+            echo "::error::Tag $TAG does not match versionName \"$BUILD_VERSION\" in app/build.gradle.kts"
+            exit 1
+          fi
+
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [[ -n "$PREV_TAG" ]]; then
+            PREV_VERSION="${PREV_TAG#v}"
+            IFS='.' read -r PREV_MAJOR PREV_MINOR PREV_PATCH <<< "$PREV_VERSION"
+
+            # 3. New version must be strictly greater than the previous release
+            if (( NEW_MAJOR < PREV_MAJOR )) || \
+               (( NEW_MAJOR == PREV_MAJOR && NEW_MINOR < PREV_MINOR )) || \
+               (( NEW_MAJOR == PREV_MAJOR && NEW_MINOR == PREV_MINOR && NEW_PATCH <= PREV_PATCH )); then
+              echo "::error::New version $NEW_VERSION is not greater than previous release $PREV_VERSION"
+              exit 1
+            fi
+
+            if (( NEW_MAJOR > PREV_MAJOR )); then
+              ACTUAL_BUMP="major"
+            elif (( NEW_MINOR > PREV_MINOR )); then
+              ACTUAL_BUMP="minor"
+            else
+              ACTUAL_BUMP="patch"
+            fi
+
+            # 4. Bump level must match what the commits since PREV_TAG require,
+            #    per Conventional Commits (https://www.conventionalcommits.org/en/v1.0.0/):
+            #    a "type!:" subject or "BREAKING CHANGE:" footer requires major,
+            #    a "feat:" commit requires at least minor, anything else needs at least patch.
+            REQUIRED_BUMP="patch"
+
+            while IFS= read -r subject; do
+              [[ -z "$subject" ]] && continue
+              if [[ "$subject" =~ ^[a-z]+(\([a-zA-Z0-9._-]+\))?!: ]]; then
+                REQUIRED_BUMP="major"
+              elif [[ "$subject" =~ ^feat(\([a-zA-Z0-9._-]+\))?: ]] && [[ "$REQUIRED_BUMP" != "major" ]]; then
+                REQUIRED_BUMP="minor"
+              fi
+            done < <(git log --no-merges --pretty=format:"%s" "$PREV_TAG"..HEAD)
+
+            if git log --no-merges --pretty=format:"%b" "$PREV_TAG"..HEAD | grep -q "^BREAKING CHANGE:"; then
+              REQUIRED_BUMP="major"
+            fi
+
+            rank() { case "$1" in major) echo 3 ;; minor) echo 2 ;; patch) echo 1 ;; esac; }
+
+            if (( $(rank "$ACTUAL_BUMP") < $(rank "$REQUIRED_BUMP") )); then
+              echo "::error::Commits since $PREV_TAG require at least a $REQUIRED_BUMP bump, but $TAG is only a $ACTUAL_BUMP bump"
+              exit 1
+            fi
+          else
+            echo "No previous tag found; skipping monotonic/bump-level checks for the first release."
+          fi
+
+          echo "Version checks passed for $TAG"
+
       - name: Run full test suite
         run: ./gradlew testDebugUnitTest --stacktrace
 
-      - name: Build APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Decode signing keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${KEYSTORE_BASE64:-}" ]]; then
+            echo "::error::Secret KEYSTORE_BASE64 is not set. Add KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS and KEY_PASSWORD as repository secrets to sign releases (see CONTRIBUTING.md)."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "${{ runner.temp }}/release.keystore"
+          echo "KEYSTORE_FILE=${{ runner.temp }}/release.keystore" >> "$GITHUB_ENV"
+
+      - name: Build signed release APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease --stacktrace
 
       - name: Extract version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
 
       - name: Generate changelog from commits
         id: changelog
@@ -47,9 +138,9 @@ jobs:
           else
             CHANGES=$(git log --oneline --no-merges)
           fi
-          echo "CHANGES<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "CHANGES<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$CHANGES" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -62,6 +153,6 @@ jobs:
 
             ---
             **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.version.outputs.VERSION }}...HEAD
-          files: app/build/outputs/apk/debug/*.apk
+          files: app/build/outputs/apk/release/*.apk
           draft: false
           prerelease: false
