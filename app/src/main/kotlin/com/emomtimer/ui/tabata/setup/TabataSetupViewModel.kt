@@ -41,7 +41,10 @@ data class TabataSetupUiState(
             min > 0 -> "${min}min"
             else -> "${sec}s"
         }
-        return "${fmt(totalMinutes, totalSeconds)} / ${fmt(workMinutes, workSeconds)} work / ${fmt(restMinutes, restSeconds)} rest"
+        val total = fmt(totalMinutes, totalSeconds)
+        val work = fmt(workMinutes, workSeconds)
+        val rest = fmt(restMinutes, restSeconds)
+        return "$total / $work work / $rest rest"
     }
 }
 

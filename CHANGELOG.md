@@ -11,6 +11,27 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.0.1] - 2026-07-29
+
+### Fixed
+- **Audio**: synchronized `ToneAudioPlayer`'s `ToneGenerator` lifecycle so concurrent
+  release/recreate from independent session ViewModels can no longer race
+- **Session**: scoped the keep-screen-on flag to active EMOM/Tabata session screens
+  instead of the whole app, removing unnecessary battery drain on Home/Setup/Settings
+- **Tabata engine**: restructured the main timing loop to resolve a detekt readability
+  finding, with no change to the drift-free timing behavior
+
+### Refactored
+- Extracted a shared `FeedbackTrigger` used by both `SessionViewModel` and
+  `TabataSessionViewModel`, eliminating duplicated settings-gated sound/vibration logic
+
+### CI
+- Conventional Commits are now enforced via a local hook and a PR check
+- The release workflow validates SemVer tag/version consistency and builds a signed
+  release APK instead of a debug build
+
+---
+
 ## [2.0.0] - 2026-05-06
 
 ### Added
