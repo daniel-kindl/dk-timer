@@ -4,18 +4,16 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emomtimer.data.audio.AudioPlayer
-import com.emomtimer.data.vibration.VibrationManager
+import com.emomtimer.data.feedback.FeedbackTrigger
 import com.emomtimer.domain.engine.TabataEngineFactory
 import com.emomtimer.domain.model.SessionStatus
 import com.emomtimer.domain.model.TabataConfig
 import com.emomtimer.domain.model.TabataEvent
 import com.emomtimer.domain.model.TabataPhase
-import com.emomtimer.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -31,9 +29,8 @@ data class TabataSessionUiState(
 @HiltViewModel
 class TabataSessionViewModel @Inject constructor(
     private val engineFactory: TabataEngineFactory,
-    private val settingsRepository: SettingsRepository,
+    private val feedbackTrigger: FeedbackTrigger,
     private val audioPlayer: AudioPlayer,
-    private val vibrationManager: VibrationManager,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -66,18 +63,18 @@ class TabataSessionViewModel @Inject constructor(
                         )
                     }
 
-                    is TabataEvent.WorkStarted -> triggerFeedback(
+                    is TabataEvent.WorkStarted -> feedbackTrigger.trigger(
                         isCompletion = false,
                         playSound = { audioPlayer.playWorkStartBeep() },
                     )
 
-                    is TabataEvent.RestStarted -> triggerFeedback(
+                    is TabataEvent.RestStarted -> feedbackTrigger.trigger(
                         isCompletion = false,
                         playSound = { audioPlayer.playRestStartBeep() },
                     )
 
                     is TabataEvent.WorkoutCompleted -> {
-                        triggerFeedback(
+                        feedbackTrigger.trigger(
                             isCompletion = true,
                             playSound = { audioPlayer.playCompletionSound() },
                         )
@@ -85,14 +82,6 @@ class TabataSessionViewModel @Inject constructor(
                     }
                 }
             }
-        }
-    }
-
-    private suspend fun triggerFeedback(isCompletion: Boolean, playSound: () -> Unit) {
-        val settings = settingsRepository.getSettings().first()
-        if (settings.soundEnabled) playSound()
-        if (settings.vibrationEnabled) {
-            if (isCompletion) vibrationManager.vibrateCompletion() else vibrationManager.vibrateInterval()
         }
     }
 

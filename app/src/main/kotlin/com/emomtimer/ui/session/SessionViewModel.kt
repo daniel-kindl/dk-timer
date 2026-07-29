@@ -4,17 +4,15 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emomtimer.data.audio.AudioPlayer
-import com.emomtimer.data.vibration.VibrationManager
+import com.emomtimer.data.feedback.FeedbackTrigger
 import com.emomtimer.domain.engine.TimerEngineFactory
 import com.emomtimer.domain.model.SessionStatus
 import com.emomtimer.domain.model.TimerConfig
 import com.emomtimer.domain.model.TimerEvent
-import com.emomtimer.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -31,9 +29,8 @@ data class SessionUiState(
 @HiltViewModel
 class SessionViewModel @Inject constructor(
     private val timerEngineFactory: TimerEngineFactory,
-    private val settingsRepository: SettingsRepository,
+    private val feedbackTrigger: FeedbackTrigger,
     private val audioPlayer: AudioPlayer,
-    private val vibrationManager: VibrationManager,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -73,24 +70,16 @@ class SessionViewModel @Inject constructor(
                         )
                     }
 
-                    is TimerEvent.IntervalCompleted -> triggerFeedback(isCompletion = false)
+                    is TimerEvent.IntervalCompleted -> feedbackTrigger.trigger(isCompletion = false) {
+                        audioPlayer.playIntervalBeep()
+                    }
 
                     is TimerEvent.WorkoutCompleted -> {
-                        triggerFeedback(isCompletion = true)
+                        feedbackTrigger.trigger(isCompletion = true) { audioPlayer.playCompletionSound() }
                         _uiState.update { it.copy(status = SessionStatus.Completed) }
                     }
                 }
             }
-        }
-    }
-
-    private suspend fun triggerFeedback(isCompletion: Boolean) {
-        val settings = settingsRepository.getSettings().first()
-        if (settings.soundEnabled) {
-            if (isCompletion) audioPlayer.playCompletionSound() else audioPlayer.playIntervalBeep()
-        }
-        if (settings.vibrationEnabled) {
-            if (isCompletion) vibrationManager.vibrateCompletion() else vibrationManager.vibrateInterval()
         }
     }
 
