@@ -1,0 +1,46 @@
+name: Commit Lint
+
+on:
+  pull_request:
+    branches: [dev, main]
+
+jobs:
+  commit-lint:
+    name: Validate Conventional Commits
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate every commit message in this PR
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          # https://www.conventionalcommits.org/en/v1.0.0/
+          pattern='^(feat|fix|build|chore|ci|docs|style|refactor|perf|test|revert)(\([a-zA-Z0-9._-]+\))?!?: .+'
+
+          failed=0
+          while IFS= read -r line; do
+            sha="${line%% *}"
+            subject="${line#* }"
+
+            if [[ "$subject" =~ ^Merge ]]; then
+              continue
+            fi
+
+            if [[ ! "$subject" =~ $pattern ]]; then
+              echo "::error::Commit $sha does not follow Conventional Commits: \"$subject\""
+              failed=1
+            fi
+          done < <(git log --no-merges --pretty=format:"%H %s" "$BASE_SHA..$HEAD_SHA")
+
+          if [[ "$failed" -ne 0 ]]; then
+            echo "One or more commits do not follow https://www.conventionalcommits.org/en/v1.0.0/"
+            exit 1
+          fi

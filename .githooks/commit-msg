@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Enforces Conventional Commits (https://www.conventionalcommits.org/en/v1.0.0/).
+# Enable once per clone: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+commit_msg_file="$1"
+subject=$(head -n1 "$commit_msg_file")
+
+# Merge commits and fixup!/squash! commits are exempt.
+if [[ "$subject" =~ ^Merge ]] || [[ "$subject" =~ ^(fixup|squash)! ]]; then
+    exit 0
+fi
+
+pattern='^(feat|fix|build|chore|ci|docs|style|refactor|perf|test|revert)(\([a-zA-Z0-9._-]+\))?!?: .+'
+
+if [[ ! "$subject" =~ $pattern ]]; then
+    echo "ERROR: commit message does not follow Conventional Commits:" >&2
+    echo "  $subject" >&2
+    echo >&2
+    echo "Expected format: <type>(<scope>)?!?: <description>" >&2
+    echo "Allowed types: feat fix build chore ci docs style refactor perf test revert" >&2
+    echo "See https://www.conventionalcommits.org/en/v1.0.0/" >&2
+    exit 1
+fi
