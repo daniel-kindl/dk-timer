@@ -11,3 +11,6 @@ local.properties
 keystore.properties
 *.jks
 *.keystore
+
+# Design-tool export, not part of the versioned codebase
+/DK Timer logo design/

@@ -3,7 +3,6 @@ package com.emomtimer.ui.settings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.ClickableText
@@ -15,7 +14,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -38,6 +36,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.emomtimer.ui.components.SessionProgressBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -198,11 +197,7 @@ private fun UpdateSection(
             ListItem(
                 headlineContent = { Text("Downloading update… ${state.progressPercent}%") },
                 supportingContent = {
-                    @Suppress("DEPRECATION")
-                    LinearProgressIndicator(
-                        progress = state.progressPercent / PERCENT_MAX,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    SessionProgressBar(progress = state.progressPercent / PERCENT_MAX)
                 },
             )
 

@@ -3,6 +3,8 @@ package com.emomtimer.ui.tabata.setup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emomtimer.domain.model.TabataPreset
+import com.emomtimer.domain.model.formatDuration
+import com.emomtimer.domain.model.minutesSecondsToMillis
 import com.emomtimer.domain.repository.TabataPresetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,26 +26,21 @@ data class TabataSetupUiState(
     val restSeconds: Int = 15,
 ) {
     val totalDurationMillis: Long
-        get() = (totalMinutes * 60L + totalSeconds) * 1_000L
+        get() = minutesSecondsToMillis(totalMinutes, totalSeconds)
 
     val workMillis: Long
-        get() = (workMinutes * 60L + workSeconds) * 1_000L
+        get() = minutesSecondsToMillis(workMinutes, workSeconds)
 
     val restMillis: Long
-        get() = (restMinutes * 60L + restSeconds) * 1_000L
+        get() = minutesSecondsToMillis(restMinutes, restSeconds)
 
     val isValid: Boolean
         get() = totalDurationMillis > 0 && workMillis > 0 && restMillis > 0
 
     fun defaultPresetName(): String {
-        fun fmt(min: Int, sec: Int): String = when {
-            min > 0 && sec > 0 -> "${min}min ${sec}s"
-            min > 0 -> "${min}min"
-            else -> "${sec}s"
-        }
-        val total = fmt(totalMinutes, totalSeconds)
-        val work = fmt(workMinutes, workSeconds)
-        val rest = fmt(restMinutes, restSeconds)
+        val total = formatDuration(totalMinutes, totalSeconds)
+        val work = formatDuration(workMinutes, workSeconds)
+        val rest = formatDuration(restMinutes, restSeconds)
         return "$total / $work work / $rest rest"
     }
 }

@@ -3,6 +3,7 @@ package com.emomtimer.ui.tabata.session
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emomtimer.core.format.sessionProgress
 import com.emomtimer.data.audio.AudioPlayer
 import com.emomtimer.data.feedback.FeedbackTrigger
 import com.emomtimer.domain.engine.TabataEngineFactory
@@ -29,7 +30,10 @@ data class TabataSessionUiState(
     val totalDurationMillis: Long = 0L,
     val currentRound: Int = 1,
     val totalRounds: Int = 0,
-)
+) {
+    val progressFraction: Float
+        get() = sessionProgress(elapsedMillis, totalDurationMillis)
+}
 
 private const val COUNTDOWN_START_SECONDS = 3
 private const val COUNTDOWN_TICK_MS = 1_000L

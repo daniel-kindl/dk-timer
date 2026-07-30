@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.emomtimer.ui.theme.JetBrainsMonoFamily
 
 private const val VIRTUAL_MULTIPLIER = 1_000
 
@@ -94,7 +95,7 @@ fun WheelPicker(
                 ) {
                     Text(
                         text = formatter(virtualIndex % count),
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.headlineMedium.copy(fontFamily = JetBrainsMonoFamily),
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
