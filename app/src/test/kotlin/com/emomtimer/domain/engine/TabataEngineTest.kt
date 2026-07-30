@@ -237,6 +237,57 @@ class TabataEngineTest {
     }
 
     // ──────────────────────────────────────────────────────────────────────
+    // Degenerate configs
+    // ──────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `workout completes after one round when total duration is zero`() = runTest {
+        val engine = engine()
+        val events = mutableListOf<TabataEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        engine.start(TabataConfig(workMillis = 1_000, restMillis = 500, totalDurationMillis = 0))
+        advanceTimeBy(1_200)
+
+        engine.stop()
+        job.cancel()
+
+        assertTrue("WorkoutCompleted must be emitted", events.any { it is TabataEvent.WorkoutCompleted })
+        assertTrue("No RestStarted since the work phase itself completes the workout",
+            events.none { it is TabataEvent.RestStarted })
+    }
+
+    @Test
+    fun `computeTotalRounds does not hang when only the work phase is zero-length`() = runTest {
+        val engine = engine()
+        val events = mutableListOf<TabataEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        engine.start(TabataConfig(workMillis = 0, restMillis = 500, totalDurationMillis = 1_500))
+        advanceTimeBy(1_600)
+
+        engine.stop()
+        job.cancel()
+
+        assertTrue("WorkoutCompleted must eventually be emitted", events.any { it is TabataEvent.WorkoutCompleted })
+    }
+
+    @Test
+    fun `computeTotalRounds does not hang when only the rest phase is zero-length`() = runTest {
+        val engine = engine()
+        val events = mutableListOf<TabataEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        engine.start(TabataConfig(workMillis = 500, restMillis = 0, totalDurationMillis = 1_500))
+        advanceTimeBy(1_600)
+
+        engine.stop()
+        job.cancel()
+
+        assertTrue("WorkoutCompleted must eventually be emitted", events.any { it is TabataEvent.WorkoutCompleted })
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
     // Round counting
     // ──────────────────────────────────────────────────────────────────────
 

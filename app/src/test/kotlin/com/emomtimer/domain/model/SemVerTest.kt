@@ -1,6 +1,7 @@
 package com.emomtimer.domain.model
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -29,6 +30,18 @@ class SemVerTest {
     @Test
     fun `equal versions compare as equal`() {
         assertEquals(0, SemVer(1, 2, 3).compareTo(SemVer(1, 2, 3)))
+    }
+
+    @Test
+    fun `a newer major version is greater regardless of minor and patch`() {
+        // Pins the exact comparison UpdateViewModel.toUiState() relies on to decide
+        // whether a fetched release is newer than the installed version.
+        assertTrue(SemVer(3, 0, 0) > SemVer(2, 9, 9))
+    }
+
+    @Test
+    fun `equal versions are not strictly newer`() {
+        assertFalse(SemVer(2, 2, 0) > SemVer(2, 2, 0))
     }
 
     @Test

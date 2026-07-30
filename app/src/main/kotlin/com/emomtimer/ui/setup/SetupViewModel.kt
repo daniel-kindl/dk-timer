@@ -3,6 +3,8 @@ package com.emomtimer.ui.setup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emomtimer.domain.model.Preset
+import com.emomtimer.domain.model.formatDuration
+import com.emomtimer.domain.model.minutesSecondsToMillis
 import com.emomtimer.domain.repository.PresetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,10 +24,10 @@ data class SetupUiState(
     val intervalSeconds: Int = 0,
 ) {
     val totalDurationMillis: Long
-        get() = (totalMinutes * 60L + totalSeconds) * 1_000L
+        get() = minutesSecondsToMillis(totalMinutes, totalSeconds)
 
     val intervalMillis: Long
-        get() = (intervalMinutes * 60L + intervalSeconds) * 1_000L
+        get() = minutesSecondsToMillis(intervalMinutes, intervalSeconds)
 
     val isValid: Boolean
         get() = totalDurationMillis > 0 && intervalMillis > 0
@@ -34,14 +36,8 @@ data class SetupUiState(
     val intervalExceedsTotal: Boolean
         get() = isValid && intervalMillis > totalDurationMillis
 
-    fun defaultPresetName(): String {
-        fun fmt(min: Int, sec: Int): String = when {
-            min > 0 && sec > 0 -> "${min}min ${sec}s"
-            min > 0 -> "${min}min"
-            else -> "${sec}s"
-        }
-        return "${fmt(totalMinutes, totalSeconds)} / ${fmt(intervalMinutes, intervalSeconds)}"
-    }
+    fun defaultPresetName(): String =
+        "${formatDuration(totalMinutes, totalSeconds)} / ${formatDuration(intervalMinutes, intervalSeconds)}"
 }
 
 @HiltViewModel

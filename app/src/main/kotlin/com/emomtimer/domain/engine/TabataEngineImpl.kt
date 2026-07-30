@@ -113,6 +113,9 @@ class TabataEngineImpl(
      * how many Work phases (rounds) this workout will run, consistent with the engine's
      * own "never cut a phase short" completion policy.
      */
+    // workMillis == 0 && restMillis == 0 together never advances phaseStartElapsed,
+    // looping forever; unreachable via the UI since TabataSetupUiState.isValid requires
+    // both workMillis and restMillis > 0.
     private fun computeTotalRounds(config: TabataConfig): Int {
         var phase = TabataPhase.Work
         var phaseStartElapsed = 0L

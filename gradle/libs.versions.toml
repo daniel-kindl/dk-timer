@@ -10,6 +10,7 @@ datastorePreferences = "1.0.0"
 coroutines = "1.7.3"
 junit = "4.13.2"
 mockk = "1.13.9"
+orgJson = "20231013"
 activityCompose = "1.8.2"
 coreKtx = "1.12.0"
 detekt = "1.23.5"
@@ -44,6 +45,7 @@ compose-material-icons-extended = { group = "androidx.compose.material", name = 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

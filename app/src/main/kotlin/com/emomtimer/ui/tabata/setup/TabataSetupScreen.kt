@@ -8,17 +8,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,8 +29,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.emomtimer.domain.model.TabataPreset
+import com.emomtimer.ui.components.DeletePresetDialog
 import com.emomtimer.ui.components.DurationPicker
 import com.emomtimer.ui.components.PresetsSection
+import com.emomtimer.ui.components.SavePresetDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,47 +48,25 @@ fun TabataSetupScreen(
     var presetToDelete by remember { mutableStateOf<TabataPreset?>(null) }
 
     if (showSaveDialog) {
-        AlertDialog(
-            onDismissRequest = { showSaveDialog = false },
-            title = { Text("Save Preset") },
-            text = {
-                OutlinedTextField(
-                    value = dialogPresetName,
-                    onValueChange = { dialogPresetName = it },
-                    label = { Text("Preset name") },
-                    singleLine = true,
-                )
+        SavePresetDialog(
+            name = dialogPresetName,
+            onNameChange = { dialogPresetName = it },
+            onSave = {
+                viewModel.savePreset(dialogPresetName)
+                showSaveDialog = false
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.savePreset(dialogPresetName)
-                        showSaveDialog = false
-                    },
-                ) { Text("Save") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showSaveDialog = false }) { Text("Cancel") }
-            },
+            onDismiss = { showSaveDialog = false },
         )
     }
 
     presetToDelete?.let { preset ->
-        AlertDialog(
-            onDismissRequest = { presetToDelete = null },
-            title = { Text("Delete Preset") },
-            text = { Text("Delete \"${preset.name}\"?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.deletePreset(preset.id)
-                        presetToDelete = null
-                    },
-                ) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+        DeletePresetDialog(
+            presetName = preset.name,
+            onConfirm = {
+                viewModel.deletePreset(preset.id)
+                presetToDelete = null
             },
-            dismissButton = {
-                TextButton(onClick = { presetToDelete = null }) { Text("Cancel") }
-            },
+            onDismiss = { presetToDelete = null },
         )
     }
 

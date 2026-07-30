@@ -173,5 +173,56 @@ class TimerEngineTest {
         val tick = events.filterIsInstance<TimerEvent.Tick>().first()
         assertEquals("totalIntervals should be 4", 4, tick.totalIntervals)
     }
+
+    // Note: totalDurationMillis = 0 / intervalMillis = 0 are not tested here — both are
+    // rejected by TimerConfig's own init block (require(... > 0)), so they can't be
+    // constructed at all, let alone reach the engine.
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Pause / resume
+    // ──────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `pausing and resuming does not cause extra interval events`() = runTest {
+        val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
+        val events = mutableListOf<TimerEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        engine.start(TimerConfig(intervalMillis = 1_000, totalDurationMillis = 5_000))
+        advanceTimeBy(400)   // 400ms into first interval
+        engine.pause()
+        advanceTimeBy(2_000) // 2s paused (should not count)
+        engine.resume()
+        advanceTimeBy(5_000) // advance enough for the rest of the workout
+
+        engine.stop()
+        job.cancel()
+
+        val intervals = events.filterIsInstance<TimerEvent.IntervalCompleted>()
+        assertEquals("Pause must not add extra interval events", 5, intervals.size)
+        assertEquals(listOf(1, 2, 3, 4, 5), intervals.map { it.intervalNumber })
+    }
+
+    @Test
+    fun `interval fires at correct time after a pause`() = runTest {
+        val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
+        val events = mutableListOf<TimerEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // 2s interval; pause 500ms in, resume 1s later. The interval boundary must
+        // land at 2s of *active* time (500 + 1500 active), unshifted by the 1s pause.
+        engine.start(TimerConfig(intervalMillis = 2_000, totalDurationMillis = 9_000))
+        advanceTimeBy(500)   // 500ms into interval
+        engine.pause()
+        advanceTimeBy(1_000) // 1s paused
+        engine.resume()
+        advanceTimeBy(1_600) // 500 + 1600 = 2100ms active elapsed → boundary crossed once
+
+        engine.stop()
+        job.cancel()
+
+        val intervals = events.filterIsInstance<TimerEvent.IntervalCompleted>()
+        assertEquals("Exactly one interval event despite the pause", 1, intervals.size)
+    }
 }
 

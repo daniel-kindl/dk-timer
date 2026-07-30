@@ -1,8 +1,5 @@
 package com.emomtimer.ui.tabata.session
 
-import android.app.Activity
-import android.view.WindowManager
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -22,32 +19,27 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.emomtimer.core.format.formatCountdown
+import com.emomtimer.core.format.formatElapsed
 import com.emomtimer.domain.model.SessionStatus
 import com.emomtimer.domain.model.TabataPhase
+import com.emomtimer.ui.components.SessionLifecycleScaffold
+import com.emomtimer.ui.components.SessionProgressBar
 
 private val WorkBackground = Color(0xFFB71C1C)   // deep red
 private val RestBackground = Color(0xFF1B5E20)   // deep green
@@ -63,68 +55,43 @@ fun TabataSessionScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // Keep the screen on for the whole lifecycle of this screen (countdown through completion)
-    val activity = LocalContext.current as Activity
-    DisposableEffect(Unit) {
-        activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        onDispose {
-            activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
-    }
-
-    // Navigate back only on an explicit stop; Completed shows its own summary first
-    LaunchedEffect(state.status) {
-        if (state.status == SessionStatus.Stopped) {
-            onSessionFinished()
-        }
-    }
-
-    var showExitConfirm by rememberSaveable { mutableStateOf(false) }
-    val canExit = state.status == SessionStatus.Running || state.status == SessionStatus.Paused
-
-    BackHandler(enabled = canExit) { showExitConfirm = true }
-
-    if (showExitConfirm) {
-        ExitConfirmDialog(
-            onConfirm = {
-                showExitConfirm = false
-                viewModel.stopSession()
-            },
-            onDismiss = { showExitConfirm = false },
+    SessionLifecycleScaffold(
+        status = state.status,
+        onSessionFinished = onSessionFinished,
+        onStopSession = viewModel::stopSession,
+    ) { onRequestExit ->
+        val isPaused = state.status == SessionStatus.Paused
+        val background by animateColorAsState(
+            targetValue = tabataBackgroundColor(status = state.status, phase = state.phase, isPaused = isPaused),
+            animationSpec = tween(durationMillis = 300),
+            label = "phase-background",
         )
-    }
 
-    val isPaused = state.status == SessionStatus.Paused
-    val background by animateColorAsState(
-        targetValue = tabataBackgroundColor(status = state.status, phase = state.phase, isPaused = isPaused),
-        animationSpec = tween(durationMillis = 300),
-        label = "phase-background",
-    )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(background),
+            contentAlignment = Alignment.Center,
+        ) {
+            when (state.status) {
+                SessionStatus.CountingDown -> CountdownContent(
+                    secondsRemaining = state.countdownSecondsRemaining,
+                    onStop = onRequestExit,
+                )
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(background),
-        contentAlignment = Alignment.Center,
-    ) {
-        when (state.status) {
-            SessionStatus.CountingDown -> CountdownContent(
-                secondsRemaining = state.countdownSecondsRemaining,
-                onStop = { showExitConfirm = true },
-            )
+                SessionStatus.Completed -> CompletionContent(
+                    totalElapsedMillis = state.elapsedMillis,
+                    onDone = onSessionFinished,
+                )
 
-            SessionStatus.Completed -> CompletionContent(
-                totalElapsedMillis = state.elapsedMillis,
-                onDone = onSessionFinished,
-            )
-
-            else -> RunningContent(
-                state = state,
-                onPauseResume = {
-                    if (isPaused) viewModel.resumeSession() else viewModel.pauseSession()
-                },
-                onStop = { showExitConfirm = true },
-            )
+                else -> RunningContent(
+                    state = state,
+                    onPauseResume = {
+                        if (isPaused) viewModel.resumeSession() else viewModel.pauseSession()
+                    },
+                    onStop = onRequestExit,
+                )
+            }
         }
     }
 }
@@ -279,10 +246,8 @@ private fun RunningContent(
                 color = OnPhaseBackground,
             )
             Spacer(Modifier.height(8.dp))
-            @Suppress("DEPRECATION")
-            LinearProgressIndicator(
-                progress = sessionProgress(state.elapsedMillis, state.totalDurationMillis),
-                modifier = Modifier.fillMaxWidth(),
+            SessionProgressBar(
+                progress = state.progressFraction,
                 color = OnPhaseBackground,
                 trackColor = OnPhaseBackground.copy(alpha = 0.2f),
             )
@@ -337,40 +302,4 @@ private fun RunningContent(
             }
         }
     }
-}
-
-@Composable
-private fun ExitConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Exit workout?") },
-        text = { Text("Your progress in this session will be lost.") },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("Exit", color = MaterialTheme.colorScheme.error)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
-        },
-    )
-}
-
-private fun sessionProgress(elapsedMillis: Long, totalDurationMillis: Long): Float {
-    if (totalDurationMillis <= 0L) return 0f
-    return (elapsedMillis.toFloat() / totalDurationMillis.toFloat()).coerceIn(0f, 1f)
-}
-
-private fun Long.formatCountdown(): String {
-    val totalSec = (this / 1_000).coerceAtLeast(0)
-    val min = totalSec / 60
-    val sec = totalSec % 60
-    return "%d:%02d".format(min, sec)
-}
-
-private fun Long.formatElapsed(): String {
-    val totalSec = this / 1_000
-    val min = totalSec / 60
-    val sec = totalSec % 60
-    return "%02d:%02d".format(min, sec)
 }
