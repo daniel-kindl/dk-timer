@@ -11,6 +11,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.1.0] - 2026-07-30
+
+### Added
+- **In-app updates**: the app now checks GitHub for new releases on startup and
+  surfaces available updates in the Settings screen with release notes
+- Downloads updates via Android's `DownloadManager` with progress tracking, then
+  installs via `PackageInstaller` (Android 12+) or an intent-based fallback on
+  older versions, handling the "install unknown apps" permission flow as needed
+
+---
+
 ## [2.0.1] - 2026-07-29
 
 ### Fixed
