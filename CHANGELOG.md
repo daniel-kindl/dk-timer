@@ -11,6 +11,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.2.0] - 2026-07-30
+
+### Added
+- **Pre-start countdown**: EMOM and Tabata sessions now count down 3-2-1
+  before the first interval begins, giving you time to get into position
+- **Progress bar**: both session screens now show an overall progress bar
+  alongside the elapsed time
+- **Tabata round counter**: the Tabata session screen now shows "ROUND X / Y",
+  matching EMOM
+- **Exit confirmation**: leaving an in-progress session (back gesture or the
+  STOP button) now asks for confirmation instead of exiting immediately
+- **Completion summary**: finishing a workout now shows a "Workout Complete!"
+  recap with total time instead of navigating away instantly
+
+---
+
 ## [2.1.0] - 2026-07-30
 
 ### Added
