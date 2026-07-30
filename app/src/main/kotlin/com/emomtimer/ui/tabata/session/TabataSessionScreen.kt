@@ -22,15 +22,12 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -50,6 +47,8 @@ import com.emomtimer.core.format.formatCountdown
 import com.emomtimer.core.format.formatElapsed
 import com.emomtimer.domain.model.SessionStatus
 import com.emomtimer.domain.model.TabataPhase
+import com.emomtimer.ui.components.ExitConfirmDialog
+import com.emomtimer.ui.components.SessionProgressBar
 
 private val WorkBackground = Color(0xFFB71C1C)   // deep red
 private val RestBackground = Color(0xFF1B5E20)   // deep green
@@ -281,10 +280,8 @@ private fun RunningContent(
                 color = OnPhaseBackground,
             )
             Spacer(Modifier.height(8.dp))
-            @Suppress("DEPRECATION")
-            LinearProgressIndicator(
+            SessionProgressBar(
                 progress = state.progressFraction,
-                modifier = Modifier.fillMaxWidth(),
                 color = OnPhaseBackground,
                 trackColor = OnPhaseBackground.copy(alpha = 0.2f),
             )
@@ -339,21 +336,4 @@ private fun RunningContent(
             }
         }
     }
-}
-
-@Composable
-private fun ExitConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Exit workout?") },
-        text = { Text("Your progress in this session will be lost.") },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("Exit", color = MaterialTheme.colorScheme.error)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
-        },
-    )
 }

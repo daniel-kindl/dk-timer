@@ -19,15 +19,12 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -45,6 +42,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.emomtimer.core.format.formatCountdown
 import com.emomtimer.core.format.formatElapsed
 import com.emomtimer.domain.model.SessionStatus
+import com.emomtimer.ui.components.ExitConfirmDialog
+import com.emomtimer.ui.components.SessionProgressBar
 
 @Composable
 fun ActiveSessionScreen(
@@ -252,11 +251,7 @@ private fun RunningContent(
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Spacer(Modifier.height(8.dp))
-            @Suppress("DEPRECATION")
-            LinearProgressIndicator(
-                progress = state.progressFraction,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            SessionProgressBar(progress = state.progressFraction)
         }
 
         Spacer(Modifier.height(8.dp))
@@ -309,21 +304,4 @@ private fun RunningContent(
             }
         }
     }
-}
-
-@Composable
-private fun ExitConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Exit workout?") },
-        text = { Text("Your progress in this session will be lost.") },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("Exit", color = MaterialTheme.colorScheme.error)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
-        },
-    )
 }
