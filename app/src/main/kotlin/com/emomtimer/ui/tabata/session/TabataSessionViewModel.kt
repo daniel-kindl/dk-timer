@@ -11,6 +11,8 @@ import com.emomtimer.domain.model.TabataConfig
 import com.emomtimer.domain.model.TabataEvent
 import com.emomtimer.domain.model.TabataPhase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,12 +21,18 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class TabataSessionUiState(
-    val status: SessionStatus = SessionStatus.Running,
+    val status: SessionStatus = SessionStatus.CountingDown,
+    val countdownSecondsRemaining: Int = COUNTDOWN_START_SECONDS,
     val phase: TabataPhase = TabataPhase.Work,
     val remainingInPhaseMillis: Long = 0L,
     val elapsedMillis: Long = 0L,
     val totalDurationMillis: Long = 0L,
+    val currentRound: Int = 1,
+    val totalRounds: Int = 0,
 )
+
+private const val COUNTDOWN_START_SECONDS = 3
+private const val COUNTDOWN_TICK_MS = 1_000L
 
 @HiltViewModel
 class TabataSessionViewModel @Inject constructor(
@@ -45,8 +53,21 @@ class TabataSessionViewModel @Inject constructor(
     )
     val uiState: StateFlow<TabataSessionUiState> = _uiState.asStateFlow()
 
+    private var countdownJob: Job? = null
+
     init {
         observeEvents()
+        countdownJob = viewModelScope.launch {
+            for (secondsLeft in COUNTDOWN_START_SECONDS - 1 downTo 0) {
+                delay(COUNTDOWN_TICK_MS)
+                _uiState.update { it.copy(countdownSecondsRemaining = secondsLeft) }
+            }
+            beginSession()
+        }
+    }
+
+    private fun beginSession() {
+        _uiState.update { it.copy(status = SessionStatus.Running) }
         engine.start(TabataConfig(workMillis, restMillis, totalDurationMillis))
     }
 
@@ -60,6 +81,8 @@ class TabataSessionViewModel @Inject constructor(
                             phase = event.phase,
                             remainingInPhaseMillis = event.remainingInPhaseMillis,
                             elapsedMillis = event.elapsedMillis,
+                            currentRound = event.currentRound,
+                            totalRounds = event.totalRounds,
                         )
                     }
 
@@ -96,6 +119,7 @@ class TabataSessionViewModel @Inject constructor(
     }
 
     fun stopSession() {
+        countdownJob?.cancel()
         engine.stop()
         _uiState.update { it.copy(status = SessionStatus.Stopped) }
     }

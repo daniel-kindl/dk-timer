@@ -1,3 +1,3 @@
 package com.emomtimer.domain.model
 
-enum class SessionStatus { Running, Paused, Stopped, Completed }
+enum class SessionStatus { CountingDown, Running, Paused, Stopped, Completed }

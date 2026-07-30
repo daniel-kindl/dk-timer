@@ -237,6 +237,71 @@ class TabataEngineTest {
     }
 
     // ──────────────────────────────────────────────────────────────────────
+    // Round counting
+    // ──────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `currentRound starts at 1 and increments only when a new Work phase starts`() = runTest {
+        val engine = engine()
+        val events = mutableListOf<TabataEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // 1s work, 0.5s rest, 3s total → 2 full cycles (2 rounds)
+        engine.start(TabataConfig(workMillis = 1_000, restMillis = 500, totalDurationMillis = 3_000))
+        advanceTimeBy(3_200)
+
+        engine.stop()
+        job.cancel()
+
+        val ticks = events.filterIsInstance<TabataEvent.Tick>()
+        val firstRestIdx = events.indexOfFirst { it is TabataEvent.RestStarted }
+        val ticksBeforeRest = events.subList(0, firstRestIdx).filterIsInstance<TabataEvent.Tick>()
+        assertTrue("Round must be 1 before the first rest starts",
+            ticksBeforeRest.all { it.currentRound == 1 })
+
+        val ticksInSecondWork = ticks.filter { it.phase == TabataPhase.Work && it.currentRound == 2 }
+        assertTrue("Round must reach 2 once the second work phase starts",
+            ticksInSecondWork.isNotEmpty())
+    }
+
+    @Test
+    fun `totalRounds is stable across all ticks for an exactly divisible duration`() = runTest {
+        val engine = engine()
+        val events = mutableListOf<TabataEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // 3s total, exactly 2 cycles of (1s work + 0.5s rest) → 2 rounds
+        engine.start(TabataConfig(workMillis = 1_000, restMillis = 500, totalDurationMillis = 3_000))
+        advanceTimeBy(3_200)
+
+        engine.stop()
+        job.cancel()
+
+        val ticks = events.filterIsInstance<TabataEvent.Tick>()
+        assertTrue("Should have tick events", ticks.isNotEmpty())
+        assertTrue("totalRounds must be 2 for every tick", ticks.all { it.totalRounds == 2 })
+    }
+
+    @Test
+    fun `totalRounds counts the trailing partial cycle as one more round`() = runTest {
+        val engine = engine()
+        val events = mutableListOf<TabataEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // 2.5s total, 1s work + 0.5s rest: cycle 1 ends at 1.5s (1 round done),
+        // cycle 2's work phase starts at 1.5s and runs to completion at 2.5s → 2 rounds total
+        engine.start(TabataConfig(workMillis = 1_000, restMillis = 500, totalDurationMillis = 2_500))
+        advanceTimeBy(4_000)
+
+        engine.stop()
+        job.cancel()
+
+        val ticks = events.filterIsInstance<TabataEvent.Tick>()
+        assertTrue("Should have tick events", ticks.isNotEmpty())
+        assertTrue("totalRounds must be 2", ticks.all { it.totalRounds == 2 })
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
     // Stop / restart
     // ──────────────────────────────────────────────────────────────────────
 
