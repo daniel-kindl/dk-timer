@@ -46,6 +46,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.emomtimer.core.format.formatCountdown
+import com.emomtimer.core.format.formatElapsed
 import com.emomtimer.domain.model.SessionStatus
 import com.emomtimer.domain.model.TabataPhase
 
@@ -281,7 +283,7 @@ private fun RunningContent(
             Spacer(Modifier.height(8.dp))
             @Suppress("DEPRECATION")
             LinearProgressIndicator(
-                progress = sessionProgress(state.elapsedMillis, state.totalDurationMillis),
+                progress = state.progressFraction,
                 modifier = Modifier.fillMaxWidth(),
                 color = OnPhaseBackground,
                 trackColor = OnPhaseBackground.copy(alpha = 0.2f),
@@ -354,23 +356,4 @@ private fun ExitConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
             TextButton(onClick = onDismiss) { Text("Cancel") }
         },
     )
-}
-
-private fun sessionProgress(elapsedMillis: Long, totalDurationMillis: Long): Float {
-    if (totalDurationMillis <= 0L) return 0f
-    return (elapsedMillis.toFloat() / totalDurationMillis.toFloat()).coerceIn(0f, 1f)
-}
-
-private fun Long.formatCountdown(): String {
-    val totalSec = (this / 1_000).coerceAtLeast(0)
-    val min = totalSec / 60
-    val sec = totalSec % 60
-    return "%d:%02d".format(min, sec)
-}
-
-private fun Long.formatElapsed(): String {
-    val totalSec = this / 1_000
-    val min = totalSec / 60
-    val sec = totalSec % 60
-    return "%02d:%02d".format(min, sec)
 }
