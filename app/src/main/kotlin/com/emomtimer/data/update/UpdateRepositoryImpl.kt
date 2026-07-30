@@ -33,7 +33,7 @@ class UpdateRepositoryImpl @Inject constructor() : UpdateRepository {
         }
     }
 
-    private fun parseRelease(body: String): AppUpdate {
+    internal fun parseRelease(body: String): AppUpdate {
         val json = JSONObject(body)
         val tagName = json.getString("tag_name")
         val version = SemVer.parse(tagName) ?: error("Malformed release tag: $tagName")

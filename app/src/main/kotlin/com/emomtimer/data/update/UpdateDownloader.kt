@@ -17,6 +17,12 @@ sealed interface DownloadStatus {
     data class Failed(val reason: String) : DownloadStatus
 }
 
+private const val PERCENT_MAX = 100
+
+/** Pure, Android-free percent calculation, guarded against a zero-byte [totalBytes]. */
+internal fun computeDownloadPercent(downloadedBytes: Long, totalBytes: Long): Int =
+    if (totalBytes > 0) ((downloadedBytes * PERCENT_MAX) / totalBytes).toInt() else 0
+
 @Singleton
 class UpdateDownloader @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -63,12 +69,10 @@ class UpdateDownloader @Inject constructor(
     private fun inProgressStatus(cursor: Cursor): DownloadStatus {
         val downloaded = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
         val total = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
-        val percent = if (total > 0) ((downloaded * PERCENT_MAX) / total).toInt() else 0
-        return DownloadStatus.InProgress(percent)
+        return DownloadStatus.InProgress(computeDownloadPercent(downloaded, total))
     }
 
     private companion object {
         const val APK_MIME_TYPE = "application/vnd.android.package-archive"
-        const val PERCENT_MAX = 100
     }
 }
