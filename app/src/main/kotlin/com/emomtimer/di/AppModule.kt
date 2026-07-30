@@ -11,6 +11,7 @@ import com.emomtimer.data.audio.ToneAudioPlayer
 import com.emomtimer.data.repository.PresetRepositoryImpl
 import com.emomtimer.data.repository.SettingsRepositoryImpl
 import com.emomtimer.data.repository.TabataPresetRepositoryImpl
+import com.emomtimer.data.update.UpdateRepositoryImpl
 import com.emomtimer.domain.engine.DefaultTabataEngineFactory
 import com.emomtimer.domain.engine.DefaultTimerEngineFactory
 import com.emomtimer.domain.engine.TabataEngineFactory
@@ -18,6 +19,7 @@ import com.emomtimer.domain.engine.TimerEngineFactory
 import com.emomtimer.domain.repository.PresetRepository
 import com.emomtimer.domain.repository.SettingsRepository
 import com.emomtimer.domain.repository.TabataPresetRepository
+import com.emomtimer.domain.repository.UpdateRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -47,6 +49,10 @@ abstract class AppModule {
     @Binds
     @Singleton
     abstract fun bindAudioPlayer(impl: ToneAudioPlayer): AudioPlayer
+
+    @Binds
+    @Singleton
+    abstract fun bindUpdateRepository(impl: UpdateRepositoryImpl): UpdateRepository
 
     companion object {
 
