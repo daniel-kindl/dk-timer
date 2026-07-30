@@ -52,6 +52,8 @@ class TimerEngineImpl(
                 val now = clock.currentTimeMillis()
                 val elapsed = now - startTime - totalPausedMs
 
+                // intervalMillis == 0 would divide by zero here; unreachable because
+                // TimerConfig's init block requires intervalMillis > 0.
                 val completedIntervals = (elapsed / config.intervalMillis).toInt()
 
                 // Emit interval events before the completion check so that the final
