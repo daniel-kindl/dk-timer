@@ -22,12 +22,20 @@ for context on `domain/engine`.
 
 Run `testDebugUnitTest` and `detekt` before considering any change done.
 
+Detekt gotchas: `@Composable` functions are exempt from `LongMethod`,
+`MagicNumber`, and similar size/style checks. Non-Composable code (e.g.
+`domain/engine`) only gets a `MagicNumber` allowlist of
+`-1,0,1,2,20,59,60,99,100,1000,5000` — new timer-math literals outside that
+set will need a named constant.
+
 ## Architecture rules (enforced by convention, not tooling — respect them)
 
 - Clean Architecture, MVVM. Packages: `domain/` (model, engine, repository
   interfaces), `data/` (Android-facing implementations: DataStore repos,
-  `ToneAudioPlayer`, `VibrationManager`), `ui/` (Compose screens +
-  ViewModels), `di/AppModule.kt` (Hilt bindings).
+  `ToneAudioPlayer`, `VibrationManager`, `feedback/` for the shared
+  `FeedbackTrigger` used by both session ViewModels, `update/` for the
+  in-app update flow), `ui/` (Compose screens + ViewModels),
+  `di/AppModule.kt` (Hilt bindings).
 - **Domain layer must stay Android-free** (pure Kotlin, no `android.*`
   imports). `Clock`/`SystemClock` in `core/` exists specifically so engine
   logic is deterministic and testable without Android.
@@ -37,6 +45,15 @@ Run `testDebugUnitTest` and `detekt` before considering any change done.
   `startTime + N × intervalMillis` rather than accumulating per-tick deltas,
   and track `totalPausedMs` separately. Preserve this if touching
   `domain/engine/*`.
+- `data/update/` (`UpdateRepositoryImpl`, `UpdateDownloader`,
+  `ApkInstaller`, `InstallResultReceiver`, `UpdateCheckCache`) is the one
+  place `data/` talks to the network directly — it polls the GitHub
+  Releases API and drives an APK install flow (`INTERNET` /
+  `REQUEST_INSTALL_PACKAGES` permissions, a `FileProvider`, in
+  `AndroidManifest.xml`).
+- `keystore.properties`, `release.keystore`, and `local.properties` are
+  real signing secrets that exist locally and are gitignored — never read
+  their contents into context, print them, or commit them.
 
 ## Commit & release rules — these are enforced, not optional
 
@@ -50,15 +67,18 @@ Run `testDebugUnitTest` and `detekt` before considering any change done.
   the last tag, matches `versionName` in `app/build.gradle.kts`, and that
   the major/minor/patch bump matches what the commits since the last tag
   require (breaking → major, `feat:` → minor, else patch). See
-  `CONTRIBUTING.md` for the full release checklist.
+  `CONTRIBUTING.md` for the full release checklist, which requires
+  updating `CHANGELOG.md` (Keep a Changelog format) before bumping
+  `versionName`.
 - Branch strategy: all work branches off `dev`; `main` only advances via
   PR from `dev` at release time. Delete feature branches after merge.
 
 ## Testing notes
 
-- Only `domain/engine` has unit tests (`TimerEngineTest.kt`,
-  `TabataEngineTest.kt`) — this is intentional, since that's the only layer
-  with real logic to test; ViewModels and Compose UI are thin by design.
+- `domain/engine` and `domain/model` have unit tests
+  (`TimerEngineTest.kt`, `TabataEngineTest.kt`, `SemVerTest.kt`) — these are
+  the only layers with real logic to test; ViewModels and Compose UI are
+  thin by design.
 - This environment cannot launch an Android emulator, so UI changes can be
   verified by reading the composable diff and reasoning about
   recomposition/lifecycle, not by running the app.

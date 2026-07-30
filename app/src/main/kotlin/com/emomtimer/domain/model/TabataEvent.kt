@@ -9,11 +9,15 @@ sealed class TabataEvent {
      * @param phase                 current phase (Work or Rest)
      * @param remainingInPhaseMillis ms until this phase ends
      * @param elapsedMillis         total effective elapsed time (excluding pauses)
+     * @param currentRound          1-based round number (a round starts at each Work phase)
+     * @param totalRounds           total number of rounds this workout will run
      */
     data class Tick(
         val phase: TabataPhase,
         val remainingInPhaseMillis: Long,
         val elapsedMillis: Long,
+        val currentRound: Int,
+        val totalRounds: Int,
     ) : TabataEvent()
 
     /** Emitted at every work-phase start (after the first rest). Triggers high-pitch beep. */
