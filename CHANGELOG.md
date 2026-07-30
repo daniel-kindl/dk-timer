@@ -11,6 +11,21 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.3.0] - 2026-07-30
+
+### Changed
+- **DK Timer brand design**: adopted the new visual identity across the app —
+  a stopwatch launcher icon on brand green, a green/graphite-neutral/red
+  color palette driving the light and dark themes, and a three-typeface
+  system (Space Grotesk for the dominant countdown numeral, JetBrains Mono
+  for computed values like round counts and elapsed time, IBM Plex Sans for
+  general UI text)
+- Tabata's phase-transition color swap now uses the brand palette, runs on a
+  340ms ease-in-out curve, and respects the system's reduced-motion setting
+- Preset empty state now reads "Save a configuration above to see it here."
+
+---
+
 ## [2.2.0] - 2026-07-30
 
 ### Added
