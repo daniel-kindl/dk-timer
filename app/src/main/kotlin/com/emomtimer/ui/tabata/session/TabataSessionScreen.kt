@@ -1,6 +1,8 @@
 package com.emomtimer.ui.tabata.session
 
+import android.provider.Settings
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,9 +29,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,13 +44,31 @@ import com.emomtimer.domain.model.SessionStatus
 import com.emomtimer.domain.model.TabataPhase
 import com.emomtimer.ui.components.SessionLifecycleScaffold
 import com.emomtimer.ui.components.SessionProgressBar
+import com.emomtimer.ui.theme.Green500
+import com.emomtimer.ui.theme.Green700
+import com.emomtimer.ui.theme.JetBrainsMonoFamily
+import com.emomtimer.ui.theme.N0
+import com.emomtimer.ui.theme.N950
+import com.emomtimer.ui.theme.Red500
+import com.emomtimer.ui.theme.Red700
+import com.emomtimer.ui.theme.SpaceGroteskFamily
 
-private val WorkBackground = Color(0xFFB71C1C)   // deep red
-private val RestBackground = Color(0xFF1B5E20)   // deep green
-private val WorkBackgroundPaused = Color(0xFF7F1010)
-private val RestBackgroundPaused = Color(0xFF0D3A10)
-private val NeutralBackground = Color(0xFF121212)
-private val OnPhaseBackground = Color.White
+private const val PHASE_TRANSITION_MILLIS = 340
+
+private val WorkBackground = Red500
+private val RestBackground = Green500
+private val WorkBackgroundPaused = Red700
+private val RestBackgroundPaused = Green700
+private val NeutralBackground = N950
+private val OnPhaseBackground = N0
+
+@Composable
+private fun rememberReducedMotionEnabled(): Boolean {
+    val contentResolver = LocalContext.current.contentResolver
+    return remember {
+        Settings.Global.getFloat(contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+    }
+}
 
 @Composable
 fun TabataSessionScreen(
@@ -61,9 +83,14 @@ fun TabataSessionScreen(
         onStopSession = viewModel::stopSession,
     ) { onRequestExit ->
         val isPaused = state.status == SessionStatus.Paused
+        val reducedMotion = rememberReducedMotionEnabled()
         val background by animateColorAsState(
             targetValue = tabataBackgroundColor(status = state.status, phase = state.phase, isPaused = isPaused),
-            animationSpec = tween(durationMillis = 300),
+            animationSpec = if (reducedMotion) {
+                tween(durationMillis = 0)
+            } else {
+                tween(durationMillis = PHASE_TRANSITION_MILLIS, easing = EaseInOut)
+            },
             label = "phase-background",
         )
 
@@ -120,7 +147,7 @@ private fun CountdownContent(secondsRemaining: Int, onStop: () -> Unit) {
         )
         Text(
             text = "$secondsRemaining",
-            style = MaterialTheme.typography.displayLarge,
+            style = MaterialTheme.typography.displayLarge.copy(fontFamily = SpaceGroteskFamily),
             color = OnPhaseBackground,
         )
         Button(
@@ -167,7 +194,7 @@ private fun CompletionContent(totalElapsedMillis: Long, onDone: () -> Unit) {
             )
             Text(
                 text = totalElapsedMillis.formatElapsed(),
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineLarge.copy(fontFamily = JetBrainsMonoFamily),
                 color = OnPhaseBackground,
             )
         }
@@ -208,7 +235,7 @@ private fun RunningContent(
             )
             Text(
                 text = "${state.currentRound} / ${state.totalRounds}",
-                style = MaterialTheme.typography.displaySmall,
+                style = MaterialTheme.typography.displaySmall.copy(fontFamily = JetBrainsMonoFamily),
                 color = OnPhaseBackground,
                 textAlign = TextAlign.Center,
             )
@@ -226,7 +253,7 @@ private fun RunningContent(
         // Countdown within the current phase
         Text(
             text = state.remainingInPhaseMillis.formatCountdown(),
-            style = MaterialTheme.typography.displayLarge,
+            style = MaterialTheme.typography.displayLarge.copy(fontFamily = SpaceGroteskFamily),
             color = OnPhaseBackground,
             textAlign = TextAlign.Center,
         )
@@ -242,7 +269,7 @@ private fun RunningContent(
             )
             Text(
                 text = state.elapsedMillis.formatElapsed(),
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineLarge.copy(fontFamily = JetBrainsMonoFamily),
                 color = OnPhaseBackground,
             )
             Spacer(Modifier.height(8.dp))

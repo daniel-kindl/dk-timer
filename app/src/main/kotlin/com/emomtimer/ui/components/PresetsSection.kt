@@ -61,7 +61,7 @@ fun <T> PresetsSection(
         }
         if (presets.isEmpty()) {
             Text(
-                "No presets saved yet.",
+                "Save a configuration above to see it here.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

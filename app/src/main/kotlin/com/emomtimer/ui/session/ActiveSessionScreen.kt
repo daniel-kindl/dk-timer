@@ -35,6 +35,8 @@ import com.emomtimer.core.format.formatElapsed
 import com.emomtimer.domain.model.SessionStatus
 import com.emomtimer.ui.components.SessionLifecycleScaffold
 import com.emomtimer.ui.components.SessionProgressBar
+import com.emomtimer.ui.theme.JetBrainsMonoFamily
+import com.emomtimer.ui.theme.SpaceGroteskFamily
 
 @Composable
 fun ActiveSessionScreen(
@@ -99,7 +101,7 @@ private fun CountdownContent(secondsRemaining: Int, onStop: () -> Unit) {
         )
         Text(
             text = "$secondsRemaining",
-            style = MaterialTheme.typography.displayLarge,
+            style = MaterialTheme.typography.displayLarge.copy(fontFamily = SpaceGroteskFamily),
             color = MaterialTheme.colorScheme.primary,
         )
         Button(
@@ -143,7 +145,7 @@ private fun CompletionContent(totalElapsedMillis: Long, onDone: () -> Unit) {
             )
             Text(
                 text = totalElapsedMillis.formatElapsed(),
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineLarge.copy(fontFamily = JetBrainsMonoFamily),
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
@@ -180,7 +182,7 @@ private fun RunningContent(
             )
             Text(
                 text = "${state.currentRound} / ${state.totalRounds}",
-                style = MaterialTheme.typography.displayLarge,
+                style = MaterialTheme.typography.displayLarge.copy(fontFamily = JetBrainsMonoFamily),
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
             )
@@ -198,7 +200,7 @@ private fun RunningContent(
             )
             Text(
                 text = state.remainingInIntervalMillis.formatCountdown(),
-                style = MaterialTheme.typography.displayMedium,
+                style = MaterialTheme.typography.displayMedium.copy(fontFamily = SpaceGroteskFamily),
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
             )
@@ -213,7 +215,7 @@ private fun RunningContent(
             )
             Text(
                 text = state.elapsedMillis.formatElapsed(),
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineLarge.copy(fontFamily = JetBrainsMonoFamily),
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Spacer(Modifier.height(8.dp))
