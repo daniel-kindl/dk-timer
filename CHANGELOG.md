@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to DK Timer are documented here.
+All notable changes to Ocho are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Versioning follows [Semantic Versioning](https://semver.org/).
@@ -8,6 +8,55 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ---
 
 ## [Unreleased]
+
+---
+
+## [3.0.0] - 2026-08-01
+
+### ⚠️ Breaking — you must reinstall
+
+The app is now **Ocho**, and its `applicationId` changed from `com.emomtimer` to
+`dev.danielkindl.ocho`. Android treats that as a different app, so:
+
+- **This build installs alongside DK Timer rather than upgrading it.** You will
+  briefly have two icons.
+- **Saved presets and settings do not carry over.** Note anything you want to keep
+  before switching; there is no migration.
+- Uninstall DK Timer once Ocho is working. The old install will not receive further
+  updates.
+
+This is the last time a rename will force a reinstall: the new `applicationId` is
+derived from a domain rather than the product name, so future renames are cosmetic.
+
+### Added
+- **Dev update channel.** Every push to `dev` publishes a prerelease that installs
+  as *Ocho Dev*, alongside the stable app and with its own data. Lets changes be
+  tested on a real device before they reach `main`. The channels cannot see each
+  other: stable reads `releases/latest`, which excludes prereleases by definition.
+- `SemVer` now parses and orders prerelease versions per SemVer 2.0.0 §11, and
+  discards build metadata per §10.
+- Dependabot for Gradle and GitHub Actions, and a security policy documenting the
+  APK self-update flow.
+
+### Fixed
+- **In-app updates were broken in 2.3.0.** The app polled `daniel-kindl/dk-timer`,
+  which does not exist, so every check returned a 404. The repository is now read
+  from `BuildConfig` and cannot drift from the real one again.
+- `ApkInstaller` called an API 31 method from a helper whose version guard lived in
+  its caller. The code was already safe; the contract is now declared.
+- `UpdateViewModel` held a `Context` only to read its own version name.
+- `SessionProgressBar` defaulted its modifier to `Modifier.fillMaxWidth()`, which
+  any caller-supplied modifier would have silently discarded.
+- Release notes linked to the wrong comparison range, and releases were still named
+  "EMOM Timer".
+
+### Changed
+- Renamed throughout: display name, `applicationId`, Kotlin package, repository,
+  and every stale "EMOM Timer" / "DK Timer" string.
+- The build now fails on warnings — Kotlin, detekt, and Android Lint. Three lint
+  checks that report on the environment rather than the code are excluded.
+- Every public declaration in `src/main` requires KDoc, enforced by detekt. 265
+  were added, recording why decisions were made rather than restating the code.
 
 ---
 
@@ -137,6 +186,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/daniel-kindl/emom-timer/compare/v2.0.0...HEAD
-[2.0.0]: https://github.com/daniel-kindl/emom-timer/compare/v1.0.0...v2.0.0
-[1.0.0]: https://github.com/daniel-kindl/emom-timer/releases/tag/v1.0.0
+[Unreleased]: https://github.com/daniel-kindl/ocho/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/daniel-kindl/ocho/compare/v2.3.0...v3.0.0
+[2.3.0]: https://github.com/daniel-kindl/ocho/compare/v2.2.0...v2.3.0
+[2.2.0]: https://github.com/daniel-kindl/ocho/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.com/daniel-kindl/ocho/compare/v2.0.1...v2.1.0
+[2.0.1]: https://github.com/daniel-kindl/ocho/compare/v2.0.0...v2.0.1
+[2.0.0]: https://github.com/daniel-kindl/ocho/compare/v1.0.0...v2.0.0
+[1.0.0]: https://github.com/daniel-kindl/ocho/releases/tag/v1.0.0

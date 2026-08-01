@@ -20,7 +20,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.danielkindl.ocho.R
 
 /** Entry point: pick a timer mode, or open settings. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +35,9 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("DK Timer") },
+                // From resources, so a dev build titles itself "Ocho Dev" and it is
+                // obvious at a glance which of the two installed apps is open.
+                title = { Text(stringResource(R.string.app_name)) },
                 actions = {
                     IconButton(onClick = onOpenSettings) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")

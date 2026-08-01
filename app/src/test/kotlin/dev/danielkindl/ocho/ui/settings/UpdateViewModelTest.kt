@@ -59,7 +59,7 @@ class UpdateViewModelTest {
     private fun update(version: String) = AppUpdate(
         version = checkNotNull(SemVer.parse(version)),
         tagName = "v$version",
-        downloadUrl = "https://example.com/dk-timer-$version.apk",
+        downloadUrl = "https://example.com/ocho-$version.apk",
         releaseNotes = "notes",
     )
 
@@ -100,7 +100,7 @@ class UpdateViewModelTest {
         viewModel.checkForUpdates()
 
         every { updateDownloader.enqueue(any()) } returns 42L
-        val apkFile = File("dk-timer-3.0.0.apk")
+        val apkFile = File("ocho-3.0.0.apk")
         every { updateDownloader.queryStatus(42L) } returnsMany listOf(
             DownloadStatus.InProgress(50),
             DownloadStatus.Successful(apkFile),
@@ -134,7 +134,7 @@ class UpdateViewModelTest {
         val viewModel = viewModel()
         viewModel.checkForUpdates()
 
-        val apkFile = File("dk-timer-3.0.0.apk")
+        val apkFile = File("ocho-3.0.0.apk")
         every { updateDownloader.enqueue(any()) } returns 42L
         every { updateDownloader.queryStatus(42L) } returns DownloadStatus.Successful(apkFile)
         every { apkInstaller.install(apkFile) } returns Unit

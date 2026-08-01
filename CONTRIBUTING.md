@@ -1,6 +1,6 @@
-# Contributing to EMOM Timer
+# Contributing to Ocho
 
-Thank you for helping improve EMOM Timer!
+Thank you for helping improve Ocho!
 
 ---
 
@@ -13,6 +13,9 @@ Thank you for helping improve EMOM Timer!
 
 **All commits go to `dev`.**
 `main` is only updated via tagged releases.
+
+Every green push to `dev` publishes a dev-channel APK automatically — see
+[Update channels](#update-channels) below.
 
 ---
 
@@ -65,8 +68,11 @@ feat(setup)!: remove deprecated preset import format
 
 3. Run checks locally:
    ```bash
-   ./gradlew testDebugUnitTest detekt
+   ./gradlew check      # tests + detekt + lint
    ```
+
+   All three run with warnings-as-errors, and detekt requires KDoc on every
+   public declaration in `src/main`. Tests are exempt.
 
 4. Open a PR targeting `dev`. `commit-lint` CI validates every commit in
    the PR.
@@ -74,6 +80,35 @@ feat(setup)!: remove deprecated preset import format
 5. After your branch is merged into `dev`, delete it (locally and on
    origin). Feature branches are disposable; `dev` and `main` are the only
    long-lived branches and are never deleted.
+
+---
+
+## Update Channels
+
+Ocho ships outside Google Play and updates itself from GitHub Releases. There are
+two channels, and they are invisible to each other by construction:
+
+| Channel | `applicationId` | Reads | Published by |
+|---------|-----------------|-------|--------------|
+| Stable | `dev.danielkindl.ocho` | `releases/latest` | `release.yml`, on a version tag |
+| Dev | `dev.danielkindl.ocho.dev` | Newest prerelease | `dev-ci.yml`, on every push to `dev` |
+
+`releases/latest` excludes prereleases by GitHub's own definition, so a stable
+install can never be offered a dev build. The differing `applicationId` means both
+apps can be installed at once, with separate presets and settings.
+
+Dev builds are versioned `<versionName>-dev.<CI run number>`, signed with the
+release key (CI's debug keystore is regenerated per run, so dev APKs signed with it
+would refuse to install over each other), and pruned to the newest five.
+
+**Two guards in `release.yml` exist because dev tags contain a hyphen. Don't remove
+them:**
+
+- The job skips any ref matching `*-*`. `release.yml` triggers on `v*`, which dev
+  tags also match, and GitHub tag filters can't express an exception — without the
+  guard, every push to `dev` would fail the release workflow.
+- Both `git describe` calls pass `--exclude='*-*'`, or a dev prerelease would
+  resolve as the previous tag and corrupt the version checks and release notes.
 
 ---
 
