@@ -1,6 +1,5 @@
 package dev.danielkindl.ocho.ui.settings
 
-import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,9 +9,9 @@ import dev.danielkindl.ocho.data.update.UpdateCheckCache
 import dev.danielkindl.ocho.data.update.UpdateDownloader
 import dev.danielkindl.ocho.domain.model.AppUpdate
 import dev.danielkindl.ocho.domain.model.SemVer
+import dev.danielkindl.ocho.domain.model.UpdateConfig
 import dev.danielkindl.ocho.domain.repository.UpdateRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,15 +32,14 @@ sealed interface UpdateUiState {
 
 @HiltViewModel
 class UpdateViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    updateConfig: UpdateConfig,
     private val updateRepository: UpdateRepository,
     private val updateDownloader: UpdateDownloader,
     private val apkInstaller: ApkInstaller,
     updateCheckCache: UpdateCheckCache,
 ) : ViewModel() {
 
-    private val installedVersion: SemVer? =
-        SemVer.parse(context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty())
+    private val installedVersion: SemVer? = updateConfig.installedVersion
 
     private val _uiState = MutableStateFlow<UpdateUiState>(
         updateCheckCache.latestUpdate.value?.let { UpdateUiState.Available(it) } ?: UpdateUiState.Idle

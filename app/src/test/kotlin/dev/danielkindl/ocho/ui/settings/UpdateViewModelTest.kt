@@ -1,14 +1,13 @@
 package dev.danielkindl.ocho.ui.settings
 
-import android.content.Context
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import dev.danielkindl.ocho.data.update.ApkInstaller
 import dev.danielkindl.ocho.data.update.DownloadStatus
 import dev.danielkindl.ocho.data.update.UpdateCheckCache
 import dev.danielkindl.ocho.data.update.UpdateDownloader
 import dev.danielkindl.ocho.domain.model.AppUpdate
 import dev.danielkindl.ocho.domain.model.SemVer
+import dev.danielkindl.ocho.domain.model.UpdateChannel
+import dev.danielkindl.ocho.domain.model.UpdateConfig
 import dev.danielkindl.ocho.domain.repository.UpdateRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -33,22 +32,20 @@ class UpdateViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
 
-    private val context = mockk<Context>()
     private val updateRepository = mockk<UpdateRepository>()
     private val updateDownloader = mockk<UpdateDownloader>()
     private val apkInstaller = mockk<ApkInstaller>()
     private val updateCheckCache = UpdateCheckCache()
 
+    private val updateConfig = UpdateConfig(
+        repoSlug = "daniel-kindl/ocho",
+        channel = UpdateChannel.Stable,
+        installedVersion = SemVer.parse("2.2.0"),
+    )
+
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-
-        val packageManager = mockk<PackageManager>()
-        val packageInfo = mockk<PackageInfo>()
-        packageInfo.versionName = "2.2.0"
-        every { context.packageManager } returns packageManager
-        every { context.packageName } returns "dev.danielkindl.ocho"
-        every { packageManager.getPackageInfo("dev.danielkindl.ocho", 0) } returns packageInfo
     }
 
     @After
@@ -57,7 +54,7 @@ class UpdateViewModelTest {
     }
 
     private fun viewModel() =
-        UpdateViewModel(context, updateRepository, updateDownloader, apkInstaller, updateCheckCache)
+        UpdateViewModel(updateConfig, updateRepository, updateDownloader, apkInstaller, updateCheckCache)
 
     private fun update(version: String) = AppUpdate(
         version = checkNotNull(SemVer.parse(version)),

@@ -10,7 +10,11 @@ import org.junit.Test
 class UpdateRepositoryImplTest {
 
     private fun repositoryFor(channel: UpdateChannel) = UpdateRepositoryImpl(
-        UpdateConfig(repoSlug = "daniel-kindl/ocho", channel = channel)
+        UpdateConfig(
+            repoSlug = "daniel-kindl/ocho",
+            channel = channel,
+            installedVersion = SemVer.parse("3.0.0"),
+        )
     )
 
     private val repository = repositoryFor(UpdateChannel.Stable)

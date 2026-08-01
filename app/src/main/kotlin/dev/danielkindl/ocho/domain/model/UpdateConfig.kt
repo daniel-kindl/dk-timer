@@ -10,8 +10,12 @@ package dev.danielkindl.ocho.domain.model
  *
  * @property repoSlug the GitHub `owner/name` pair to query, e.g. `daniel-kindl/ocho`.
  * @property channel which releases from that repository this build is eligible for.
+ * @property installedVersion this build's own version, or null if its `versionName`
+ *   is not valid SemVer. Null disables update prompts rather than guessing, since
+ *   there is nothing meaningful to compare a fetched release against.
  */
 data class UpdateConfig(
     val repoSlug: String,
     val channel: UpdateChannel,
+    val installedVersion: SemVer?,
 )

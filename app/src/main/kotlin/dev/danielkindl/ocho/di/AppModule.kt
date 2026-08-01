@@ -17,6 +17,7 @@ import dev.danielkindl.ocho.domain.engine.DefaultTabataEngineFactory
 import dev.danielkindl.ocho.domain.engine.DefaultTimerEngineFactory
 import dev.danielkindl.ocho.domain.engine.TabataEngineFactory
 import dev.danielkindl.ocho.domain.engine.TimerEngineFactory
+import dev.danielkindl.ocho.domain.model.SemVer
 import dev.danielkindl.ocho.domain.model.UpdateChannel
 import dev.danielkindl.ocho.domain.model.UpdateConfig
 import dev.danielkindl.ocho.domain.repository.PresetRepository
@@ -90,6 +91,7 @@ abstract class AppModule {
         fun provideUpdateConfig(): UpdateConfig = UpdateConfig(
             repoSlug = BuildConfig.UPDATE_REPO,
             channel = UpdateChannel.fromId(BuildConfig.UPDATE_CHANNEL),
+            installedVersion = SemVer.parse(BuildConfig.VERSION_NAME),
         )
     }
 }

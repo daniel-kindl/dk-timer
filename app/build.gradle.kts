@@ -94,7 +94,23 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
+    kotlinOptions {
+        jvmTarget = "17"
+        // The codebase compiles clean, so this costs nothing today and stops the
+        // first warning from becoming the first of fifty.
+        allWarningsAsErrors = true
+    }
+
+    lint {
+        warningsAsErrors = true
+        abortOnError = true
+        // Excluded because they report on the environment rather than on this code,
+        // and would fail the build for reasons no commit here can fix:
+        //   GradleDependency        - dependency freshness; Dependabot's job
+        //   OldTargetApi            - fires whenever Google ships a new SDK
+        //   ObsoleteLintCustomCheck - Compose's bundled lint jar vs our Kotlin version
+        disable += setOf("GradleDependency", "OldTargetApi", "ObsoleteLintCustomCheck")
+    }
     // buildConfig is off by default from AGP 8.0 onwards; the update channel needs it.
     buildFeatures {
         compose = true
