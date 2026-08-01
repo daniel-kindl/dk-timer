@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import dev.danielkindl.ocho.core.format.formatElapsed
-import dev.danielkindl.ocho.ui.theme.Phase
+import dev.danielkindl.ocho.domain.model.Phase
 import dev.danielkindl.ocho.ui.theme.phaseTheme
 
 /** Height of the timeline strip. */

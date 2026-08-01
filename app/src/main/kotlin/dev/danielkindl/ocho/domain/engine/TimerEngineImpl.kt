@@ -42,6 +42,11 @@ class TimerEngineImpl(
             ).toInt()
             var lastCompletedInterval = 0
 
+            // A lead-in only means something if the interval is longer than it is.
+            // At or below it the countdown would run continuously and convey nothing.
+            val countdownEnabled = config.intervalMillis > COUNTDOWN_LEAD_MILLIS
+            var lastCountdownSecond = 0
+
             while (isActive) {
                 // Suspend cheaply while paused; re-check on every tick.
                 while (isPaused && isActive) {
@@ -61,6 +66,10 @@ class TimerEngineImpl(
                 for (i in (lastCompletedInterval + 1)..completedIntervals) {
                     _events.emit(TimerEvent.IntervalCompleted(i))
                 }
+                if (completedIntervals != lastCompletedInterval) {
+                    // New interval: the previous countdown is spent.
+                    lastCountdownSecond = 0
+                }
                 lastCompletedInterval = completedIntervals
 
                 if (elapsed >= config.totalDurationMillis) {
@@ -70,6 +79,9 @@ class TimerEngineImpl(
 
                 val nextIntervalAt = startTime + totalPausedMs + (completedIntervals + 1) * config.intervalMillis
                 val remainingInInterval = (nextIntervalAt - now).coerceAtLeast(0L)
+
+                lastCountdownSecond =
+                    emitCountdownIfDue(countdownEnabled, remainingInInterval, lastCountdownSecond)
 
                 _events.emit(
                     TimerEvent.Tick(
@@ -94,8 +106,30 @@ class TimerEngineImpl(
         job = null
     }
 
+    /**
+     * Emits one lead-in tick if the interval has crossed into a new whole second.
+     *
+     * @return the second just emitted, or [lastSecond] unchanged if nothing was due.
+     */
+    private suspend fun emitCountdownIfDue(
+        enabled: Boolean,
+        remainingInInterval: Long,
+        lastSecond: Int,
+    ): Int {
+        if (!enabled) return lastSecond
+        val seconds = ceil(remainingInInterval.toDouble() / MILLIS_PER_SECOND).toInt()
+        if (seconds !in 1..COUNTDOWN_LEAD_SECONDS || seconds == lastSecond) return lastSecond
+        _events.emit(TimerEvent.CountdownTick(seconds))
+        return seconds
+    }
+
     private companion object {
         const val TICK_MS = 100L
         const val PAUSE_CHECK_MS = 50L
+
+        /** How many seconds of lead-in precede each boundary. */
+        const val COUNTDOWN_LEAD_SECONDS = 3
+        const val MILLIS_PER_SECOND = 1_000L
+        const val COUNTDOWN_LEAD_MILLIS = COUNTDOWN_LEAD_SECONDS * MILLIS_PER_SECOND
     }
 }

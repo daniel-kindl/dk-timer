@@ -5,6 +5,19 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
+    <!--
+      A session must keep exact time with the screen off. Foreground status stops
+      the process being killed; WAKE_LOCK stops the CPU sleeping, which is what
+      would otherwise stall the engine's delay() calls and lose interval beeps.
+      Neither alone is sufficient.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Android 13+. If denied, the session still runs correctly and only the
+         ongoing notification is hidden. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:name=".OchoApp"
         android:allowBackup="true"
@@ -38,6 +51,20 @@
         <receiver
             android:name=".data.update.InstallResultReceiver"
             android:exported="false" />
+
+        <!--
+          specialUse rather than mediaPlayback: this is a timer, not a media app.
+          The honest declaration costs nothing for a sideloaded build, and claiming
+          media playback would invite media-specific system behaviour we do not want.
+        -->
+        <service
+            android:name=".data.session.SessionService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Interval workout timer keeping exact time and emitting audio cues while backgrounded or with the screen off." />
+        </service>
 
     </application>
 

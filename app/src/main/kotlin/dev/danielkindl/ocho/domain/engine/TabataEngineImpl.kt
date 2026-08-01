@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.math.ceil
 
 /**
  * Drift-free Tabata engine that alternates WORK and REST phases.
@@ -45,6 +46,7 @@ class TabataEngineImpl(
             var phaseStartElapsed = 0L
             // A round starts at each Work phase; the initial Work phase is round 1.
             var currentRound = 1
+            var lastCountdownSecond = 0
 
             // Emit the initial WorkStarted so the screen shows "WORK" immediately
             // and the audio player fires the high-pitch beep at T=0.
@@ -62,6 +64,9 @@ class TabataEngineImpl(
                     val phaseEnd = phaseStartElapsed + phaseDuration
                     val remainingInPhase = (phaseEnd - elapsed).coerceAtLeast(0L)
 
+                    lastCountdownSecond =
+                        emitCountdownIfDue(phaseDuration, remainingInPhase, lastCountdownSecond)
+
                     _events.emit(
                         TabataEvent.Tick(
                             phase = phase,
@@ -75,6 +80,8 @@ class TabataEngineImpl(
                     if (elapsed >= phaseEnd) {
                         // Phase complete — advance the accumulated phase clock.
                         phaseStartElapsed += phaseDuration
+                        // The countdown belonged to the phase that just ended.
+                        lastCountdownSecond = 0
 
                         // Check for workout completion BEFORE starting the next phase.
                         if (phaseStartElapsed >= config.totalDurationMillis) {
@@ -109,6 +116,26 @@ class TabataEngineImpl(
     }
 
     /**
+     * Emits one lead-in tick if the phase has crossed into a new whole second.
+     *
+     * Evaluated per phase, since work and rest can differ in length: a rest short
+     * enough to be covered entirely by the lead-in should not count itself down.
+     *
+     * @return the second just emitted, or [lastSecond] unchanged if nothing was due.
+     */
+    private suspend fun emitCountdownIfDue(
+        phaseDuration: Long,
+        remainingInPhase: Long,
+        lastSecond: Int,
+    ): Int {
+        if (phaseDuration <= COUNTDOWN_LEAD_MILLIS) return lastSecond
+        val seconds = ceil(remainingInPhase.toDouble() / MILLIS_PER_SECOND).toInt()
+        if (seconds !in 1..COUNTDOWN_LEAD_SECONDS || seconds == lastSecond) return lastSecond
+        _events.emit(TabataEvent.CountdownTick(seconds))
+        return seconds
+    }
+
+    /**
      * Mirrors the phase-alternation loop above (without real-time delays) to determine
      * how many Work phases (rounds) this workout will run, consistent with the engine's
      * own "never cut a phase short" completion policy.
@@ -132,5 +159,10 @@ class TabataEngineImpl(
     private companion object {
         const val TICK_MS = 100L
         const val PAUSE_CHECK_MS = 50L
+
+        /** How many seconds of lead-in precede each phase change. */
+        const val COUNTDOWN_LEAD_SECONDS = 3
+        const val MILLIS_PER_SECOND = 1_000L
+        const val COUNTDOWN_LEAD_MILLIS = COUNTDOWN_LEAD_SECONDS * MILLIS_PER_SECOND
     }
 }

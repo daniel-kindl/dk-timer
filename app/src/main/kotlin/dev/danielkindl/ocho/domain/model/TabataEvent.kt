@@ -34,6 +34,16 @@ sealed class TabataEvent {
     /** Emitted at every rest-phase start. Triggers low-pitch beep. */
     data object RestStarted : TabataEvent()
 
+    /**
+     * Emitted once per second over the last few seconds before a phase flips.
+     *
+     * Produced inside the engine loop, so it shares the phase boundary's drift-free
+     * anchoring. Suppressed when the current phase is no longer than the lead-in.
+     *
+     * @property secondsRemaining counts down and never repeats within one phase.
+     */
+    data class CountdownTick(val secondsRemaining: Int) : TabataEvent()
+
     /** Emitted once the workout is done (after the last phase finishes). */
     data object WorkoutCompleted : TabataEvent()
 }

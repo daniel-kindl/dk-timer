@@ -30,6 +30,21 @@ sealed class TimerEvent {
      */
     data class IntervalCompleted(val intervalNumber: Int) : TimerEvent()
 
+    /**
+     * Emitted once per second over the last few seconds before a boundary.
+     *
+     * Produced inside the engine loop rather than derived from [Tick] by a consumer,
+     * so it inherits the same drift-free anchoring as the boundary it precedes. A
+     * consumer counting down from tick values would drift exactly as much as the
+     * accumulated-delay approach the engine exists to avoid.
+     *
+     * Suppressed entirely when the interval is no longer than the lead-in, since a
+     * continuous countdown conveys nothing.
+     *
+     * @property secondsRemaining counts down and never repeats within one interval.
+     */
+    data class CountdownTick(val secondsRemaining: Int) : TimerEvent()
+
     /** Emitted once when totalDurationMillis is reached. */
     object WorkoutCompleted : TimerEvent()
 }

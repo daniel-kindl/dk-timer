@@ -20,7 +20,7 @@ import dev.danielkindl.ocho.R
 import dev.danielkindl.ocho.core.format.formatCountdown
 import dev.danielkindl.ocho.core.format.formatElapsed
 import dev.danielkindl.ocho.domain.model.SessionStatus
-import dev.danielkindl.ocho.domain.model.TabataPhase
+import dev.danielkindl.ocho.domain.model.Phase
 import dev.danielkindl.ocho.ui.components.PhaseClock
 import dev.danielkindl.ocho.ui.components.PhaseLabel
 import dev.danielkindl.ocho.ui.components.PhaseScaffold
@@ -29,7 +29,7 @@ import dev.danielkindl.ocho.ui.components.SUBDUED_ON_PLATE
 import dev.danielkindl.ocho.ui.components.SecondarySessionControl
 import dev.danielkindl.ocho.ui.components.SessionColumn
 import dev.danielkindl.ocho.ui.components.SessionLifecycleScaffold
-import dev.danielkindl.ocho.ui.theme.Phase
+import dev.danielkindl.ocho.domain.model.SessionSnapshot
 
 /**
  * A running Tabata session.
@@ -54,7 +54,7 @@ fun TabataSessionScreen(
         onSessionFinished = onSessionFinished,
         onStopSession = viewModel::stopSession,
     ) { onRequestExit ->
-        PhaseScaffold(phase = state.phaseColour()) { theme ->
+        PhaseScaffold(phase = state.phase) { theme ->
             when (state.status) {
                 SessionStatus.CountingDown -> PrepareContent(
                     secondsRemaining = state.countdownSecondsRemaining,
@@ -86,18 +86,6 @@ fun TabataSessionScreen(
     }
 }
 
-/**
- * Maps session lifecycle onto the four-phase colour model.
- *
- * Pausing deliberately does not change the phase: you are still in the work
- * interval, merely frozen in it, and flipping the plate would say otherwise. The
- * stopped clock and the changed control label carry that state instead.
- */
-private fun TabataSessionUiState.phaseColour(): Phase = when (status) {
-    SessionStatus.CountingDown -> Phase.PREPARE
-    SessionStatus.Completed -> Phase.COMPLETE
-    else -> if (phase == TabataPhase.Work) Phase.WORK else Phase.REST
-}
 
 @Composable
 private fun PrepareContent(
@@ -142,13 +130,13 @@ private fun CompleteContent(
 
 @Composable
 private fun RunningContent(
-    state: TabataSessionUiState,
+    state: SessionSnapshot,
     onPlate: androidx.compose.ui.graphics.Color,
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
 ) {
     val isPaused = state.status == SessionStatus.Paused
-    val phaseName = if (state.phase == TabataPhase.Work) "Work" else "Rest"
+    val phaseName = if (state.phase == Phase.WORK) "Work" else "Rest"
 
     SessionColumn {
         PhaseLabel(if (isPaused) "$phaseName · paused" else phaseName, onPlate)
