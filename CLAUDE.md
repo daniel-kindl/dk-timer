@@ -4,10 +4,10 @@ Guidance for AI agents working in this repository.
 
 ## What this is
 
-**Ocho** is a native Android interval timer (Kotlin, Compose, Hilt) with two modes:
-EMOM and Tabata. Read `README.md` for the feature list and usage, and
-`docs/ARCHITECTURE.md` for the package layout, session ownership, and the drift-free
-timing explanation; neither is repeated here.
+**Ocho** is a native Android interval timer (Kotlin, Compose, Hilt) with three modes:
+EMOM, Tabata and AMRAP. Read `README.md` for the feature list and usage, and
+`docs/ARCHITECTURE.md` for the package layout, session ownership, the unified
+workout stack, and the drift-free timing explanation; none of it is repeated here.
 
 Package root is `dev.danielkindl.ocho`. The app was previously EMOM Timer, then DK
 Timer. If you find those names anywhere, they are stale.
@@ -16,6 +16,7 @@ Timer. If you find those names anywhere, they are stale.
 
 ```bash
 ./gradlew check                        # tests + detekt + lint. Run before calling anything done.
+./gradlew koverLogDebug                # line coverage per package
 ./gradlew assembleDebug                # debug APK
 ./gradlew assembleDev -PdevBuildNumber=1   # dev-channel APK
 ./gradlew assembleRelease              # signed; needs keystore.properties
@@ -43,6 +44,11 @@ is testable without Android. `BuildConfig` is read in exactly one place,
 **The engines are drift-free.** They compute elapsed time as
 `startTime + N × interval` and track `totalPausedMs` separately, never accumulating
 per-tick deltas. Preserve this in `domain/engine/`.
+
+**One stack serves every mode.** One setup screen, one session screen, one preset
+type, two routes. A new mode is a `SessionRequest` variant, a `WorkoutEngine` adapter,
+a home card and a `when` branch in three places the compiler will point at. Do not
+add a screen or a preset type per mode; that is what this release removed.
 
 **Never read, print, or commit** `keystore.properties`, `release.keystore`, or
 `local.properties`. They hold real signing secrets and are gitignored.
@@ -103,8 +109,14 @@ All work branches off `dev`. `main` advances only via release PR. See
 
 ## Testing
 
-`domain/engine`, `domain/model`, `data/repository`, `data/update`, and the update
-ViewModel have unit tests. Composables are thin by design and untested.
+`domain/`, `data/repository`, `data/update`, and the non-Compose parts of `ui/`
+(setup state, timeline segments) have unit tests. Composables are thin by design and
+untested.
+
+**Coverage is reported, never gated.** `./gradlew koverLogDebug` prints it per
+package; CI copies that into the job summary. Do not add a threshold, and do not
+write tests to move the number. If a figure looks wrong, check the exclusions in the
+`kover` block before writing anything.
 
 **No emulator is available here.** Verify UI changes by reading the diff and
 reasoning about recomposition, not by running the app.

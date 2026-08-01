@@ -8,7 +8,7 @@ when you're mid-effort and not looking at the screen.
 [![Latest release](https://img.shields.io/github/v/release/daniel-kindl/ocho?label=latest)](https://github.com/daniel-kindl/ocho/releases/latest)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
 [![API 26+](https://img.shields.io/badge/API-26%2B-brightgreen)](https://developer.android.com/)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.22-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
 
 *An **ocho** is a figure-eight step in tango. It's also Spanish for **eight**, the
 round count of a classic Tabata.*
@@ -21,6 +21,7 @@ round count of a classic Tabata.*
 |---------|--------|
 | EMOM timer | Total duration and interval length, set with drum-roll mm:ss pickers |
 | Tabata timer | Total, work, and rest durations; phases alternate automatically |
+| AMRAP timer | Total duration only; one unbroken block with no interval beeps |
 | Phase colours | A full-screen amber, red, green, or violet plate per phase, readable across a room and distinguishable without colour vision |
 | Run timeline | Proportional preview of a workout's shape before you start it |
 | Sound feedback | Distinct tones per event, on the alarm stream so silent mode can't mute them |
@@ -65,6 +66,10 @@ confirming.
 **Tabata.** Set total, work, and rest. Phases alternate automatically with distinct
 high and low beeps, and the whole screen switches between a dark red work plate and
 a light green rest one.
+
+**AMRAP.** Set total duration and go. Nothing interrupts you: no interval beeps, no
+round counter, just the clock counting down and a 3-2-1 before it stops. Count your
+own rounds.
 
 **Presets.** Tap Save in the Presets row to store the current configuration. The
 name is pre-filled from the durations, so edit it or accept it. Tap a chip to load,
