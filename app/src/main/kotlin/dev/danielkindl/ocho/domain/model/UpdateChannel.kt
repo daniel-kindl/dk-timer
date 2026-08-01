@@ -7,6 +7,8 @@ package dev.danielkindl.ocho.domain.model
  * `releases/latest` endpoint, which GitHub defines as excluding pre-releases, while
  * dev builds read the full release list and consider only pre-releases. A stable
  * install can therefore never be offered a dev build, or the reverse.
+ *
+ * @property id the value stored in `BuildConfig.UPDATE_CHANNEL`, resolved by [fromId].
  */
 enum class UpdateChannel(val id: String) {
 

@@ -11,9 +11,16 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Where an in-flight APK download has got to, as reported by [UpdateDownloader.queryStatus]. */
 sealed interface DownloadStatus {
+
+    /** Still downloading. @property percent completion from 0 to 100. */
     data class InProgress(val percent: Int) : DownloadStatus
+
+    /** Finished. @property file the downloaded APK, ready to hand to the installer. */
     data class Successful(val file: File) : DownloadStatus
+
+    /** Gave up. @property reason human-readable explanation, shown directly to the user. */
     data class Failed(val reason: String) : DownloadStatus
 }
 
@@ -23,25 +30,48 @@ private const val PERCENT_MAX = 100
 internal fun computeDownloadPercent(downloadedBytes: Long, totalBytes: Long): Int =
     if (totalBytes > 0) ((downloadedBytes * PERCENT_MAX) / totalBytes).toInt() else 0
 
+/**
+ * Downloads release APKs via the system [DownloadManager].
+ *
+ * Uses the platform downloader rather than fetching in-process so a download
+ * survives the app being backgrounded or killed mid-transfer, and so the user gets
+ * a system progress notification for free.
+ *
+ * Files land in the app's external files directory, which needs no storage
+ * permission and is cleaned up when the app is uninstalled.
+ */
 @Singleton
 class UpdateDownloader @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
     private val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
+    /**
+     * Starts downloading [update]'s APK.
+     *
+     * @return the DownloadManager id to pass to [queryStatus]. Returns as soon as the
+     *   download is queued, not when it completes.
+     */
     fun enqueue(update: AppUpdate): Long {
         val request = DownloadManager.Request(Uri.parse(update.downloadUrl))
-            .setTitle("DK Timer ${update.tagName}")
+            .setTitle("Ocho ${update.tagName}")
             .setDestinationInExternalFilesDir(
                 context,
                 Environment.DIRECTORY_DOWNLOADS,
-                "dk-timer-${update.tagName}.apk",
+                "ocho-${update.tagName}.apk",
             )
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             .setMimeType(APK_MIME_TYPE)
         return downloadManager.enqueue(request)
     }
 
+    /**
+     * Reads the current state of the download with [downloadId].
+     *
+     * Every state that is neither success nor failure — pending, running, paused —
+     * reports as [DownloadStatus.InProgress], so a stalled download keeps showing
+     * progress rather than looking like an error.
+     */
     fun queryStatus(downloadId: Long): DownloadStatus {
         downloadManager.query(DownloadManager.Query().setFilterById(downloadId)).use { cursor ->
             if (!cursor.moveToFirst()) return DownloadStatus.Failed("Download not found")

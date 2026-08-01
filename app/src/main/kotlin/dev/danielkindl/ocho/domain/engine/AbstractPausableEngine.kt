@@ -14,12 +14,14 @@ abstract class AbstractPausableEngine(protected val clock: Clock) {
     @Volatile private var pauseStartTime = 0L
     @Volatile protected var totalPausedMs = 0L
 
+    /** Clears accumulated pause time. Call at the start of each session, not between phases. */
     protected fun resetPauseState() {
         isPaused = false
         pauseStartTime = 0L
         totalPausedMs = 0L
     }
 
+    /** Freezes elapsed time. Idempotent: pausing an already-paused engine does nothing. */
     open fun pause() {
         if (!isPaused) {
             pauseStartTime = clock.currentTimeMillis()
@@ -27,6 +29,7 @@ abstract class AbstractPausableEngine(protected val clock: Clock) {
         }
     }
 
+    /** Resumes, adding the paused interval to [totalPausedMs]. Idempotent while running. */
     open fun resume() {
         if (isPaused) {
             // Update totalPausedMs BEFORE clearing isPaused so the timer loop

@@ -38,6 +38,15 @@ import dev.danielkindl.ocho.ui.components.SessionProgressBar
 import dev.danielkindl.ocho.ui.theme.JetBrainsMonoFamily
 import dev.danielkindl.ocho.ui.theme.SpaceGroteskFamily
 
+/**
+ * A running EMOM session: countdown, round counter, progress, and transport controls.
+ *
+ * Built for glancing at from across a room mid-effort — the remaining-time numeral
+ * dominates and everything else is secondary.
+ *
+ * @param onSessionFinished invoked on an explicit stop, not on completion, which
+ *   shows its own summary first.
+ */
 @Composable
 fun ActiveSessionScreen(
     onSessionFinished: () -> Unit,

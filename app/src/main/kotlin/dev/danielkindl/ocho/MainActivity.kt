@@ -8,6 +8,12 @@ import dev.danielkindl.ocho.ui.navigation.AppNavigation
 import dev.danielkindl.ocho.ui.theme.OchoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * The app's only activity; hosts the entire Compose navigation graph.
+ *
+ * Single-activity by design, so session view models survive rotation via the
+ * navigation back stack rather than needing to save and restore timer state.
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 

@@ -45,6 +45,13 @@ private val LightColors = lightColorScheme(
     outline = N300,
 )
 
+/**
+ * Applies the Ocho colour scheme and typography.
+ *
+ * Deliberately ignores Material You dynamic colour: the phase backgrounds carry
+ * meaning — red is work, green is rest — and letting the system recolour them would
+ * destroy the signal the user reads mid-workout.
+ */
 @Composable
 fun OchoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -62,7 +69,7 @@ fun OchoTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = EmomTypography,
+        typography = OchoTypography,
         content = content,
     )
 }

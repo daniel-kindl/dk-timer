@@ -6,13 +6,23 @@ import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.os.Build
 import android.widget.Toast
+import dev.danielkindl.ocho.R
 
+/**
+ * Reports the outcome of a `PackageInstaller` session started by [ApkInstaller].
+ *
+ * The install runs out of process, so its result arrives as a broadcast rather than
+ * a return value. `STATUS_PENDING_USER_ACTION` is not a failure — it is Android
+ * asking for the confirmation dialog to be shown, and the install stalls silently
+ * unless that intent is forwarded.
+ */
 class InstallResultReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         when (val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)) {
             PackageInstaller.STATUS_PENDING_USER_ACTION -> forwardUserActionIntent(context, intent)
-            PackageInstaller.STATUS_SUCCESS -> showToast(context, "DK Timer updated")
+            PackageInstaller.STATUS_SUCCESS ->
+                showToast(context, "${context.getString(R.string.app_name)} updated")
             else -> showToast(context, installFailureMessage(intent, status))
         }
     }

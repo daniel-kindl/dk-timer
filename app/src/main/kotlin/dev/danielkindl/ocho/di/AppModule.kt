@@ -34,46 +34,62 @@ import javax.inject.Singleton
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
+/**
+ * Application-wide bindings.
+ *
+ * The `@Binds` half maps each domain interface to its `data/` implementation, which
+ * is what keeps `domain/` and `ui/` from ever naming an Android-facing class. The
+ * `@Provides` half builds the things that have no injectable constructor.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class AppModule {
 
+    /** Binds the DataStore-backed settings store. */
     @Binds
     @Singleton
     abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
 
+    /** Binds the DataStore-backed EMOM preset store. */
     @Binds
     @Singleton
     abstract fun bindPresetRepository(impl: PresetRepositoryImpl): PresetRepository
 
+    /** Binds the DataStore-backed Tabata preset store. */
     @Binds
     @Singleton
     abstract fun bindTabataPresetRepository(impl: TabataPresetRepositoryImpl): TabataPresetRepository
 
+    /** Binds the `ToneGenerator` player. Singleton because it owns a native audio handle. */
     @Binds
     @Singleton
     abstract fun bindAudioPlayer(impl: ToneAudioPlayer): AudioPlayer
 
+    /** Binds the GitHub Releases update source. */
     @Binds
     @Singleton
     abstract fun bindUpdateRepository(impl: UpdateRepositoryImpl): UpdateRepository
 
     companion object {
 
+        /** The real system clock. Tests substitute a fake to make engine timing deterministic. */
         @Provides
         @Singleton
         fun provideClock(): Clock = SystemClock()
 
+        /** Factory for EMOM engines; each session gets one scoped to its view model. */
         @Provides
         @Singleton
         fun provideTimerEngineFactory(clock: Clock): TimerEngineFactory =
             DefaultTimerEngineFactory(clock)
 
+        /** Factory for Tabata engines; each session gets one scoped to its view model. */
         @Provides
         @Singleton
         fun provideTabataEngineFactory(clock: Clock): TabataEngineFactory =
             DefaultTabataEngineFactory(clock)
 
+        /** The single preferences store shared by settings and both preset repositories. */
         @Provides
         @Singleton
         fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =

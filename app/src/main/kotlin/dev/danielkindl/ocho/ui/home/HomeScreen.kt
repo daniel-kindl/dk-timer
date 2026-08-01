@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/** Entry point: pick a timer mode, or open settings. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(

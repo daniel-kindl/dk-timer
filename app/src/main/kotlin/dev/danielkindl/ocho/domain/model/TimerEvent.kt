@@ -1,5 +1,12 @@
 package dev.danielkindl.ocho.domain.model
 
+/**
+ * Everything an EMOM session reports as it runs.
+ *
+ * A single stream carries both display updates and the moments that need sound or
+ * vibration, so the view model cannot drift out of step with what the engine
+ * believes is happening.
+ */
 sealed class TimerEvent {
     /**
      * Emitted ~every 100 ms to drive UI updates.
@@ -16,7 +23,11 @@ sealed class TimerEvent {
         val totalIntervals: Int,
     ) : TimerEvent()
 
-    /** Emitted at each interval boundary (1-indexed). No event for interval 0. */
+    /**
+     * Emitted at each interval boundary. No event for interval 0.
+     *
+     * @property intervalNumber the 1-indexed interval that just ended.
+     */
     data class IntervalCompleted(val intervalNumber: Int) : TimerEvent()
 
     /** Emitted once when totalDurationMillis is reached. */

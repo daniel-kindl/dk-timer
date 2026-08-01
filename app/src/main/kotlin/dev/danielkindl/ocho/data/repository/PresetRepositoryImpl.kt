@@ -7,6 +7,7 @@ import dev.danielkindl.ocho.domain.repository.PresetRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+/** DataStore-backed [PresetRepository]; persistence details live in [JsonListDataStore]. */
 class PresetRepositoryImpl @Inject constructor(
     dataStore: DataStore<Preferences>,
 ) : PresetRepository {

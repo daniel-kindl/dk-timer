@@ -21,6 +21,19 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Everything the Tabata session screen renders.
+ *
+ * @property status where the session is in its lifecycle.
+ * @property countdownSecondsRemaining seconds left in the pre-start countdown;
+ *   meaningful only while [status] is [SessionStatus.CountingDown].
+ * @property phase work or rest; also selects the full-screen background colour.
+ * @property remainingInPhaseMillis time until the phase flips — the large numeral.
+ * @property elapsedMillis time worked, excluding time spent paused.
+ * @property totalDurationMillis the configured workout length.
+ * @property currentRound 1-indexed round; a round begins at each work phase.
+ * @property totalRounds rounds this workout will run.
+ */
 data class TabataSessionUiState(
     val status: SessionStatus = SessionStatus.CountingDown,
     val countdownSecondsRemaining: Int = COUNTDOWN_START_SECONDS,
@@ -31,6 +44,7 @@ data class TabataSessionUiState(
     val currentRound: Int = 1,
     val totalRounds: Int = 0,
 ) {
+    /** Overall completion from 0f to 1f, for the progress bar. */
     val progressFraction: Float
         get() = sessionProgress(elapsedMillis, totalDurationMillis)
 }
@@ -38,6 +52,10 @@ data class TabataSessionUiState(
 private const val COUNTDOWN_START_SECONDS = 3
 private const val COUNTDOWN_TICK_MS = 1_000L
 
+/**
+ * Runs one Tabata session. Mirrors `SessionViewModel`, with phase transitions
+ * driving both the beep pitch and the background colour.
+ */
 @HiltViewModel
 class TabataSessionViewModel @Inject constructor(
     private val engineFactory: TabataEngineFactory,
@@ -55,6 +73,7 @@ class TabataSessionViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(
         TabataSessionUiState(totalDurationMillis = totalDurationMillis)
     )
+    /** Current session state, driven by engine events. */
     val uiState: StateFlow<TabataSessionUiState> = _uiState.asStateFlow()
 
     private var countdownJob: Job? = null
@@ -112,16 +131,22 @@ class TabataSessionViewModel @Inject constructor(
         }
     }
 
+    /** Freezes the workout. Paused time does not count toward the total. */
     fun pauseSession() {
         engine.pause()
         _uiState.update { it.copy(status = SessionStatus.Paused) }
     }
 
+    /** Resumes from [pauseSession] without losing phase alignment. */
     fun resumeSession() {
         engine.resume()
         _uiState.update { it.copy(status = SessionStatus.Running) }
     }
 
+    /**
+     * Ends the session early. Distinct from completing it: no completion feedback,
+     * and the screen navigates away instead of showing the summary.
+     */
     fun stopSession() {
         countdownJob?.cancel()
         engine.stop()

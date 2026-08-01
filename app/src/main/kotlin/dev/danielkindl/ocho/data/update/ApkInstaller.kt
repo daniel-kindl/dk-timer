@@ -14,17 +14,34 @@ import java.io.File
 import java.io.FileInputStream
 import javax.inject.Inject
 
+/**
+ * Installs a downloaded APK over the running app.
+ *
+ * Takes two routes by API level. From Android 12 the `PackageInstaller` session API
+ * can install without a per-install confirmation dialog; below that the only option
+ * is an `ACTION_VIEW` intent that hands off to the system installer UI.
+ *
+ * Either route needs the user to have granted "install unknown apps" first — see
+ * [canInstallPackages] and [unknownSourcesSettingsIntent].
+ */
 class ApkInstaller @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
 
+    /** Whether the user has granted this app permission to install packages. */
     fun canInstallPackages(): Boolean = context.packageManager.canRequestPackageInstalls()
 
+    /** Settings screen where the user grants that permission; launch when [canInstallPackages] is false. */
     fun unknownSourcesSettingsIntent(): Intent =
         Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
             .setData(Uri.parse("package:${context.packageName}"))
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
+    /**
+     * Starts installing [apkFile]. Returns as soon as the install is handed off;
+     * the outcome arrives at [InstallResultReceiver], or via the system UI on
+     * older versions.
+     */
     fun install(apkFile: File) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             installViaPackageInstaller(apkFile)

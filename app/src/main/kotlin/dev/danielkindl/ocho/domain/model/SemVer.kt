@@ -12,6 +12,12 @@ package dev.danielkindl.ocho.domain.model
  * precede and above `3.0.0-dev.7`. Without it, [parse] returns null for every dev
  * build, the installed version reads as unknown, and the update check silently
  * reports "up to date" forever.
+ *
+ * @property major incremented for breaking changes.
+ * @property minor incremented for backwards-compatible features.
+ * @property patch incremented for backwards-compatible fixes.
+ * @property preRelease dot-separated identifiers after the hyphen, e.g.
+ *   `["dev", "12"]`. Empty for a normal release.
  */
 data class SemVer(
     val major: Int,

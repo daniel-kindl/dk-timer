@@ -12,6 +12,15 @@ import org.json.JSONObject
 /**
  * Generic JSON-array-in-a-string-preference CRUD store, shared by the EMOM and Tabata
  * preset repositories (which differ only in item shape and DataStore key).
+ *
+ * Unparseable stored JSON yields an empty list rather than throwing. Presets are
+ * disposable convenience data, so a corrupt blob should cost the user their saved
+ * presets, not crash the setup screen every time they open it.
+ *
+ * @param key the DataStore preference key holding this list's JSON.
+ * @param parseItem reads one item from its JSON object.
+ * @param serializeItem writes one item into a JSON object.
+ * @param idOf extracts the identity used to deduplicate and delete.
  */
 class JsonListDataStore<T>(
     private val dataStore: DataStore<Preferences>,
@@ -22,9 +31,11 @@ class JsonListDataStore<T>(
 ) {
     private val key = stringPreferencesKey(key)
 
+    /** Emits the stored list, and again on every [upsert] or [delete]. */
     fun observe(): Flow<List<T>> =
         dataStore.data.map { prefs -> parseItems(prefs[key] ?: return@map emptyList()) }
 
+    /** Adds [item], replacing any existing entry whose id matches. */
     suspend fun upsert(item: T) {
         dataStore.edit { prefs ->
             val current = parseItems(prefs[key] ?: "[]").toMutableList()
@@ -34,6 +45,7 @@ class JsonListDataStore<T>(
         }
     }
 
+    /** Removes the entry with [id]. A missing id is not an error. */
     suspend fun delete(id: String) {
         dataStore.edit { prefs ->
             val current = parseItems(prefs[key] ?: "[]").toMutableList()

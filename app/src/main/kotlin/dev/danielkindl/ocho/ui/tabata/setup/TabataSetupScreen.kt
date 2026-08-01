@@ -34,6 +34,11 @@ import dev.danielkindl.ocho.ui.components.DurationPicker
 import dev.danielkindl.ocho.ui.components.PresetsSection
 import dev.danielkindl.ocho.ui.components.SavePresetDialog
 
+/**
+ * Configures a Tabata workout: total duration, work and rest phases, and presets.
+ *
+ * @param onStartSession receives the resolved durations in milliseconds.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TabataSetupScreen(

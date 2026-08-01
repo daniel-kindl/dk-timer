@@ -70,6 +70,13 @@ private fun rememberReducedMotionEnabled(): Boolean {
     }
 }
 
+/**
+ * A running Tabata session. Like the EMOM screen, but the entire background carries
+ * the phase colour so work and rest are readable from across the room without
+ * focusing on any text.
+ *
+ * @param onSessionFinished invoked on an explicit stop, not on completion.
+ */
 @Composable
 fun TabataSessionScreen(
     onSessionFinished: () -> Unit,

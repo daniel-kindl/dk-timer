@@ -10,6 +10,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+/**
+ * DataStore-backed [SettingsRepository].
+ *
+ * A missing key reads as the [UserSettings] default rather than an error, so a
+ * first launch behaves like one where both toggles were deliberately left on.
+ */
 class SettingsRepositoryImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>,
 ) : SettingsRepository {

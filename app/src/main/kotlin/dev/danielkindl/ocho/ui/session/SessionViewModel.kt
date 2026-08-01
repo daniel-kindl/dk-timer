@@ -20,6 +20,18 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Everything the EMOM session screen renders.
+ *
+ * @property status where the session is in its lifecycle.
+ * @property countdownSecondsRemaining seconds left in the pre-start countdown;
+ *   meaningful only while [status] is [SessionStatus.CountingDown].
+ * @property currentRound 1-indexed interval in progress.
+ * @property totalRounds intervals this workout will run.
+ * @property elapsedMillis time worked, excluding time spent paused.
+ * @property remainingInIntervalMillis time until the next beep — the large numeral.
+ * @property totalDurationMillis the configured workout length.
+ */
 data class SessionUiState(
     val status: SessionStatus = SessionStatus.CountingDown,
     val countdownSecondsRemaining: Int = COUNTDOWN_START_SECONDS,
@@ -29,6 +41,7 @@ data class SessionUiState(
     val remainingInIntervalMillis: Long = 0L,
     val totalDurationMillis: Long = 0L,
 ) {
+    /** Overall completion from 0f to 1f, for the progress bar. */
     val progressFraction: Float
         get() = sessionProgress(elapsedMillis, totalDurationMillis)
 }
@@ -36,6 +49,13 @@ data class SessionUiState(
 private const val COUNTDOWN_START_SECONDS = 3
 private const val COUNTDOWN_TICK_MS = 1_000L
 
+/**
+ * Runs one EMOM session: owns the engine, translates its events into UI state, and
+ * fires sound and vibration at the right moments.
+ *
+ * Configuration arrives through `SavedStateHandle` from the navigation route, so a
+ * rotation mid-workout rebuilds the screen without disturbing the running engine.
+ */
 @HiltViewModel
 class SessionViewModel @Inject constructor(
     private val timerEngineFactory: TimerEngineFactory,
@@ -54,6 +74,8 @@ class SessionViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(
         SessionUiState(totalDurationMillis = totalDurationMillis)
     )
+
+    /** Current session state, driven by engine events. */
     val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()
 
     private var countdownJob: Job? = null
@@ -106,16 +128,22 @@ class SessionViewModel @Inject constructor(
         }
     }
 
+    /** Freezes the workout. Paused time does not count toward the total. */
     fun pauseSession() {
         timerEngine.pause()
         _uiState.update { it.copy(status = SessionStatus.Paused) }
     }
 
+    /** Resumes from [pauseSession] without losing interval alignment. */
     fun resumeSession() {
         timerEngine.resume()
         _uiState.update { it.copy(status = SessionStatus.Running) }
     }
 
+    /**
+     * Ends the session early. Distinct from completing it: no completion feedback,
+     * and the screen navigates away instead of showing the summary.
+     */
     fun stopSession() {
         countdownJob?.cancel()
         timerEngine.stop()

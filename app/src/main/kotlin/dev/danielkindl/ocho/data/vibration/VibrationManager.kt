@@ -8,6 +8,13 @@ import android.os.VibratorManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
+/**
+ * Vibration feedback for timer events.
+ *
+ * The haptic channel matters most exactly when audio does not: a loud gym, or a
+ * phone in a pocket. Interval and completion use distinguishable patterns so the
+ * two are told apart without looking.
+ */
 class VibrationManager @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {

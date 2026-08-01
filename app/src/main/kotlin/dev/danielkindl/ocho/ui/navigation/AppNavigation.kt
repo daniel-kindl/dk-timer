@@ -20,6 +20,13 @@ private const val ROUTE_SESSION = "session/{totalDurationMillis}/{intervalMillis
 private const val ROUTE_TABATA_SETUP = "tabata-setup"
 private const val ROUTE_TABATA_SESSION = "tabata-session/{totalDurationMillis}/{workMillis}/{restMillis}"
 
+/**
+ * The whole navigation graph: home, both setup screens, both session screens, settings.
+ *
+ * Session configuration travels as route arguments rather than shared state, so each
+ * session view model reads its own durations from `SavedStateHandle` and survives
+ * rotation without any extra save/restore code.
+ */
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()

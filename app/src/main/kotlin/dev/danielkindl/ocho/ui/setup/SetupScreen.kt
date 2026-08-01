@@ -34,6 +34,12 @@ import dev.danielkindl.ocho.ui.components.DurationPicker
 import dev.danielkindl.ocho.ui.components.PresetsSection
 import dev.danielkindl.ocho.ui.components.SavePresetDialog
 
+/**
+ * Configures an EMOM workout: total duration, interval, and saved presets.
+ *
+ * @param onStartSession receives the resolved durations in milliseconds; navigation
+ *   is the caller's concern, so this screen stays independent of the nav graph.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetupScreen(

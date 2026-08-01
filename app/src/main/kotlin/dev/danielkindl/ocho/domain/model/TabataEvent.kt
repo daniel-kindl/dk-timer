@@ -1,7 +1,15 @@
 package dev.danielkindl.ocho.domain.model
 
+/** The two halves of a Tabata round; drives both the beep pitch and the background colour. */
 enum class TabataPhase { Work, Rest }
 
+/**
+ * Everything a Tabata session reports as it runs.
+ *
+ * Phase changes are announced as their own events rather than inferred from
+ * consecutive [Tick]s, so the beep fires exactly once per transition even if a tick
+ * is dropped or delivered late.
+ */
 sealed class TabataEvent {
     /**
      * Emitted ~every 100 ms to drive UI updates.

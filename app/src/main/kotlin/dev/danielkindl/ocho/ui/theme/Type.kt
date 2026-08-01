@@ -8,27 +8,41 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import dev.danielkindl.ocho.R
 
-// Space Grotesk — reserved for the single biggest display element per screen
-// (the active-session countdown numeral and the wordmark), always weight 700.
+/*
+ * Three typefaces, each with one job. The split is what lets a glance at the
+ * session screen separate the number that matters from everything around it.
+ */
+
+/**
+ * Reserved for the single biggest display element on a screen — the active-session
+ * countdown numeral and the wordmark. Always weight 700; only one use per screen,
+ * or it stops signalling primacy.
+ */
 val SpaceGroteskFamily = FontFamily(
     Font(R.font.space_grotesk, FontWeight.Bold),
 )
 
-// JetBrains Mono — anything the timer computed, not a human wrote: interval
-// labels, round counts, elapsed time, preset durations.
+/**
+ * Anything the timer computed rather than a human wrote: interval labels, round
+ * counts, elapsed time, preset durations.
+ *
+ * Monospaced so digits share a width and values do not shift the layout as they
+ * tick — a proportional font makes a running counter visibly jitter.
+ */
 val JetBrainsMonoFamily = FontFamily(
     Font(R.font.jetbrains_mono, FontWeight.Normal),
     Font(R.font.jetbrains_mono, FontWeight.Medium),
 )
 
-// IBM Plex Sans — general UI text: buttons, body copy, headings.
+/** General UI text: buttons, body copy, headings. */
 val IbmPlexSansFamily = FontFamily(
     Font(R.font.ibm_plex_sans, FontWeight.Normal),
     Font(R.font.ibm_plex_sans, FontWeight.Medium),
     Font(R.font.ibm_plex_sans, FontWeight.SemiBold),
 )
 
-val EmomTypography = Typography(
+/** The full Material 3 type scale, assembled from the three families above. */
+val OchoTypography = Typography(
     // Display — large timer numbers shown during active sessions
     displayLarge = TextStyle(
         fontFamily = IbmPlexSansFamily,

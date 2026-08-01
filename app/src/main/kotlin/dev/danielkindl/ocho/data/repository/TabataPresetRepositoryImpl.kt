@@ -7,6 +7,7 @@ import dev.danielkindl.ocho.domain.repository.TabataPresetRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+/** DataStore-backed [TabataPresetRepository]; persistence details live in [JsonListDataStore]. */
 class TabataPresetRepositoryImpl @Inject constructor(
     dataStore: DataStore<Preferences>,
 ) : TabataPresetRepository {

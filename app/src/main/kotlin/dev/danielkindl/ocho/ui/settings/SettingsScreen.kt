@@ -38,6 +38,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.danielkindl.ocho.ui.components.SessionProgressBar
 
+/**
+ * Feedback toggles, the in-app updater, and app info.
+ *
+ * Two view models rather than one: settings are trivial state, while the update flow
+ * is a multi-step state machine with its own failure modes, and merging them would
+ * put download progress in the same object as a pair of booleans.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
