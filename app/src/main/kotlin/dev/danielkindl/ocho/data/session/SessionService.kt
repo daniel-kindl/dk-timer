@@ -156,6 +156,7 @@ class SessionService : Service() {
     /** Not a bound service; everything goes through [SessionController]. */
     override fun onBind(intent: Intent?): IBinder? = null
 
+    /** Intent actions the notification's controls send back to this service. */
     companion object {
         /** Notification action: freeze the running session. */
         const val ACTION_PAUSE = "dev.danielkindl.ocho.action.PAUSE"

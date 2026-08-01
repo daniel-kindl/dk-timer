@@ -61,8 +61,10 @@ fun OchoTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
+            // Only the icon polarity is set here. Tinting the bar itself is
+            // deprecated and unnecessary: MainActivity draws edge to edge, so the
+            // bar takes the colour of whatever is painted behind it.
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.background.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }

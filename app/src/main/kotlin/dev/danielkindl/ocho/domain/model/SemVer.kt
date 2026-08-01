@@ -35,6 +35,7 @@ data class SemVer(
         return if (core != 0) core else comparePreRelease(preRelease, other.preRelease)
     }
 
+    /** Parsing, and the precedence rules from SemVer sections 10 and 11. */
     companion object {
         private const val CORE_PART_COUNT = 3
 

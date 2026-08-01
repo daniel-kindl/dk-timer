@@ -81,6 +81,7 @@ abstract class AppModule {
         impl: AndroidSessionServiceLauncher,
     ): SessionServiceLauncher
 
+    /** Bindings for types that have no injectable constructor. */
     companion object {
 
         /** The real system clock. Tests substitute a fake to make engine timing deterministic. */

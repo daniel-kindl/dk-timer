@@ -1,10 +1,12 @@
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.android.application)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.detekt)
 }
 
@@ -25,12 +27,12 @@ val devBuildNumber = (project.findProperty("devBuildNumber") as String?)?.toIntO
 
 android {
     namespace = "dev.danielkindl.ocho"
-    compileSdk = 34
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "dev.danielkindl.ocho"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 7
         versionName = "3.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -99,12 +101,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-        // The codebase compiles clean, so this costs nothing today and stops the
-        // first warning from becoming the first of fifty.
-        allWarningsAsErrors = true
-    }
 
     lint {
         warningsAsErrors = true
@@ -114,16 +110,31 @@ android {
         //   GradleDependency        - dependency freshness; Dependabot's job
         //   OldTargetApi            - fires whenever Google ships a new SDK
         //   ObsoleteLintCustomCheck - Compose's bundled lint jar vs our Kotlin version
-        disable += setOf("GradleDependency", "OldTargetApi", "ObsoleteLintCustomCheck")
+//   PropertyEscape          - flags local.properties, which Studio generates and
+        //                             git ignores; not a file this project controls
+        disable += setOf(
+            "GradleDependency",
+            "OldTargetApi",
+            "ObsoleteLintCustomCheck",
+            "PropertyEscape",
+        )
     }
     // buildConfig is off by default from AGP 8.0 onwards; the update channel needs it.
     buildFeatures {
         compose = true
         buildConfig = true
     }
-    composeOptions { kotlinCompilerExtensionVersion = "1.5.8" }
     packaging {
         resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        // The codebase compiles clean, so this costs nothing today and stops the
+        // first warning from becoming the first of fifty.
+        allWarningsAsErrors.set(true)
     }
 }
 

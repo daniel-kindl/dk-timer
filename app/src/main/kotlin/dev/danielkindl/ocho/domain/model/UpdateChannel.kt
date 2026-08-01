@@ -20,6 +20,7 @@ enum class UpdateChannel(val id: String) {
 
     ;
 
+    /** Resolution from the build-time channel id. */
     companion object {
         /**
          * Resolves the build-time channel id, falling back to [Stable] if it is

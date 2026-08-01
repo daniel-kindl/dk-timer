@@ -1,19 +1,19 @@
 [versions]
-agp = "8.2.2"
-kotlin = "1.9.22"
-composeBom = "2024.02.01"
-hilt = "2.51"
-hiltNavigationCompose = "1.2.0"
-navigationCompose = "2.7.7"
-lifecycle = "2.7.0"
-datastorePreferences = "1.0.0"
-coroutines = "1.7.3"
+agp = "9.3.1"
+kotlin = "2.4.10"
+composeBom = "2026.06.01"
+hilt = "2.60.1"
+hiltNavigationCompose = "1.4.0"
+navigationCompose = "2.9.8"
+lifecycle = "2.11.0"
+datastorePreferences = "1.2.1"
+coroutines = "1.11.0"
 junit = "4.13.2"
-mockk = "1.13.9"
-orgJson = "20231013"
-activityCompose = "1.8.2"
-coreKtx = "1.12.0"
-detekt = "1.23.5"
+mockk = "1.14.11"
+orgJson = "20260719"
+activityCompose = "1.13.0"
+coreKtx = "1.19.0"
+detekt = "1.23.8"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -52,4 +52,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }

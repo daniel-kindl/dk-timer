@@ -1,7 +1,18 @@
 package dev.danielkindl.ocho.domain.model
 
-/** The two halves of a Tabata round; drives both the beep pitch and the background colour. */
-enum class TabataPhase { Work, Rest }
+/**
+ * The two halves of a Tabata round.
+ *
+ * Internal to the engine, which uses it to pick the next phase duration. The rest of
+ * the app works in terms of the domain-wide [Phase] instead.
+ */
+enum class TabataPhase {
+    /** The effort interval. */
+    Work,
+
+    /** The recovery interval. */
+    Rest,
+}
 
 /**
  * Everything a Tabata session reports as it runs.

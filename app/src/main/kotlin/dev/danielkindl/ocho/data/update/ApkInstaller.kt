@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.net.Uri
+import androidx.core.net.toUri
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresApi
@@ -34,7 +35,7 @@ class ApkInstaller @Inject constructor(
     /** Settings screen where the user grants that permission; launch when [canInstallPackages] is false. */
     fun unknownSourcesSettingsIntent(): Intent =
         Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
-            .setData(Uri.parse("package:${context.packageName}"))
+            .setData("package:${context.packageName}".toUri())
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
     /**
