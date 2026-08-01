@@ -8,6 +8,10 @@ on:
 jobs:
   release:
     name: Build & Publish Release
+    # Dev prereleases are tagged v3.0.0-dev.12 and also match the v* filter above,
+    # which GitHub's tag patterns cannot express an exception to. Without this guard
+    # every push to `dev` starts this workflow and fails it on the SemVer check.
+    if: "!contains(github.ref_name, '-')"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -50,7 +54,10 @@ jobs:
             exit 1
           fi
 
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          # --exclude='*-*' skips dev prereleases, which would otherwise resolve as
+          # the previous tag and break both the monotonic check and the bump-level
+          # check below.
+          PREV_TAG=$(git describe --tags --abbrev=0 --exclude='*-*' HEAD^ 2>/dev/null || echo "")
 
           if [[ -n "$PREV_TAG" ]]; then
             PREV_VERSION="${PREV_TAG#v}"
@@ -132,12 +139,15 @@ jobs:
       - name: Generate changelog from commits
         id: changelog
         run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          # --exclude='*-*' so dev prereleases cannot become the comparison point and
+          # truncate the notes to the handful of commits since the last dev build.
+          PREV_TAG=$(git describe --tags --abbrev=0 --exclude='*-*' HEAD^ 2>/dev/null || echo "")
           if [ -n "$PREV_TAG" ]; then
             CHANGES=$(git log --oneline "$PREV_TAG"..HEAD --no-merges)
           else
             CHANGES=$(git log --oneline --no-merges)
           fi
+          echo "PREV_TAG=$PREV_TAG" >> "$GITHUB_OUTPUT"
           echo "CHANGES<<EOF" >> "$GITHUB_OUTPUT"
           echo "$CHANGES" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
@@ -146,13 +156,13 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.VERSION }}
-          name: "EMOM Timer ${{ steps.version.outputs.VERSION }}"
+          name: "Ocho ${{ steps.version.outputs.VERSION }}"
           body: |
             ## What's Changed
             ${{ steps.changelog.outputs.CHANGES }}
 
             ---
-            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.version.outputs.VERSION }}...HEAD
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.changelog.outputs.PREV_TAG }}...${{ steps.version.outputs.VERSION }}
           files: app/build/outputs/apk/release/*.apk
           draft: false
           prerelease: false
