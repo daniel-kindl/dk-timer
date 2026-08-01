@@ -16,7 +16,8 @@ round count of a classic Tabata.*
 |---------|--------|
 | ⏱ EMOM timer | Total duration and interval length, set with drum-roll mm:ss pickers |
 | 🔁 Tabata timer | Total, work, and rest durations; phases alternate automatically |
-| 🔴🟢 Phase colours | Full-screen red (work) / green (rest) during Tabata, readable across a room |
+| 🎨 Phase colours | Full-screen amber / red / green / violet plate per phase, readable across a room and distinguishable without colour vision |
+| 📊 Run timeline | Proportional preview of a workout's shape before you start it |
 | 🔔 Sound feedback | Distinct tones per event, on the alarm stream so silent mode can't mute them |
 | 📳 Vibration feedback | Different patterns for intervals and for completion |
 | ⏸ Pause & resume | Freeze mid-session without drift or losing interval alignment |
@@ -134,6 +135,24 @@ app/src/main/kotlin/dev/danielkindl/ocho/
     ├── components/     WheelPicker, DurationPicker, PresetsSection, session scaffolding
     └── theme/          Colour ramp, three-typeface system, Material 3 scale
 ```
+
+### The phase colour system
+
+The session screen's background is the primary information channel, not decoration.
+Four states, each owning one full-bleed plate — prepare amber, work red, rest light
+green, complete violet — resolved in `ui/theme/PhaseColors.kt`.
+
+Rest is a **light** plate on purpose. Red and mid-green sit at nearly the same
+lightness, so under deuteranopia they collapse into two similar mid-tone plates and
+the signal fails. Separating them by lightness as well as hue keeps them distinct
+with no colour vision at all, and flips the on-plate text from white to ink as a
+second, redundant cue.
+
+Phase is never carried by colour alone: the plate, the uppercase label, the audio
+cue, and the haptic all say the same thing. Material You dynamic colour is
+deliberately disabled — work must be red on every device.
+
+The full specification lives in `ocho-design-system/`.
 
 ### Drift-free timing
 
