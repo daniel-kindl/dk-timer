@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.math.ceil
 
 /**
  * Picker state for the EMOM setup screen.
@@ -52,6 +53,17 @@ data class SetupUiState(
     /** True when interval exceeds total — no interval events will fire. */
     val intervalExceedsTotal: Boolean
         get() = isValid && intervalMillis > totalDurationMillis
+
+    /**
+     * Rounds this configuration will run, matching the engine's own ceiling: a
+     * partial final interval still counts as a round, because it still gets a beep.
+     */
+    val roundCount: Int
+        get() = if (!isValid) 0 else ceil(totalDurationMillis.toDouble() / intervalMillis).toInt()
+
+    /** The interval as a short label for the run timeline, e.g. `1min`. */
+    val intervalLabel: String
+        get() = formatDuration(intervalMinutes, intervalSeconds)
 
     /** Suggested preset name, e.g. `20min / 1min`, used when the user leaves the field blank. */
     fun defaultPresetName(): String =

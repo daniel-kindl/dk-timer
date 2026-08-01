@@ -1,13 +1,13 @@
 package dev.danielkindl.ocho.ui.settings
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,9 +33,12 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.danielkindl.ocho.R
+import dev.danielkindl.ocho.ui.components.ErrorPlate
 import dev.danielkindl.ocho.ui.components.SessionProgressBar
 
 /**
@@ -66,7 +69,7 @@ fun SettingsScreen(
                 title = { Text("Settings") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(painterResource(R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                 },
             )
@@ -78,6 +81,9 @@ fun SettingsScreen(
                 .padding(padding),
         ) {
             ListItem(
+                leadingContent = {
+                    Icon(painterResource(R.drawable.ic_bell), contentDescription = null)
+                },
                 headlineContent = { Text("Sound") },
                 supportingContent = {
                     Text(
@@ -94,6 +100,9 @@ fun SettingsScreen(
             )
             HorizontalDivider()
             ListItem(
+                leadingContent = {
+                    Icon(painterResource(R.drawable.ic_zap), contentDescription = null)
+                },
                 headlineContent = { Text("Vibration") },
                 supportingContent = {
                     Text(
@@ -126,6 +135,22 @@ fun SettingsScreen(
             HorizontalDivider()
 
             Spacer(modifier = Modifier.weight(1f))
+
+            // The wordmark is set in type, not drawn: "ocho", always lowercase, with
+            // only the final o in brand green so it reads as the timer dial. Two
+            // pre-rendered variants rather than live text, so the exact tracking and
+            // the green-o treatment survive font fallback.
+            Image(
+                painter = painterResource(
+                    if (isSystemInDarkTheme()) R.drawable.wordmark_dark else R.drawable.wordmark_light
+                ),
+                contentDescription = "Ocho",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .height(40.dp)
+                    .padding(bottom = 8.dp),
+            )
+
             val uriHandler = LocalUriHandler.current
             val authorLink = buildAnnotatedString {
                 append("Made by ")
@@ -214,12 +239,14 @@ private fun UpdateSection(
                 trailingContent = { Button(onClick = onInstall) { Text("Install") } },
             )
 
+        // An error is a plate inside the layout, never a colour applied to the
+        // surrounding surface — see ErrorPlate for why that separation is structural.
         is UpdateUiState.Error ->
-            ListItem(
-                headlineContent = {
-                    Text(state.message, color = MaterialTheme.colorScheme.error)
-                },
-                trailingContent = { TextButton(onClick = onCheck) { Text("Retry") } },
+            ErrorPlate(
+                message = state.message,
+                actionLabel = "Try again",
+                onAction = onCheck,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             )
     }
 }

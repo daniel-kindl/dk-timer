@@ -1,79 +1,44 @@
 package dev.danielkindl.ocho.ui.tabata.session
 
-import android.provider.Settings
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.danielkindl.ocho.R
 import dev.danielkindl.ocho.core.format.formatCountdown
 import dev.danielkindl.ocho.core.format.formatElapsed
 import dev.danielkindl.ocho.domain.model.SessionStatus
 import dev.danielkindl.ocho.domain.model.TabataPhase
+import dev.danielkindl.ocho.ui.components.PhaseClock
+import dev.danielkindl.ocho.ui.components.PhaseLabel
+import dev.danielkindl.ocho.ui.components.PhaseScaffold
+import dev.danielkindl.ocho.ui.components.PrimarySessionControl
+import dev.danielkindl.ocho.ui.components.SUBDUED_ON_PLATE
+import dev.danielkindl.ocho.ui.components.SecondarySessionControl
+import dev.danielkindl.ocho.ui.components.SessionColumn
 import dev.danielkindl.ocho.ui.components.SessionLifecycleScaffold
-import dev.danielkindl.ocho.ui.components.SessionProgressBar
-import dev.danielkindl.ocho.ui.theme.Green500
-import dev.danielkindl.ocho.ui.theme.Green700
-import dev.danielkindl.ocho.ui.theme.JetBrainsMonoFamily
-import dev.danielkindl.ocho.ui.theme.N0
-import dev.danielkindl.ocho.ui.theme.N950
-import dev.danielkindl.ocho.ui.theme.Red500
-import dev.danielkindl.ocho.ui.theme.Red700
-import dev.danielkindl.ocho.ui.theme.SpaceGroteskFamily
-
-private const val PHASE_TRANSITION_MILLIS = 340
-
-private val WorkBackground = Red500
-private val RestBackground = Green500
-private val WorkBackgroundPaused = Red700
-private val RestBackgroundPaused = Green700
-private val NeutralBackground = N950
-private val OnPhaseBackground = N0
-
-@Composable
-private fun rememberReducedMotionEnabled(): Boolean {
-    val contentResolver = LocalContext.current.contentResolver
-    return remember {
-        Settings.Global.getFloat(contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
-    }
-}
+import dev.danielkindl.ocho.ui.theme.Phase
 
 /**
- * A running Tabata session. Like the EMOM screen, but the entire background carries
- * the phase colour so work and rest are readable from across the room without
- * focusing on any text.
+ * A running Tabata session.
+ *
+ * The full-bleed phase colour is the primary information channel — it answers "what
+ * am I doing right now" from three metres away, before any text is read. Work and
+ * rest differ by lightness as well as hue, so the distinction survives with no
+ * colour vision at all, and the uppercase phase label carries the same information
+ * redundantly.
  *
  * @param onSessionFinished invoked on an explicit stop, not on completion.
  */
@@ -89,39 +54,30 @@ fun TabataSessionScreen(
         onSessionFinished = onSessionFinished,
         onStopSession = viewModel::stopSession,
     ) { onRequestExit ->
-        val isPaused = state.status == SessionStatus.Paused
-        val reducedMotion = rememberReducedMotionEnabled()
-        val background by animateColorAsState(
-            targetValue = tabataBackgroundColor(status = state.status, phase = state.phase, isPaused = isPaused),
-            animationSpec = if (reducedMotion) {
-                tween(durationMillis = 0)
-            } else {
-                tween(durationMillis = PHASE_TRANSITION_MILLIS, easing = EaseInOut)
-            },
-            label = "phase-background",
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(background),
-            contentAlignment = Alignment.Center,
-        ) {
+        PhaseScaffold(phase = state.phaseColour()) { theme ->
             when (state.status) {
-                SessionStatus.CountingDown -> CountdownContent(
+                SessionStatus.CountingDown -> PrepareContent(
                     secondsRemaining = state.countdownSecondsRemaining,
+                    onPlate = theme.onPlate,
                     onStop = onRequestExit,
                 )
 
-                SessionStatus.Completed -> CompletionContent(
+                SessionStatus.Completed -> CompleteContent(
                     totalElapsedMillis = state.elapsedMillis,
+                    rounds = state.totalRounds,
+                    onPlate = theme.onPlate,
                     onDone = onSessionFinished,
                 )
 
                 else -> RunningContent(
                     state = state,
+                    onPlate = theme.onPlate,
                     onPauseResume = {
-                        if (isPaused) viewModel.resumeSession() else viewModel.pauseSession()
+                        if (state.status == SessionStatus.Paused) {
+                            viewModel.resumeSession()
+                        } else {
+                            viewModel.pauseSession()
+                        }
                     },
                     onStop = onRequestExit,
                 )
@@ -130,210 +86,104 @@ fun TabataSessionScreen(
     }
 }
 
-private fun tabataBackgroundColor(status: SessionStatus, phase: TabataPhase, isPaused: Boolean): Color = when {
-    status != SessionStatus.Running && status != SessionStatus.Paused -> NeutralBackground
-    phase == TabataPhase.Work && isPaused -> WorkBackgroundPaused
-    phase == TabataPhase.Work -> WorkBackground
-    isPaused -> RestBackgroundPaused
-    else -> RestBackground
+/**
+ * Maps session lifecycle onto the four-phase colour model.
+ *
+ * Pausing deliberately does not change the phase: you are still in the work
+ * interval, merely frozen in it, and flipping the plate would say otherwise. The
+ * stopped clock and the changed control label carry that state instead.
+ */
+private fun TabataSessionUiState.phaseColour(): Phase = when (status) {
+    SessionStatus.CountingDown -> Phase.PREPARE
+    SessionStatus.Completed -> Phase.COMPLETE
+    else -> if (phase == TabataPhase.Work) Phase.WORK else Phase.REST
 }
 
 @Composable
-private fun CountdownContent(secondsRemaining: Int, onStop: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        Text(
-            text = "GET READY",
-            style = MaterialTheme.typography.headlineMedium,
-            color = OnPhaseBackground,
-        )
-        Text(
-            text = "$secondsRemaining",
-            style = MaterialTheme.typography.displayLarge.copy(fontFamily = SpaceGroteskFamily),
-            color = OnPhaseBackground,
-        )
-        Button(
+private fun PrepareContent(
+    secondsRemaining: Int,
+    onPlate: androidx.compose.ui.graphics.Color,
+    onStop: () -> Unit,
+) {
+    SessionColumn {
+        PhaseLabel("Prepare", onPlate)
+        PhaseClock(secondsRemaining.toString(), onPlate)
+        SecondarySessionControl(
+            label = "Stop",
+            onPlate = onPlate,
             onClick = onStop,
-            modifier = Modifier.fillMaxWidth().height(64.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = OnPhaseBackground.copy(alpha = 0.2f),
-                contentColor = OnPhaseBackground,
-            ),
-        ) {
-            Icon(Icons.Default.Stop, contentDescription = "Stop", modifier = Modifier.size(28.dp))
-            Spacer(Modifier.width(8.dp))
-            Text("STOP", style = MaterialTheme.typography.titleMedium)
-        }
+            icon = painterResource(R.drawable.ic_square),
+        )
     }
 }
 
 @Composable
-private fun CompletionContent(totalElapsedMillis: Long, onDone: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        Icon(
-            Icons.Default.CheckCircle,
-            contentDescription = null,
-            modifier = Modifier.size(72.dp),
-            tint = OnPhaseBackground,
-        )
-        Text(
-            text = "Workout Complete!",
-            style = MaterialTheme.typography.headlineMedium,
-            color = OnPhaseBackground,
-            textAlign = TextAlign.Center,
-        )
+private fun CompleteContent(
+    totalElapsedMillis: Long,
+    rounds: Int,
+    onPlate: androidx.compose.ui.graphics.Color,
+    onDone: () -> Unit,
+) {
+    SessionColumn {
+        PhaseLabel("Complete", onPlate)
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            PhaseClock(totalElapsedMillis.formatElapsed(), onPlate)
+            Spacer(Modifier.height(8.dp))
             Text(
-                text = "TOTAL TIME",
-                style = MaterialTheme.typography.titleLarge,
-                color = OnPhaseBackground.copy(alpha = 0.7f),
-            )
-            Text(
-                text = totalElapsedMillis.formatElapsed(),
-                style = MaterialTheme.typography.headlineLarge.copy(fontFamily = JetBrainsMonoFamily),
-                color = OnPhaseBackground,
+                text = "$rounds rounds",
+                style = MaterialTheme.typography.titleMedium,
+                color = onPlate.copy(alpha = SUBDUED_ON_PLATE),
+                textAlign = TextAlign.Center,
             )
         }
-        Button(
-            onClick = onDone,
-            modifier = Modifier.fillMaxWidth().height(64.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = OnPhaseBackground.copy(alpha = 0.2f),
-                contentColor = OnPhaseBackground,
-            ),
-        ) {
-            Text("DONE", style = MaterialTheme.typography.titleLarge)
-        }
+        SecondarySessionControl(label = "Done", onPlate = onPlate, onClick = onDone)
     }
 }
 
 @Composable
 private fun RunningContent(
     state: TabataSessionUiState,
+    onPlate: androidx.compose.ui.graphics.Color,
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
 ) {
     val isPaused = state.status == SessionStatus.Paused
+    val phaseName = if (state.phase == TabataPhase.Work) "Work" else "Rest"
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        // Round counter
+    SessionColumn {
+        PhaseLabel(if (isPaused) "$phaseName · paused" else phaseName, onPlate)
+
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            PhaseClock(state.remainingInPhaseMillis.formatCountdown(), onPlate)
+            Spacer(Modifier.height(12.dp))
             Text(
-                text = "ROUND",
-                style = MaterialTheme.typography.headlineMedium,
-                color = OnPhaseBackground.copy(alpha = 0.7f),
+                text = "round ${state.currentRound}/${state.totalRounds}",
+                style = MaterialTheme.typography.titleMedium,
+                color = onPlate.copy(alpha = SUBDUED_ON_PLATE),
+                textAlign = TextAlign.Center,
             )
+            Spacer(Modifier.height(4.dp))
             Text(
-                text = "${state.currentRound} / ${state.totalRounds}",
-                style = MaterialTheme.typography.displaySmall.copy(fontFamily = JetBrainsMonoFamily),
-                color = OnPhaseBackground,
+                text = state.elapsedMillis.formatElapsed(),
+                style = MaterialTheme.typography.labelSmall,
+                color = onPlate.copy(alpha = SUBDUED_ON_PLATE),
                 textAlign = TextAlign.Center,
             )
         }
 
-        // Phase label
-        Text(
-            text = if (isPaused) "⏸  PAUSED"
-                   else if (state.phase == TabataPhase.Work) "WORK" else "REST",
-            style = MaterialTheme.typography.displayMedium,
-            color = OnPhaseBackground,
-            textAlign = TextAlign.Center,
-        )
-
-        // Countdown within the current phase
-        Text(
-            text = state.remainingInPhaseMillis.formatCountdown(),
-            style = MaterialTheme.typography.displayLarge.copy(fontFamily = SpaceGroteskFamily),
-            color = OnPhaseBackground,
-            textAlign = TextAlign.Center,
-        )
-
-        HorizontalDivider(color = OnPhaseBackground.copy(alpha = 0.3f))
-
-        // Elapsed time + overall progress
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "ELAPSED",
-                style = MaterialTheme.typography.titleLarge,
-                color = OnPhaseBackground.copy(alpha = 0.7f),
-            )
-            Text(
-                text = state.elapsedMillis.formatElapsed(),
-                style = MaterialTheme.typography.headlineLarge.copy(fontFamily = JetBrainsMonoFamily),
-                color = OnPhaseBackground,
-            )
-            Spacer(Modifier.height(8.dp))
-            SessionProgressBar(
-                progress = state.progressFraction,
-                color = OnPhaseBackground,
-                trackColor = OnPhaseBackground.copy(alpha = 0.2f),
-            )
-        }
-
-        Spacer(Modifier.height(8.dp))
-
-        // Controls
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Button(
+            PrimarySessionControl(
+                label = if (isPaused) "Resume" else "Pause",
+                icon = painterResource(
+                    if (isPaused) R.drawable.ic_play else R.drawable.ic_pause
+                ),
+                onPlate = onPlate,
                 onClick = onPauseResume,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(64.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = OnPhaseBackground.copy(alpha = 0.2f),
-                    contentColor = OnPhaseBackground,
-                ),
-            ) {
-                Icon(
-                    if (isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
-                    contentDescription = if (isPaused) "Resume" else "Pause",
-                    modifier = Modifier.size(28.dp),
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    if (isPaused) "RESUME" else "PAUSE",
-                    style = MaterialTheme.typography.titleMedium,
-                )
-            }
-
-            Button(
-                onClick = onStop,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(64.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = OnPhaseBackground.copy(alpha = 0.2f),
-                    contentColor = OnPhaseBackground,
-                ),
-            ) {
-                Icon(
-                    Icons.Default.Stop,
-                    contentDescription = "Stop",
-                    modifier = Modifier.size(28.dp),
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("STOP", style = MaterialTheme.typography.titleMedium)
-            }
+            )
+            SecondarySessionControl(label = "Stop", onPlate = onPlate, onClick = onStop)
         }
     }
 }

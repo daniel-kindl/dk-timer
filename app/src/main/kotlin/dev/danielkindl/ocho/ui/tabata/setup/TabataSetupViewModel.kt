@@ -58,6 +58,34 @@ data class TabataSetupUiState(
     val isValid: Boolean
         get() = totalDurationMillis > 0 && workMillis > 0 && restMillis > 0
 
+    /**
+     * Rounds this configuration will run.
+     *
+     * Mirrors the engine's completion policy — a phase always runs to its end, so a
+     * workout whose total does not divide evenly rounds up rather than being cut
+     * short. The preview and the session therefore agree.
+     */
+    val roundCount: Int
+        get() {
+            if (!isValid) return 0
+            val cycle = workMillis + restMillis
+            var elapsed = 0L
+            var rounds = 0
+            while (elapsed < totalDurationMillis) {
+                rounds++
+                elapsed += cycle
+            }
+            return rounds
+        }
+
+    /** Structure summary for the run timeline, e.g. `8 × (45s work / 15s rest)`. */
+    val patternLabel: String
+        get() {
+            val work = formatDuration(workMinutes, workSeconds)
+            val rest = formatDuration(restMinutes, restSeconds)
+            return "$roundCount × ($work work / $rest rest)"
+        }
+
     /** Suggested preset name, e.g. `20min / 45s work / 15s rest`, used when the field is blank. */
     fun defaultPresetName(): String {
         val total = formatDuration(totalMinutes, totalSeconds)

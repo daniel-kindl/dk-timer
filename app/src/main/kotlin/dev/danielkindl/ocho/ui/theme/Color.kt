@@ -45,16 +45,38 @@ val Green900 = Color(0xFF173124)
 /** Darkest green. Unused; reserved ramp step. */
 val Green950 = Color(0xFF0E1D16)
 
-/**
- * Signal red: the Tabata work phase, and error states.
+/*
+ * Signal colours. State only, never decoration.
  *
- * Never decorative. Red carries meaning in this app, so using it as an accent would
- * dilute the one cue the user reads without looking directly at the screen.
+ * All four hues below are spent on session phases, which is why an error can no
+ * longer be "the red one". Errors are separated structurally instead: a phase
+ * colour is only ever a full-bleed background, an error is only ever a tinted plate
+ * inside the layout. See PhaseColors.kt.
  */
+
+/** Prepare phase, light theme. */
+val Amber500 = Color(0xFFE8A317)
+
+/** Prepare phase, dark theme. */
+val Amber700 = Color(0xFFA8720A)
+
+/** Error plate surface. The only red that is not a work phase. */
+val Red100 = Color(0xFFFDE0E1)
+
+/** Work phase, light theme. */
 val Red500 = Color(0xFFE5484D)
 
-/** Darker red for the work-phase background, where the 500 step is too bright full-screen. */
+/** Work phase, dark theme; also error plate text and glyphs. */
 val Red700 = Color(0xFFB3282D)
+
+/** Complete phase, light theme. */
+val Violet500 = Color(0xFF7C6CF0)
+
+/** Complete phase, dark theme. */
+val Violet700 = Color(0xFF5645C4)
+
+/** Reserved for informational states. No current consumer. */
+val Blue500 = Color(0xFF2E82F6)
 
 /*
  * Green-tinted graphite neutrals. Slightly desaturated toward the brand hue rather

@@ -1,48 +1,43 @@
 package dev.danielkindl.ocho.ui.session
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.danielkindl.ocho.R
 import dev.danielkindl.ocho.core.format.formatCountdown
 import dev.danielkindl.ocho.core.format.formatElapsed
 import dev.danielkindl.ocho.domain.model.SessionStatus
+import dev.danielkindl.ocho.ui.components.PhaseClock
+import dev.danielkindl.ocho.ui.components.PhaseLabel
+import dev.danielkindl.ocho.ui.components.PhaseScaffold
+import dev.danielkindl.ocho.ui.components.PrimarySessionControl
+import dev.danielkindl.ocho.ui.components.SUBDUED_ON_PLATE
+import dev.danielkindl.ocho.ui.components.SecondarySessionControl
+import dev.danielkindl.ocho.ui.components.SessionColumn
 import dev.danielkindl.ocho.ui.components.SessionLifecycleScaffold
-import dev.danielkindl.ocho.ui.components.SessionProgressBar
-import dev.danielkindl.ocho.ui.theme.JetBrainsMonoFamily
-import dev.danielkindl.ocho.ui.theme.SpaceGroteskFamily
+import dev.danielkindl.ocho.ui.theme.Phase
 
 /**
- * A running EMOM session: countdown, round counter, progress, and transport controls.
+ * A running EMOM session.
  *
- * Built for glancing at from across a room mid-effort — the remaining-time numeral
- * dominates and everything else is secondary.
+ * Shares the phase colour system with Tabata, but EMOM has no rest interval — the
+ * whole session is one continuous work phase, so the plate stays red between the
+ * amber prepare countdown and the violet completion screen. The clock counts down to
+ * the next interval beep rather than to a phase change.
  *
  * @param onSessionFinished invoked on an explicit stop, not on completion, which
  *   shows its own summary first.
@@ -59,226 +54,131 @@ fun ActiveSessionScreen(
         onSessionFinished = onSessionFinished,
         onStopSession = viewModel::stopSession,
     ) { onRequestExit ->
-        Scaffold { padding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center,
-            ) {
-                when (state.status) {
-                    SessionStatus.CountingDown -> CountdownContent(
-                        secondsRemaining = state.countdownSecondsRemaining,
-                        onStop = onRequestExit,
-                    )
+        PhaseScaffold(phase = state.phaseColour()) { theme ->
+            when (state.status) {
+                SessionStatus.CountingDown -> PrepareContent(
+                    secondsRemaining = state.countdownSecondsRemaining,
+                    onPlate = theme.onPlate,
+                    onStop = onRequestExit,
+                )
 
-                    SessionStatus.Completed -> CompletionContent(
-                        totalElapsedMillis = state.elapsedMillis,
-                        onDone = onSessionFinished,
-                    )
+                SessionStatus.Completed -> CompleteContent(
+                    totalElapsedMillis = state.elapsedMillis,
+                    rounds = state.totalRounds,
+                    onPlate = theme.onPlate,
+                    onDone = onSessionFinished,
+                )
 
-                    else -> RunningContent(
-                        state = state,
-                        onPauseResume = {
-                            if (state.status == SessionStatus.Paused) {
-                                viewModel.resumeSession()
-                            } else {
-                                viewModel.pauseSession()
-                            }
-                        },
-                        onStop = onRequestExit,
-                    )
-                }
+                else -> RunningContent(
+                    state = state,
+                    onPlate = theme.onPlate,
+                    onPauseResume = {
+                        if (state.status == SessionStatus.Paused) {
+                            viewModel.resumeSession()
+                        } else {
+                            viewModel.pauseSession()
+                        }
+                    },
+                    onStop = onRequestExit,
+                )
             }
         }
     }
 }
 
+/**
+ * Maps session lifecycle onto the phase colour model.
+ *
+ * EMOM never reports [Phase.REST]: every interval is work. Pausing keeps the work
+ * plate, because the user is still inside the work interval — the stopped clock and
+ * the changed control label carry that state instead.
+ */
+private fun SessionUiState.phaseColour(): Phase = when (status) {
+    SessionStatus.CountingDown -> Phase.PREPARE
+    SessionStatus.Completed -> Phase.COMPLETE
+    else -> Phase.WORK
+}
+
 @Composable
-private fun CountdownContent(secondsRemaining: Int, onStop: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        Text(
-            text = "GET READY",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = "$secondsRemaining",
-            style = MaterialTheme.typography.displayLarge.copy(fontFamily = SpaceGroteskFamily),
-            color = MaterialTheme.colorScheme.primary,
-        )
-        Button(
+private fun PrepareContent(secondsRemaining: Int, onPlate: Color, onStop: () -> Unit) {
+    SessionColumn {
+        PhaseLabel("Prepare", onPlate)
+        PhaseClock(secondsRemaining.toString(), onPlate)
+        SecondarySessionControl(
+            label = "Stop",
+            onPlate = onPlate,
             onClick = onStop,
-            modifier = Modifier.fillMaxWidth().height(64.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-        ) {
-            Icon(Icons.Default.Stop, contentDescription = "Stop", modifier = Modifier.size(28.dp))
-            Spacer(Modifier.width(8.dp))
-            Text("STOP", style = MaterialTheme.typography.titleMedium)
-        }
+            icon = painterResource(R.drawable.ic_square),
+        )
     }
 }
 
 @Composable
-private fun CompletionContent(totalElapsedMillis: Long, onDone: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        Icon(
-            Icons.Default.CheckCircle,
-            contentDescription = null,
-            modifier = Modifier.size(72.dp),
-            tint = MaterialTheme.colorScheme.primary,
-        )
-        Text(
-            text = "Workout Complete!",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
+private fun CompleteContent(
+    totalElapsedMillis: Long,
+    rounds: Int,
+    onPlate: Color,
+    onDone: () -> Unit,
+) {
+    SessionColumn {
+        PhaseLabel("Complete", onPlate)
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            PhaseClock(totalElapsedMillis.formatElapsed(), onPlate)
+            Spacer(Modifier.height(8.dp))
             Text(
-                text = "TOTAL TIME",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = totalElapsedMillis.formatElapsed(),
-                style = MaterialTheme.typography.headlineLarge.copy(fontFamily = JetBrainsMonoFamily),
-                color = MaterialTheme.colorScheme.onSurface,
+                text = "$rounds rounds",
+                style = MaterialTheme.typography.titleMedium,
+                color = onPlate.copy(alpha = SUBDUED_ON_PLATE),
+                textAlign = TextAlign.Center,
             )
         }
-        Button(
-            onClick = onDone,
-            modifier = Modifier.fillMaxWidth().height(64.dp),
-        ) {
-            Text("DONE", style = MaterialTheme.typography.titleLarge)
-        }
+        SecondarySessionControl(label = "Done", onPlate = onPlate, onClick = onDone)
     }
 }
 
 @Composable
 private fun RunningContent(
     state: SessionUiState,
+    onPlate: Color,
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
 ) {
     val isPaused = state.status == SessionStatus.Paused
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        // Round counter
+    SessionColumn {
+        PhaseLabel(if (isPaused) "Work · paused" else "Work", onPlate)
+
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            PhaseClock(state.remainingInIntervalMillis.formatCountdown(), onPlate)
+            Spacer(Modifier.height(12.dp))
             Text(
-                text = "ROUND",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = "${state.currentRound} / ${state.totalRounds}",
-                style = MaterialTheme.typography.displayLarge.copy(fontFamily = JetBrainsMonoFamily),
-                color = MaterialTheme.colorScheme.primary,
+                text = "round ${state.currentRound}/${state.totalRounds}",
+                style = MaterialTheme.typography.titleMedium,
+                color = onPlate.copy(alpha = SUBDUED_ON_PLATE),
                 textAlign = TextAlign.Center,
             )
-        }
-
-        // Countdown to next beep
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = if (isPaused) "⏸  PAUSED" else "NEXT BEEP IN",
-                style = MaterialTheme.typography.headlineMedium,
-                color = if (isPaused)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = state.remainingInIntervalMillis.formatCountdown(),
-                style = MaterialTheme.typography.displayMedium.copy(fontFamily = SpaceGroteskFamily),
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center,
-            )
-        }
-
-        // Elapsed time + overall progress
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "ELAPSED",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Spacer(Modifier.height(4.dp))
             Text(
                 text = state.elapsedMillis.formatElapsed(),
-                style = MaterialTheme.typography.headlineLarge.copy(fontFamily = JetBrainsMonoFamily),
-                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelSmall,
+                color = onPlate.copy(alpha = SUBDUED_ON_PLATE),
+                textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(8.dp))
-            SessionProgressBar(progress = state.progressFraction)
         }
 
-        Spacer(Modifier.height(8.dp))
-
-        // Pause / Resume + Stop buttons
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Button(
+            PrimarySessionControl(
+                label = if (isPaused) "Resume" else "Pause",
+                icon = painterResource(
+                    if (isPaused) R.drawable.ic_play else R.drawable.ic_pause
+                ),
+                onPlate = onPlate,
                 onClick = onPauseResume,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(64.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isPaused)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.secondary,
-                ),
-            ) {
-                Icon(
-                    if (isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
-                    contentDescription = if (isPaused) "Resume" else "Pause",
-                    modifier = Modifier.size(28.dp),
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    if (isPaused) "RESUME" else "PAUSE",
-                    style = MaterialTheme.typography.titleMedium,
-                )
-            }
-
-            Button(
-                onClick = onStop,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(64.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                ),
-            ) {
-                Icon(
-                    Icons.Default.Stop,
-                    contentDescription = "Stop",
-                    modifier = Modifier.size(28.dp),
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("STOP", style = MaterialTheme.typography.titleMedium)
-            }
+            )
+            SecondarySessionControl(label = "Stop", onPlate = onPlate, onClick = onStop)
         }
     }
 }

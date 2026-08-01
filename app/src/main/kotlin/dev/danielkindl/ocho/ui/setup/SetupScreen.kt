@@ -4,10 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -25,13 +26,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.danielkindl.ocho.R
+import dev.danielkindl.ocho.domain.model.PREPARE_COUNTDOWN_MILLIS
 import dev.danielkindl.ocho.domain.model.Preset
 import dev.danielkindl.ocho.ui.components.DeletePresetDialog
 import dev.danielkindl.ocho.ui.components.DurationPicker
+import dev.danielkindl.ocho.ui.components.ErrorPlate
 import dev.danielkindl.ocho.ui.components.PresetsSection
+import dev.danielkindl.ocho.ui.components.RunTimeline
+import dev.danielkindl.ocho.ui.components.emomSegments
 import dev.danielkindl.ocho.ui.components.SavePresetDialog
 
 /**
@@ -82,7 +89,7 @@ fun SetupScreen(
                 title = { Text("EMOM") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(painterResource(R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                 },
             )
@@ -98,7 +105,7 @@ fun SetupScreen(
         ) {
 
             DurationPicker(
-                label = "Total Duration",
+                label = "Total duration",
                 minutes = state.totalMinutes,
                 seconds = state.totalSeconds,
                 onMinutesChange = viewModel::setTotalMinutes,
@@ -115,11 +122,22 @@ fun SetupScreen(
                 onSecondsChange = viewModel::setIntervalSeconds,
             )
 
+            if (state.isValid) {
+                RunTimeline(
+                    segments = emomSegments(
+                        prepareMillis = PREPARE_COUNTDOWN_MILLIS,
+                        totalMillis = state.totalDurationMillis,
+                    ),
+                    patternLabel = "${state.roundCount} × ${state.intervalLabel}",
+                    totalMillis = state.totalDurationMillis,
+                )
+            }
+
             if (state.intervalExceedsTotal) {
-                Text(
-                    text = "⚠ Interval exceeds total duration — no beeps will fire.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.error,
+                ErrorPlate(
+                    message = "The interval is longer than the total duration, " +
+                        "so no interval beeps will fire. Shorten the interval or " +
+                        "lengthen the workout.",
                 )
             }
 
@@ -145,7 +163,9 @@ fun SetupScreen(
                     .fillMaxWidth()
                     .height(52.dp),
             ) {
-                Text("START", style = MaterialTheme.typography.titleLarge)
+                Icon(painterResource(R.drawable.ic_play), contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(10.dp))
+                Text("Start", style = MaterialTheme.typography.titleLarge)
             }
         }
     }

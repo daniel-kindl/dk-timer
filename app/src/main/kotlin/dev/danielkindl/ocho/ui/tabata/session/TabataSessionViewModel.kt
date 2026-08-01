@@ -7,6 +7,7 @@ import dev.danielkindl.ocho.core.format.sessionProgress
 import dev.danielkindl.ocho.data.audio.AudioPlayer
 import dev.danielkindl.ocho.data.feedback.FeedbackTrigger
 import dev.danielkindl.ocho.domain.engine.TabataEngineFactory
+import dev.danielkindl.ocho.domain.model.PREPARE_COUNTDOWN_SECONDS
 import dev.danielkindl.ocho.domain.model.SessionStatus
 import dev.danielkindl.ocho.domain.model.TabataConfig
 import dev.danielkindl.ocho.domain.model.TabataEvent
@@ -36,7 +37,7 @@ import javax.inject.Inject
  */
 data class TabataSessionUiState(
     val status: SessionStatus = SessionStatus.CountingDown,
-    val countdownSecondsRemaining: Int = COUNTDOWN_START_SECONDS,
+    val countdownSecondsRemaining: Int = PREPARE_COUNTDOWN_SECONDS,
     val phase: TabataPhase = TabataPhase.Work,
     val remainingInPhaseMillis: Long = 0L,
     val elapsedMillis: Long = 0L,
@@ -49,7 +50,6 @@ data class TabataSessionUiState(
         get() = sessionProgress(elapsedMillis, totalDurationMillis)
 }
 
-private const val COUNTDOWN_START_SECONDS = 3
 private const val COUNTDOWN_TICK_MS = 1_000L
 
 /**
@@ -81,7 +81,7 @@ class TabataSessionViewModel @Inject constructor(
     init {
         observeEvents()
         countdownJob = viewModelScope.launch {
-            for (secondsLeft in COUNTDOWN_START_SECONDS - 1 downTo 0) {
+            for (secondsLeft in PREPARE_COUNTDOWN_SECONDS - 1 downTo 0) {
                 delay(COUNTDOWN_TICK_MS)
                 _uiState.update { it.copy(countdownSecondsRemaining = secondsLeft) }
             }

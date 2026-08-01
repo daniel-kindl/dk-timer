@@ -4,10 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -25,13 +26,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.danielkindl.ocho.R
+import dev.danielkindl.ocho.domain.model.PREPARE_COUNTDOWN_MILLIS
 import dev.danielkindl.ocho.domain.model.TabataPreset
 import dev.danielkindl.ocho.ui.components.DeletePresetDialog
 import dev.danielkindl.ocho.ui.components.DurationPicker
 import dev.danielkindl.ocho.ui.components.PresetsSection
+import dev.danielkindl.ocho.ui.components.RunTimeline
+import dev.danielkindl.ocho.ui.components.tabataSegments
 import dev.danielkindl.ocho.ui.components.SavePresetDialog
 
 /**
@@ -81,7 +87,7 @@ fun TabataSetupScreen(
                 title = { Text("Tabata") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(painterResource(R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                 },
             )
@@ -97,7 +103,7 @@ fun TabataSetupScreen(
         ) {
 
             DurationPicker(
-                label = "Total Duration",
+                label = "Total duration",
                 minutes = state.totalMinutes,
                 seconds = state.totalSeconds,
                 onMinutesChange = viewModel::setTotalMinutes,
@@ -124,6 +130,19 @@ fun TabataSetupScreen(
                 onSecondsChange = viewModel::setRestSeconds,
             )
 
+            if (state.isValid) {
+                RunTimeline(
+                    segments = tabataSegments(
+                        prepareMillis = PREPARE_COUNTDOWN_MILLIS,
+                        workMillis = state.workMillis,
+                        restMillis = state.restMillis,
+                        totalMillis = state.totalDurationMillis,
+                    ),
+                    patternLabel = state.patternLabel,
+                    totalMillis = state.totalDurationMillis,
+                )
+            }
+
             PresetsSection(
                 presets = presets,
                 getKey = { it.id },
@@ -146,7 +165,9 @@ fun TabataSetupScreen(
                     .fillMaxWidth()
                     .height(52.dp),
             ) {
-                Text("START", style = MaterialTheme.typography.titleLarge)
+                Icon(painterResource(R.drawable.ic_play), contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(10.dp))
+                Text("Start", style = MaterialTheme.typography.titleLarge)
             }
         }
     }

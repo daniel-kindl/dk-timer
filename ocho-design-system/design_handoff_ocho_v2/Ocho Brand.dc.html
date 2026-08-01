@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/tangorock-design-system-f79ea8a1-59c1-49f3-b07d-9d731e88751d/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/tangorock-design-system-f79ea8a1-59c1-49f3-b07d-9d731e88751d/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/tangorock-design-system-f79ea8a1-59c1-49f3-b07d-9d731e88751d/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/tangorock-design-system-f79ea8a1-59c1-49f3-b07d-9d731e88751d/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/tangorock-design-system-f79ea8a1-59c1-49f3-b07d-9d731e88751d/tokens/radius.css">
+  <link rel="stylesheet" href="_ds/tangorock-design-system-f79ea8a1-59c1-49f3-b07d-9d731e88751d/tokens/elevation.css">
+  <link rel="stylesheet" href="_ds/tangorock-design-system-f79ea8a1-59c1-49f3-b07d-9d731e88751d/tokens/motion.css">
+  <link rel="stylesheet" href="_ds/tangorock-design-system-f79ea8a1-59c1-49f3-b07d-9d731e88751d/tokens/semantic.css">
+  <link rel="stylesheet" href="_ds/tangorock-design-system-f79ea8a1-59c1-49f3-b07d-9d731e88751d/tokens/dark.css">
+  <link rel="stylesheet" href="_ds/tangorock-design-system-f79ea8a1-59c1-49f3-b07d-9d731e88751d/tokens/base.css">
+  <link rel="stylesheet" href="_ds/tangorock-design-system-f79ea8a1-59c1-49f3-b07d-9d731e88751d/styles.css">
+  <script src="_ds/tangorock-design-system-f79ea8a1-59c1-49f3-b07d-9d731e88751d/_ds_bundle.js"></script>
+  <meta name="design_doc_mode" content="canvas">
+</helmet>
+
+<section style="background:var(--n-0);padding:64px 40px;display:flex;flex-direction:column;gap:40px;align-items:center;font-family:'IBM Plex Sans',sans-serif;border-bottom:1px solid var(--border-subtle)">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="deut" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.367 0.861 -0.228 0 0  0.280 0.673 0.047 0 0  -0.012 0.043 0.969 0 0  0 0 0 1 0"></feColorMatrix></filter></svg>
+
+  <div id="4a" style="max-width:700px;text-align:center;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;gap:10px;align-items:center;justify-content:center">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;background:var(--red-700);color:var(--n-0);padding:3px 8px;border-radius:3px">4a</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--n-500)">Pressure-testing work / rest</div>
+    </div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:30px;letter-spacing:-0.03em;color:var(--n-900)">Red is right. The pair is not.</div>
+    <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--n-600);line-height:1.65">Red and green sit at almost the same lightness, so the two most important states in the app collapse into one for anyone with a red-green deficiency — roughly 8% of men, in a category that skews male.</div>
+  </div>
+
+  <div style="width:100%;max-width:900px;display:flex;flex-direction:column;gap:26px">
+    <div style="display:grid;grid-template-columns:120px 1fr 1fr 1fr;gap:12px;align-items:center">
+      <div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--n-500);text-align:center">Normal vision</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--n-500);text-align:center">Deuteranopia</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--n-500);text-align:center">Greyscale</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:120px 1fr 1fr 1fr;gap:12px;align-items:center">
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-800)">Current</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">500 / 500</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <div style="flex:1;height:76px;border-radius:8px;background:var(--red-500);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:#FFFFFF">WORK</div>
+        <div style="flex:1;height:76px;border-radius:8px;background:var(--green-500);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:#FFFFFF">REST</div>
+      </div>
+      <div style="display:flex;gap:6px;filter:url(#deut)">
+        <div style="flex:1;height:76px;border-radius:8px;background:var(--red-500);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:#FFFFFF">WORK</div>
+        <div style="flex:1;height:76px;border-radius:8px;background:var(--green-500);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:#FFFFFF">REST</div>
+      </div>
+      <div style="display:flex;gap:6px;filter:grayscale(1)">
+        <div style="flex:1;height:76px;border-radius:8px;background:var(--red-500);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:#FFFFFF">WORK</div>
+        <div style="flex:1;height:76px;border-radius:8px;background:var(--green-500);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:#FFFFFF">REST</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:120px 1fr 1fr 1fr;gap:12px;align-items:center">
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--green-700)">Proposed</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">500 / 200</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <div style="flex:1;height:76px;border-radius:8px;background:var(--red-500);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:#FFFFFF">WORK</div>
+        <div style="flex:1;height:76px;border-radius:8px;background:var(--green-200);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--n-950)">REST</div>
+      </div>
+      <div style="display:flex;gap:6px;filter:url(#deut)">
+        <div style="flex:1;height:76px;border-radius:8px;background:var(--red-500);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:#FFFFFF">WORK</div>
+        <div style="flex:1;height:76px;border-radius:8px;background:var(--green-200);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--n-950)">REST</div>
+      </div>
+      <div style="display:flex;gap:6px;filter:grayscale(1)">
+        <div style="flex:1;height:76px;border-radius:8px;background:var(--red-500);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:#FFFFFF">WORK</div>
+        <div style="flex:1;height:76px;border-radius:8px;background:var(--green-200);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--n-950)">REST</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="width:100%;max-width:900px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div style="background:var(--n-50);border:1px solid var(--border-subtle);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:8px">
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:500;color:var(--n-800)">Why red survives the traffic-light objection</div>
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.65">Red does mean stop on a road, and work is when you go — but in every timer, heart-rate zone and effort scale your users have already met, red means <em>hard</em>. Category convention beats the road here, and the instruction is carried by the beep and the label, not the hue.</div>
+    </div>
+    <div style="background:var(--n-50);border:1px solid var(--border-subtle);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:8px">
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:500;color:var(--n-800)">Why rest moves to green-200</div>
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.65">The states then differ by lightness, not just hue, so they stay distinct with no colour vision at all. Text polarity flips with them — white on work, ink on rest — which is a second, redundant signal. Rest should read quieter than work anyway.</div>
+    </div>
+  </div>
+
+  <div style="width:100%;max-width:900px;display:flex;flex-direction:column;gap:14px">
+    <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-700)">All four states, corrected</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      <div style="background:var(--amber-500);border-radius:12px;padding:22px;height:140px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-2)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:rgba(12,17,15,.66)">PREPARE</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:40px;letter-spacing:-0.03em;color:var(--n-950);line-height:1;font-variant-numeric:tabular-nums">00:10</div>
+      </div>
+      <div style="background:var(--red-500);border-radius:12px;padding:22px;height:140px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-2)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.82)">WORK</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:40px;letter-spacing:-0.03em;color:#FFFFFF;line-height:1;font-variant-numeric:tabular-nums">00:20</div>
+      </div>
+      <div style="background:var(--green-200);border-radius:12px;padding:22px;height:140px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-2)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--green-800)">REST</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:40px;letter-spacing:-0.03em;color:var(--n-950);line-height:1;font-variant-numeric:tabular-nums">00:10</div>
+      </div>
+      <div style="background:var(--violet-500);border-radius:12px;padding:22px;height:140px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-2)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.82)">COMPLETE</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:40px;letter-spacing:-0.03em;color:#FFFFFF;line-height:1;font-variant-numeric:tabular-nums">08:00</div>
+      </div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-500)">Light–dark–light–dark across the run. The screen alternates brightness every interval, so the flip is visible in peripheral vision.</div>
+  </div>
+</section>
+
+<section style="background:var(--n-50);padding:64px 40px;display:flex;flex-direction:column;gap:48px;align-items:center;font-family:'IBM Plex Sans',sans-serif;border-bottom:1px solid var(--border-subtle)">
+  <div id="3a" style="max-width:700px;text-align:center;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;gap:10px;align-items:center;justify-content:center">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;background:var(--green-600);color:var(--n-0);padding:3px 8px;border-radius:3px">3a</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--n-500)">Four states — developed</div>
+    </div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:30px;letter-spacing:-0.03em;color:var(--n-900)">One colour per state, and only one</div>
+    <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--n-600);line-height:1.65">Built out from <a href="#2c" style="color:var(--green-600)">2c</a>: the full state machine, both themes, the run read as a timeline, and an answer to the error problem that direction created.</div>
+  </div>
+
+  <!-- The four screens -->
+  <div style="width:100%;max-width:1060px;display:flex;flex-direction:column;gap:14px">
+    <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-700)">The session screen, all four states</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+
+      <div style="border-radius:12px;overflow:hidden;box-shadow:var(--shadow-2)">
+        <div style="background:var(--amber-500);padding:28px 22px;height:210px;display:flex;flex-direction:column;justify-content:space-between">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:rgba(12,17,15,.66)">PREPARE</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:60px;letter-spacing:-0.03em;color:var(--n-950);line-height:1;font-variant-numeric:tabular-nums">00:10</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(12,17,15,.66)">round 1/8 next</div>
+        </div>
+      </div>
+
+      <div style="border-radius:12px;overflow:hidden;box-shadow:var(--shadow-2)">
+        <div style="background:var(--red-500);padding:28px 22px;height:210px;display:flex;flex-direction:column;justify-content:space-between">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.82)">WORK</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:60px;letter-spacing:-0.03em;color:#FFFFFF;line-height:1;font-variant-numeric:tabular-nums">00:20</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,.82)">round 3/8</div>
+        </div>
+      </div>
+
+      <div style="border-radius:12px;overflow:hidden;box-shadow:var(--shadow-2)">
+        <div style="background:var(--green-200);padding:28px 22px;height:210px;display:flex;flex-direction:column;justify-content:space-between">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--green-800)">REST</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:60px;letter-spacing:-0.03em;color:var(--n-950);line-height:1;font-variant-numeric:tabular-nums">00:10</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--green-800)">round 4/8 next</div>
+        </div>
+      </div>
+
+      <div style="border-radius:12px;overflow:hidden;box-shadow:var(--shadow-2)">
+        <div style="background:var(--violet-500);padding:28px 22px;height:210px;display:flex;flex-direction:column;justify-content:space-between">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.82)">COMPLETE</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:60px;letter-spacing:-0.03em;color:#FFFFFF;line-height:1;font-variant-numeric:tabular-nums">08:00</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,.82)">8/8 rounds · tabata</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-500)">Light plates take ink type, dark plates take white. The polarity flip is a second signal on top of the hue.</div>
+  </div>
+
+  <!-- Dark theme -->
+  <div style="width:100%;max-width:1060px;display:flex;flex-direction:column;gap:14px">
+    <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-700)">Dark theme — same four, dropped one step</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+      <div style="background:var(--amber-700);border-radius:12px;padding:24px 22px;height:150px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-2)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.78)">PREPARE</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:44px;letter-spacing:-0.03em;color:#FFFFFF;line-height:1;font-variant-numeric:tabular-nums">00:10</div>
+      </div>
+      <div style="background:var(--red-700);border-radius:12px;padding:24px 22px;height:150px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-2)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.78)">WORK</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:44px;letter-spacing:-0.03em;color:#FFFFFF;line-height:1;font-variant-numeric:tabular-nums">00:20</div>
+      </div>
+      <div style="background:var(--green-400);border-radius:12px;padding:24px 22px;height:150px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-2)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--green-900)">REST</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:44px;letter-spacing:-0.03em;color:var(--n-950);line-height:1;font-variant-numeric:tabular-nums">00:10</div>
+      </div>
+      <div style="background:var(--violet-700);border-radius:12px;padding:24px 22px;height:150px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-2)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.78)">COMPLETE</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:44px;letter-spacing:-0.03em;color:#FFFFFF;line-height:1;font-variant-numeric:tabular-nums">08:00</div>
+      </div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-500)">Dark drops each plate to the 700 step, except rest — it holds at green-400 so the light/dark alternation survives the theme.</div>
+  </div>
+
+  <!-- Timeline -->
+  <div style="width:100%;max-width:1060px;display:flex;flex-direction:column;gap:14px">
+    <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-700)">A Tabata, read as a strip</div>
+    <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:24px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;gap:2px;height:44px;border-radius:6px;overflow:hidden">
+        <div style="flex:10;background:var(--amber-500)"></div>
+        <div style="flex:20;background:var(--red-500)"></div>
+        <div style="flex:10;background:var(--green-200)"></div>
+        <div style="flex:20;background:var(--red-500)"></div>
+        <div style="flex:10;background:var(--green-200)"></div>
+        <div style="flex:20;background:var(--red-500)"></div>
+        <div style="flex:10;background:var(--green-200)"></div>
+        <div style="flex:20;background:var(--red-500)"></div>
+        <div style="flex:10;background:var(--green-200)"></div>
+        <div style="flex:20;background:var(--red-500)"></div>
+        <div style="flex:10;background:var(--green-200)"></div>
+        <div style="flex:20;background:var(--red-500)"></div>
+        <div style="flex:10;background:var(--green-200)"></div>
+        <div style="flex:20;background:var(--red-500)"></div>
+        <div style="flex:10;background:var(--green-200)"></div>
+        <div style="flex:20;background:var(--red-500)"></div>
+        <div style="flex:24;background:var(--violet-500)"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">
+        <div>00:00 prepare</div>
+        <div style="white-space:nowrap">8 × 20s / 10s</div>
+        <div>04:10 complete</div>
+      </div>
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.65">The strip is the preset preview on the setup screen — you see the shape of the workout before you start it, and the violet cap tells you where it ends.</div>
+    </div>
+  </div>
+
+  <!-- Error problem -->
+  <div style="width:100%;max-width:1060px;display:flex;flex-direction:column;gap:14px">
+    <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-700)">The error problem this direction creates</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:24px;display:flex;flex-direction:column;gap:14px">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:500;color:var(--n-800)">Errors leave the phase layer entirely</div>
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.65">All four signal colours are spent on phases, so red can no longer mean "wrong". The fix is structural, not chromatic: phase colour is only ever a <em>full-bleed background</em>; errors are only ever a <em>tinted plate inside the layout</em>. Same hue, different surface, no ambiguity.</div>
+        <div style="background:var(--red-100);border-radius:8px;padding:14px 16px;display:flex;gap:10px;align-items:flex-start">
+          <div style="color:var(--red-700);flex:none;margin-top:1px"><x-import component-from-global-scope="TangorockDesignSystem_f79ea8.Icon" name="octagon-alert" size="16" hint-size="16px,16px"></x-import></div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--red-700)">Timer drifted while backgrounded</div>
+            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.6">Battery optimisation is on for Ocho. Exempt the app to keep the clock exact.</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:24px;display:flex;flex-direction:column;gap:14px">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:500;color:var(--n-800)">Never both at once</div>
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.65">A red error plate must not appear over a red work screen. Errors raised mid-session wait for the rest interval, or surface in the notification instead — the running clock is never covered.</div>
+        <div style="background:var(--green-200);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--green-800)">REST</div>
+          <div style="background:var(--n-0);border-radius:6px;padding:10px 12px;display:flex;gap:8px;align-items:center">
+            <div style="color:var(--red-700);flex:none"><x-import component-from-global-scope="TangorockDesignSystem_f79ea8.Icon" name="octagon-alert" size="14" hint-size="14px,14px"></x-import></div>
+            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:var(--n-800)">Sound is muted at the system level.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kotlin -->
+  <div style="width:100%;max-width:1060px;display:flex;flex-direction:column;gap:14px">
+    <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-700)">The state machine, in colour</div>
+    <div style="background:var(--n-950);border-radius:12px;box-shadow:var(--shadow-3);padding:24px;overflow:auto">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--n-500);margin-bottom:14px">ui/theme/PhaseColors.kt</div>
+      <div style="margin:0;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;color:var(--n-200)">
+        <div style="white-space:pre"><span style="color:var(--green-300)">enum class</span> Phase { PREPARE, WORK, REST, COMPLETE }</div>
+        <div style="height:1.7em"></div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">data class</span> PhaseTheme(<span style="color:var(--green-300)">val</span> plate: Color, <span style="color:var(--green-300)">val</span> onPlate: Color)</div>
+        <div style="height:1.7em"></div>
+        <div style="white-space:pre;color:var(--n-500)">// Full-bleed plate behind the clock</div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">fun</span> phaseTheme(p: Phase, dark: Boolean) = <span style="color:var(--green-300)">when</span> (p) {</div>
+        <div style="white-space:pre">    Phase.PREPARE  -> <span style="color:var(--green-300)">if</span> (dark) PhaseTheme(Color(<span style="color:var(--amber-500)">0xFFA8720A</span>), N0)</div>
+        <div style="white-space:pre">                      <span style="color:var(--green-300)">else</span>     PhaseTheme(Color(<span style="color:var(--amber-500)">0xFFE8A317</span>), N950)</div>
+        <div style="white-space:pre">    Phase.WORK     -> <span style="color:var(--green-300)">if</span> (dark) PhaseTheme(Color(<span style="color:var(--amber-500)">0xFFB3282D</span>), N0)</div>
+        <div style="white-space:pre">                      <span style="color:var(--green-300)">else</span>     PhaseTheme(Color(<span style="color:var(--amber-500)">0xFFE5484D</span>), N0)</div>
+        <div style="white-space:pre">    Phase.REST     -> <span style="color:var(--green-300)">if</span> (dark) PhaseTheme(Color(<span style="color:var(--amber-500)">0xFF5CA47C</span>), N950)</div>
+        <div style="white-space:pre">                      <span style="color:var(--green-300)">else</span>     PhaseTheme(Color(<span style="color:var(--amber-500)">0xFFB0D8BE</span>), N950)</div>
+        <div style="white-space:pre">    Phase.COMPLETE -> <span style="color:var(--green-300)">if</span> (dark) PhaseTheme(Color(<span style="color:var(--amber-500)">0xFF5645C4</span>), N0)</div>
+        <div style="white-space:pre">                      <span style="color:var(--green-300)">else</span>     PhaseTheme(Color(<span style="color:var(--amber-500)">0xFF7C6CF0</span>), N0)</div>
+        <div style="white-space:pre">}</div>
+        <div style="height:1.7em"></div>
+        <div style="white-space:pre;color:var(--n-500)">// Errors never use the plate — tinted surface, inside the layout</div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> ErrorSurface   = Color(<span style="color:var(--amber-500)">0xFFFDE0E1</span>)  <span style="color:var(--n-500)">// --red-100</span></div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> OnErrorSurface = Color(<span style="color:var(--amber-500)">0xFFB3282D</span>)  <span style="color:var(--n-500)">// --red-700</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--n-100);padding:64px 40px;display:flex;flex-direction:column;gap:40px;align-items:center;font-family:'IBM Plex Sans',sans-serif">
+  <div style="max-width:680px;text-align:center;display:flex;flex-direction:column;gap:10px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--n-500)">Turn 2 — palette explorations</div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:30px;letter-spacing:-0.03em;color:var(--n-900)">Three ways to encode a phase</div>
+    <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--n-600);line-height:1.65">The brand green is fixed. What is open is how the session screen tells you, from three metres away and out of breath, which phase you are in. Base palette is <a href="#1a" style="color:var(--green-600)">1a</a>.</div>
+  </div>
+
+  <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;justify-content:center">
+
+    <!-- 2a -->
+    <div id="2a" style="width:380px;background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:24px;display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;gap:10px;align-items:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;background:var(--n-900);color:var(--n-0);padding:3px 8px;border-radius:3px">2a</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:18px;letter-spacing:-0.022em;color:var(--n-900)">Night session</div>
+      </div>
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.65">Dark by default, not as a theme option. Phase colour arrives as a bright plate on near-black, so the screen never flashes white in a dim gym.</div>
+      <div style="border-radius:8px;overflow:hidden;box-shadow:var(--shadow-2)">
+        <div style="background:var(--red-500);padding:22px 20px;display:flex;flex-direction:column;gap:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.82)">WORK</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:46px;letter-spacing:-0.03em;color:#FFFFFF;line-height:1;font-variant-numeric:tabular-nums">00:20</div>
+        </div>
+        <div style="background:var(--n-950);padding:16px 20px;display:flex;justify-content:space-between;align-items:center">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--green-400)">round 3/8</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--n-500)">rest 00:10</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+        <div style="display:flex;flex-direction:column;gap:5px"><div style="height:40px;border-radius:6px;background:var(--red-500)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">work</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px"><div style="height:40px;border-radius:6px;background:var(--green-400)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">rest</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px"><div style="height:40px;border-radius:6px;background:var(--amber-500)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">prep</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px"><div style="height:40px;border-radius:6px;background:var(--n-950)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">base</div></div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500);line-height:1.6">Rest brightens to --green-400 for contrast on ink. Light theme becomes the secondary.</div>
+    </div>
+
+    <!-- 2b -->
+    <div id="2b" style="width:380px;background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:24px;display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;gap:10px;align-items:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;background:var(--n-900);color:var(--n-0);padding:3px 8px;border-radius:3px">2b</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:18px;letter-spacing:-0.022em;color:var(--n-900)">Single hue</div>
+      </div>
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.65">No red at all. Phase is carried by value — dark green works, pale green rests. Legible to red-green colourblind users, and the most faithful to a one-hue system.</div>
+      <div style="border-radius:8px;overflow:hidden;box-shadow:var(--shadow-2)">
+        <div style="background:var(--green-800);padding:22px 20px;display:flex;flex-direction:column;gap:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--green-300)">WORK</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:46px;letter-spacing:-0.03em;color:#FFFFFF;line-height:1;font-variant-numeric:tabular-nums">00:20</div>
+        </div>
+        <div style="background:var(--green-100);padding:16px 20px;display:flex;justify-content:space-between;align-items:center">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--green-800)">round 3/8</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--green-600)">rest 00:10</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+        <div style="display:flex;flex-direction:column;gap:5px"><div style="height:40px;border-radius:6px;background:var(--green-800)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">work</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px"><div style="height:40px;border-radius:6px;background:var(--green-100)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">rest</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px"><div style="height:40px;border-radius:6px;background:var(--green-500)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">prep</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px"><div style="height:40px;border-radius:6px;background:var(--n-50);border:1px solid var(--border-subtle)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">base</div></div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500);line-height:1.6">Trade-off: no innate urgency. Work has to earn it through darkness and type weight.</div>
+    </div>
+
+    <!-- 2c -->
+    <div id="2c" style="width:380px;background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:24px;display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;gap:10px;align-items:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;background:var(--n-900);color:var(--n-0);padding:3px 8px;border-radius:3px">2c</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:18px;letter-spacing:-0.022em;color:var(--n-900)">Four states</div>
+      </div>
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.65">Adds a fourth colour for finished. A session that ends on violet is unmistakably over — you never squint at a green screen wondering if it is resting or done.</div>
+      <div style="border-radius:8px;overflow:hidden;box-shadow:var(--shadow-2)">
+        <div style="background:var(--violet-500);padding:22px 20px;display:flex;flex-direction:column;gap:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.82)">COMPLETE</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:46px;letter-spacing:-0.03em;color:#FFFFFF;line-height:1;font-variant-numeric:tabular-nums">08:00</div>
+        </div>
+        <div style="background:var(--n-0);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border-subtle)">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--n-800)">8/8 rounds</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--n-500)">tabata</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+        <div style="display:flex;flex-direction:column;gap:5px"><div style="height:40px;border-radius:6px;background:var(--red-500)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">work</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px"><div style="height:40px;border-radius:6px;background:var(--green-500)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">rest</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px"><div style="height:40px;border-radius:6px;background:var(--amber-500)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">prep</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px"><div style="height:40px;border-radius:6px;background:var(--violet-500)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">done</div></div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500);line-height:1.6">Spends all four signal colours. Nothing is left to mark an error state.</div>
+    </div>
+
+  </div>
+</section>
+
+<div style="min-height:100vh;background:var(--n-50);padding:64px 40px 120px;display:flex;flex-direction:column;gap:80px;align-items:center;font-family:'IBM Plex Sans',sans-serif">
+
+  <div id="1a" style="max-width:660px;text-align:center;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;gap:10px;align-items:center;justify-content:center">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;background:var(--n-900);color:var(--n-0);padding:3px 8px;border-radius:3px">1a</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--n-500)">Base — brand &amp; Android assets</div>
+    </div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;letter-spacing:-0.03em;color:var(--n-900)">och<span style="color:var(--green-500)">o</span></div>
+    <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--n-600);line-height:1.65">Ocho is eight — the eight rounds of a Tabata. The mark is the numeral, set in Space Grotesk. Nothing is drawn: the system has no logo files, so the name does the work.</div>
+  </div>
+
+  <!-- ── Wordmark ────────────────────────────────────────── -->
+  <div style="width:100%;max-width:1000px;display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:20px;letter-spacing:-0.022em;color:var(--n-900)">Wordmark</div>
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--n-600)">Always lowercase. Space Grotesk 700, tracking −0.03em. Final <span style="font-family:'JetBrains Mono',monospace">o</span> in green — it reads as the dial.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:48px;display:flex;align-items:center;justify-content:center">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:56px;letter-spacing:-0.03em;color:var(--n-900);line-height:1">och<span style="color:var(--green-500)">o</span></div>
+      </div>
+      <div style="background:var(--n-950);border-radius:12px;box-shadow:var(--shadow-2);padding:48px;display:flex;align-items:center;justify-content:center">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:56px;letter-spacing:-0.03em;color:var(--n-0);line-height:1">och<span style="color:var(--green-400)">o</span></div>
+      </div>
+    </div>
+    <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:32px;display:flex;gap:40px;align-items:center;flex-wrap:wrap;justify-content:center">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:30px;letter-spacing:-0.03em;color:var(--n-900);line-height:1">och<span style="color:var(--green-500)">o</span></div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.03em;color:var(--n-900);line-height:1">och<span style="color:var(--green-500)">o</span></div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;letter-spacing:-0.03em;color:var(--n-900);line-height:1">och<span style="color:var(--green-500)">o</span></div>
+      <div style="background:var(--n-950);color:var(--n-0);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;letter-spacing:-0.03em;padding:10px 16px;border-radius:6px;line-height:1">och<span style="color:var(--green-400)">o</span></div>
+    </div>
+  </div>
+
+  <!-- ── App icon ────────────────────────────────────────── -->
+  <div style="width:100%;max-width:1000px;display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:20px;letter-spacing:-0.022em;color:var(--n-900)">App icon — the numeral 8</div>
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--n-600)">Space Grotesk 700 on a solid <span style="font-family:'JetBrains Mono',monospace">--green-500</span> plate. Legible at 48dp because it is one glyph and nothing else.</div>
+    </div>
+    <div style="display:flex;gap:24px;align-items:flex-end;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+        <div style="width:144px;height:144px;border-radius:32px;background:var(--green-500);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-2)">
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:100px;letter-spacing:-0.03em;color:var(--n-0);line-height:1">8</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">144px</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+        <div style="width:96px;height:96px;border-radius:22px;background:var(--green-500);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-2)">
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:66px;letter-spacing:-0.03em;color:var(--n-0);line-height:1">8</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">96px</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+        <div style="width:64px;height:64px;border-radius:15px;background:var(--green-500);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-1)">
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:44px;letter-spacing:-0.03em;color:var(--n-0);line-height:1">8</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">64px</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+        <div style="width:48px;height:48px;border-radius:11px;background:var(--green-500);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-1)">
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:33px;letter-spacing:-0.03em;color:var(--n-0);line-height:1">8</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">48dp</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+        <div style="width:144px;height:144px;border-radius:50%;background:var(--green-500);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-2)">
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:100px;letter-spacing:-0.03em;color:var(--n-0);line-height:1">8</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">round mask</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+        <div style="width:144px;height:144px;border-radius:32px;background:var(--n-200);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-2)">
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:100px;letter-spacing:-0.03em;color:var(--n-800);line-height:1">8</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">themed / monochrome</div>
+      </div>
+    </div>
+
+    <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:24px;display:flex;gap:32px;align-items:center;flex-wrap:wrap">
+      <div style="position:relative;width:172px;height:172px;flex:none">
+        <div style="position:absolute;inset:0;background:var(--green-500);border-radius:8px"></div>
+        <div style="position:absolute;inset:22px;border:1px dashed var(--alpha-paper-64);border-radius:50%"></div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:96px;letter-spacing:-0.03em;color:var(--n-0);line-height:1">8</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;min-width:280px;flex:1">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:500;color:var(--n-800)">Adaptive icon anatomy</div>
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.65">The full canvas is 108×108dp; only the centre 72dp circle is guaranteed visible under any launcher mask. The numeral sits inside that safe zone at a 66dp optical size, so square, squircle, and circle masks all crop cleanly.</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-500)">foreground: numeral, transparent · background: solid --green-500 · monochrome: numeral only</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Android exports ─────────────────────────────────── -->
+  <div style="width:100%;max-width:1000px;display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:20px;letter-spacing:-0.022em;color:var(--n-900)">Android exports</div>
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--n-600)">Rendered PNGs below, drawn at xxxhdpi and downscaled by the launcher. Drop into <span style="font-family:'JetBrains Mono',monospace">app/src/main/res/</span>.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px">
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:20px;display:flex;flex-direction:column;gap:14px;align-items:center">
+        <img src="assets/android/ic_launcher_foreground.png" alt="Adaptive foreground" style="width:108px;height:108px;background:var(--n-100);border-radius:6px">
+        <div style="text-align:center;display:flex;flex-direction:column;gap:2px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-800)">ic_launcher_foreground</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">432×432 · transparent</div>
+        </div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:20px;display:flex;flex-direction:column;gap:14px;align-items:center">
+        <img src="assets/android/ic_launcher_background.png" alt="Adaptive background" style="width:108px;height:108px;border-radius:6px">
+        <div style="text-align:center;display:flex;flex-direction:column;gap:2px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-800)">ic_launcher_background</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">432×432 · #3D8560</div>
+        </div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:20px;display:flex;flex-direction:column;gap:14px;align-items:center">
+        <img src="assets/android/ic_launcher_monochrome.png" alt="Monochrome icon" style="width:108px;height:108px;background:var(--n-100);border-radius:6px">
+        <div style="text-align:center;display:flex;flex-direction:column;gap:2px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-800)">ic_launcher_monochrome</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">432×432 · themed icons</div>
+        </div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:20px;display:flex;flex-direction:column;gap:14px;align-items:center">
+        <img src="assets/android/ic_notification.png" alt="Notification icon" style="width:108px;height:108px;background:var(--n-800);border-radius:6px">
+        <div style="text-align:center;display:flex;flex-direction:column;gap:2px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-800)">ic_notification</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">96×96 · white, flat alpha</div>
+        </div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:20px;display:flex;flex-direction:column;gap:14px;align-items:center">
+        <img src="assets/android/play_store_512.png" alt="Play Store icon" style="width:108px;height:108px;border-radius:6px">
+        <div style="text-align:center;display:flex;flex-direction:column;gap:2px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-800)">play_store_512</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">512×512 · full bleed</div>
+        </div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:20px;display:flex;flex-direction:column;gap:14px;align-items:center">
+        <img src="assets/android/wordmark_dark.png" alt="Wordmark on dark" style="width:150px;border-radius:6px">
+        <div style="text-align:center;display:flex;flex-direction:column;gap:2px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-800)">wordmark_light / _dark</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">splash &amp; about screen</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Colour ─────────────────────────────────────────── -->
+  <div style="width:100%;max-width:1000px;display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:20px;letter-spacing:-0.022em;color:var(--n-900)">Colour</div>
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--n-600)">One brand hue. Signal red exists only to encode the work phase.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-700)">Brand — green</div>
+      <div style="display:grid;grid-template-columns:repeat(11,1fr);gap:4px">
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:60px;border-radius:6px;background:var(--green-50);border:1px solid var(--border-subtle)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">50</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:60px;border-radius:6px;background:var(--green-100)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">100</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:60px;border-radius:6px;background:var(--green-200)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">200</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:60px;border-radius:6px;background:var(--green-300)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">300</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:60px;border-radius:6px;background:var(--green-400)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">400</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:60px;border-radius:6px;background:var(--green-500);box-shadow:var(--shadow-1)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-800);font-weight:500">500</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:60px;border-radius:6px;background:var(--green-600)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">600</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:60px;border-radius:6px;background:var(--green-700)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">700</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:60px;border-radius:6px;background:var(--green-800)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">800</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:60px;border-radius:6px;background:var(--green-900)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">900</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:60px;border-radius:6px;background:var(--green-950)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">950</div></div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-500)">--green-500 #3D8560 — primary, and the rest phase.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-700)">Phase colours</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="width:100%;height:80px;border-radius:8px;background:var(--red-500);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;letter-spacing:-0.02em;color:var(--n-0)">WORK</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-500)">--red-500 #E5484D</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="width:100%;height:80px;border-radius:8px;background:var(--green-500);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;letter-spacing:-0.02em;color:var(--n-0)">REST</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-500)">--green-500 #3D8560</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="width:100%;height:80px;border-radius:8px;background:var(--amber-500);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;letter-spacing:-0.02em;color:var(--n-950)">PREPARE</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-500)">--amber-500 #E8A317</div>
+        </div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-500)">Signal colours encode phase only — never decoration, never marketing.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-700)">Neutrals — green-tinted graphite</div>
+      <div style="display:grid;grid-template-columns:repeat(9,1fr);gap:4px">
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:52px;border-radius:6px;background:var(--n-50);border:1px solid var(--border-subtle)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">50</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:52px;border-radius:6px;background:var(--n-100)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">100</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:52px;border-radius:6px;background:var(--n-200)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">200</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:52px;border-radius:6px;background:var(--n-300)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">300</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:52px;border-radius:6px;background:var(--n-400)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">400</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:52px;border-radius:6px;background:var(--n-500)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-0)">500</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:52px;border-radius:6px;background:var(--n-700)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">700</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:52px;border-radius:6px;background:var(--n-900)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">900</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div style="width:100%;height:52px;border-radius:6px;background:var(--n-950)"></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--n-500)">950</div></div>
+      </div>
+    </div>
+
+    <div style="background:var(--n-950);border-radius:12px;box-shadow:var(--shadow-3);padding:24px;overflow:auto">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--n-500);margin-bottom:14px">ui/theme/Color.kt</div>
+      <div style="margin:0;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;color:var(--n-200)">
+        <div style="white-space:pre;color:var(--n-500)">// Tangorock ramp — the only source of colour in Ocho</div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> Green500  = Color(<span style="color:var(--amber-500)">0xFF3D8560</span>)   <span style="color:var(--n-500)">// primary action</span></div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> Green600  = Color(<span style="color:var(--amber-500)">0xFF336E4F</span>)   <span style="color:var(--n-500)">// hover / pressed container</span></div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> Green400  = Color(<span style="color:var(--amber-500)">0xFF5CA47C</span>)   <span style="color:var(--n-500)">// rest phase, dark theme</span></div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> Green300  = Color(<span style="color:var(--amber-500)">0xFF84BE9B</span>)   <span style="color:var(--n-500)">// primary on dark</span></div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> Green200  = Color(<span style="color:var(--amber-500)">0xFFB0D8BE</span>)   <span style="color:var(--n-500)">// rest phase, light theme</span></div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> Red500    = Color(<span style="color:var(--amber-500)">0xFFE5484D</span>)   <span style="color:var(--n-500)">// work phase</span></div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> Amber500  = Color(<span style="color:var(--amber-500)">0xFFE8A317</span>)   <span style="color:var(--n-500)">// prepare phase</span></div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> Violet500 = Color(<span style="color:var(--amber-500)">0xFF7C6CF0</span>)   <span style="color:var(--n-500)">// complete phase</span></div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> N0        = Color(<span style="color:var(--amber-500)">0xFFFFFFFF</span>)</div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> N50       = Color(<span style="color:var(--amber-500)">0xFFF7F9F8</span>)   <span style="color:var(--n-500)">// surface, light</span></div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> N800      = Color(<span style="color:var(--amber-500)">0xFF232B28</span>)   <span style="color:var(--n-500)">// surface variant, dark</span></div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> N950      = Color(<span style="color:var(--amber-500)">0xFF0C110F</span>)   <span style="color:var(--n-500)">// surface, dark</span></div>
+        <div style="height:1.7em"></div>
+        <div style="white-space:pre"><span style="color:var(--green-300)">val</span> LightColors = lightColorScheme(</div>
+        <div style="white-space:pre">    primary = Green500, <span>onPrimary</span> = N0,</div>
+        <div style="white-space:pre">    surface = N50,      <span>onSurface</span> = Color(<span style="color:var(--amber-500)">0xFF161C1A</span>),</div>
+        <div style="white-space:pre">    error   = Red500,   <span>onError</span>   = N0,</div>
+        <div style="white-space:pre">)</div>
+      </div>
+    </div>
+    <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-600);line-height:1.65">Dynamic colour is off. A timer that changes meaning with colour cannot hand its palette to the wallpaper — work must be red on every device.</div>
+  </div>
+
+  <!-- ── Type ───────────────────────────────────────────── -->
+  <div style="width:100%;max-width:1000px;display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:20px;letter-spacing:-0.022em;color:var(--n-900)">Type on Android</div>
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--n-600)">All three families are already vendored in <span style="font-family:'JetBrains Mono',monospace">res/font/</span>. If a human wrote it, Plex; if the timer produced it, JetBrains Mono.</div>
+    </div>
+    <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:28px;display:flex;flex-direction:column;gap:22px">
+      <div style="display:flex;gap:28px;align-items:baseline;flex-wrap:wrap;border-bottom:1px solid var(--border-subtle);padding-bottom:20px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:76px;letter-spacing:-0.03em;color:var(--n-900);line-height:1;font-variant-numeric:tabular-nums">04:32</div>
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-800)">displayLarge · Space Grotesk 700 · 76sp</div>
+          <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-600)">The clock face. Tabular numerals, so digits never shift.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:28px;align-items:baseline;flex-wrap:wrap;border-bottom:1px solid var(--border-subtle);padding-bottom:20px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--n-900);line-height:1">round 3/8</div>
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-800)">titleMedium · JetBrains Mono · 20sp</div>
+          <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-600)">Machine-authored: rounds, intervals, durations.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:28px;align-items:baseline;flex-wrap:wrap">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:16px;color:var(--n-900);line-height:1.65">Vibrate on interval change</div>
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-800)">bodyLarge · IBM Plex Sans · 16sp</div>
+          <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-600)">Everything a person wrote: labels, settings, prose.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Iconography ────────────────────────────────────── -->
+  <div style="width:100%;max-width:1000px;display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:20px;letter-spacing:-0.022em;color:var(--n-900)">Iconography</div>
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--n-600)">Lucide (ISC licence) — free and open source, vendored into <span style="font-family:'JetBrains Mono',monospace">assets/icons/</span>. Stroke 1.75, rounded caps, <span style="font-family:'JetBrains Mono',monospace">currentColor</span>. Nothing is hand-drawn.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+        <div style="width:36px;height:36px;border-radius:8px;background:var(--green-50);display:flex;align-items:center;justify-content:center;color:var(--green-500)"><x-import component-from-global-scope="TangorockDesignSystem_f79ea8.Icon" name="play" size="20" hint-size="20px,20px"></x-import></div>
+        <div style="display:flex;flex-direction:column;gap:2px"><div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-800)">Start</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">play</div></div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+        <div style="width:36px;height:36px;border-radius:8px;background:var(--green-50);display:flex;align-items:center;justify-content:center;color:var(--green-500)"><x-import component-from-global-scope="TangorockDesignSystem_f79ea8.Icon" name="rotate-cw" size="20" hint-size="20px,20px"></x-import></div>
+        <div style="display:flex;flex-direction:column;gap:2px"><div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-800)">Rounds</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">rotate-cw</div></div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+        <div style="width:36px;height:36px;border-radius:8px;background:var(--green-50);display:flex;align-items:center;justify-content:center;color:var(--green-500)"><x-import component-from-global-scope="TangorockDesignSystem_f79ea8.Icon" name="bell" size="20" hint-size="20px,20px"></x-import></div>
+        <div style="display:flex;flex-direction:column;gap:2px"><div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-800)">Cues</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">bell</div></div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+        <div style="width:36px;height:36px;border-radius:8px;background:var(--green-50);display:flex;align-items:center;justify-content:center;color:var(--green-500)"><x-import component-from-global-scope="TangorockDesignSystem_f79ea8.Icon" name="zap" size="20" hint-size="20px,20px"></x-import></div>
+        <div style="display:flex;flex-direction:column;gap:2px"><div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-800)">Intensity</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">zap</div></div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+        <div style="width:36px;height:36px;border-radius:8px;background:var(--green-50);display:flex;align-items:center;justify-content:center;color:var(--green-500)"><x-import component-from-global-scope="TangorockDesignSystem_f79ea8.Icon" name="activity" size="20" hint-size="20px,20px"></x-import></div>
+        <div style="display:flex;flex-direction:column;gap:2px"><div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-800)">Session</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">activity</div></div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+        <div style="width:36px;height:36px;border-radius:8px;background:var(--green-50);display:flex;align-items:center;justify-content:center;color:var(--green-500)"><x-import component-from-global-scope="TangorockDesignSystem_f79ea8.Icon" name="settings" size="20" hint-size="20px,20px"></x-import></div>
+        <div style="display:flex;flex-direction:column;gap:2px"><div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-800)">Settings</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n-500)">settings</div></div>
+      </div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-500)">Sizes: 20dp in nav rails and feature marks, 24dp max in the session toolbar. One weight per screen.</div>
+  </div>
+
+  <!-- ── Behaviour ──────────────────────────────────────── -->
+  <div style="width:100%;max-width:1000px;display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:20px;letter-spacing:-0.022em;color:var(--n-900)">Behaviour</div>
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--n-600)">Rules that only matter because this runs on a phone, mid-workout, at arm's length.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:24px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:500;color:var(--n-800)">Phase transition</div>
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.65">The full-screen colour swap runs 340ms on <span style="font-family:'JetBrains Mono',monospace">--ease-in-out</span>. The beep and haptic fire on the frame the interval flips — never delayed by the animation.</div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:24px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:500;color:var(--n-800)">Reduced motion</div>
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.65">Animator duration scale of 0 zeroes the crossfade. The colour still swaps instantly — motion is decoration here, colour is information.</div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:24px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:500;color:var(--n-800)">Touch targets</div>
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.65">48dp minimum, everywhere. The session screen's start/pause target is 96dp — it gets hit with sweaty hands and no attention.</div>
+      </div>
+      <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:var(--shadow-2);padding:24px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:500;color:var(--n-800)">Screen stays on</div>
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--n-700);line-height:1.65">A running session holds the screen awake and keeps the notification live, so the clock survives a lock and a backgrounding.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-700)">Button states</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+        <button style="font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:14px;padding:12px 20px;border-radius:6px;border:none;background:var(--green-500);color:var(--n-0)">Start</button>
+        <button style="font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:14px;padding:12px 20px;border-radius:6px;border:none;background:var(--green-600);color:var(--n-0)">Hover</button>
+        <button style="font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:14px;padding:13px 20px 11px;border-radius:6px;border:none;background:var(--green-700);color:var(--n-0)">Pressed</button>
+        <button style="font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:14px;padding:12px 20px;border-radius:6px;border:none;background:var(--green-500);color:var(--n-0);box-shadow:var(--shadow-focus)">Focused</button>
+        <button style="font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:14px;padding:12px 20px;border-radius:6px;border:none;background:var(--green-500);color:var(--n-0);opacity:.45;cursor:not-allowed">Disabled</button>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-500)">Hover darkens one step, press darkens two and shifts 1px down. No scale transforms.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--n-700)">Voice — empty states and errors</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="background:var(--n-50);border:1px dashed var(--border-subtle);border-radius:12px;padding:28px;text-align:center;font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--n-600)">Presets appear here after you save a workout.</div>
+        <div style="background:var(--n-0);border:1px solid var(--border-subtle);border-radius:12px;padding:28px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--n-700)">Sound is muted at the system level. Cues will vibrate only.</div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--n-500)">Sentence case. State the cause and the next move. No exclamation marks, no emoji.</div>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+</body>
+</html>

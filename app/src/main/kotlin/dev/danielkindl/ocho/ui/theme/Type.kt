@@ -5,8 +5,18 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import dev.danielkindl.ocho.R
+
+/**
+ * OpenType feature giving every digit the same advance width.
+ *
+ * Without it a proportional `1` is narrower than an `8`, and the clock visibly
+ * jitters as it counts down — the most-looked-at element on screen shifting on
+ * every tick. Applied to the clock and every other live numeral.
+ */
+private const val TABULAR_FIGURES = "tnum"
 
 /*
  * Three typefaces, each with one job. The split is what lets a glance at the
@@ -41,89 +51,115 @@ val IbmPlexSansFamily = FontFamily(
     Font(R.font.ibm_plex_sans, FontWeight.SemiBold),
 )
 
-/** The full Material 3 type scale, assembled from the three families above. */
+/**
+ * The Material 3 type scale.
+ *
+ * Governing rule: **if a human wrote it, IBM Plex Sans; if the timer produced it,
+ * JetBrains Mono; Space Grotesk is display only.** The three families are never
+ * mixed within a role — the split is what lets a glance at the session screen
+ * separate the number that matters from the words around it.
+ *
+ * Slots the design system does not name (`displaySmall`, the `headline*` family,
+ * `titleSmall`, `bodySmall`, `labelLarge`, `labelMedium`) are interpolated from
+ * their neighbours so Material components that reach for them still land inside
+ * the system.
+ */
 val OchoTypography = Typography(
-    // Display — large timer numbers shown during active sessions
+    // The clock face. Never below 48sp on any screen size.
     displayLarge = TextStyle(
-        fontFamily = IbmPlexSansFamily,
+        fontFamily = SpaceGroteskFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 64.sp,
-        lineHeight = 72.sp,
+        fontSize = 76.sp,
+        lineHeight = 76.sp,
+        letterSpacing = (-0.03).em,
+        fontFeatureSettings = TABULAR_FIGURES,
     ),
+    // Wordmark and completion figures.
     displayMedium = TextStyle(
-        fontFamily = IbmPlexSansFamily,
+        fontFamily = SpaceGroteskFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 48.sp,
-        lineHeight = 56.sp,
+        fontSize = 40.sp,
+        lineHeight = 44.sp,
+        letterSpacing = (-0.03).em,
     ),
     displaySmall = TextStyle(
-        fontFamily = IbmPlexSansFamily,
+        fontFamily = SpaceGroteskFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 36.sp,
-        lineHeight = 44.sp,
+        fontSize = 32.sp,
+        lineHeight = 38.sp,
+        letterSpacing = (-0.03).em,
+        fontFeatureSettings = TABULAR_FIGURES,
     ),
 
-    // Headline — section headings, wheel-picker numbers, card titles
+    // Headlines are computed values more often than prose here, so they take mono.
     headlineLarge = TextStyle(
-        fontFamily = IbmPlexSansFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 32.sp,
-        lineHeight = 40.sp,
+        fontFamily = JetBrainsMonoFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 28.sp,
+        lineHeight = 34.sp,
+        fontFeatureSettings = TABULAR_FIGURES,
     ),
     headlineMedium = TextStyle(
-        fontFamily = IbmPlexSansFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 28.sp,
-        lineHeight = 36.sp,
+        fontFamily = JetBrainsMonoFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 24.sp,
+        lineHeight = 30.sp,
+        fontFeatureSettings = TABULAR_FIGURES,
     ),
     headlineSmall = TextStyle(
-        fontFamily = IbmPlexSansFamily,
+        fontFamily = SpaceGroteskFamily,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 24.sp,
-        lineHeight = 32.sp,
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
+        letterSpacing = (-0.022).em,
     ),
 
-    // Title — screen headings, button labels
+    // Section headings.
     titleLarge = TextStyle(
-        fontFamily = IbmPlexSansFamily,
-        fontWeight = FontWeight.Medium,
+        fontFamily = SpaceGroteskFamily,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
-        lineHeight = 28.sp,
+        lineHeight = 26.sp,
+        letterSpacing = (-0.022).em,
     ),
+    // Round counts, durations, intervals.
     titleMedium = TextStyle(
-        fontFamily = IbmPlexSansFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
+        fontFamily = JetBrainsMonoFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 20.sp,
+        lineHeight = 26.sp,
+        fontFeatureSettings = TABULAR_FIGURES,
     ),
     titleSmall = TextStyle(
-        fontFamily = IbmPlexSansFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
+        fontFamily = JetBrainsMonoFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 22.sp,
+        fontFeatureSettings = TABULAR_FIGURES,
     ),
 
-    // Body — descriptions and supporting text
+    // Prose and settings labels.
     bodyLarge = TextStyle(
         fontFamily = IbmPlexSansFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
-        lineHeight = 24.sp,
+        lineHeight = 26.sp, // 1.65
     ),
     bodyMedium = TextStyle(
         fontFamily = IbmPlexSansFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
-        lineHeight = 20.sp,
+        lineHeight = 22.sp,
     ),
+    // 12sp is the floor for on-screen text.
     bodySmall = TextStyle(
         fontFamily = IbmPlexSansFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
-        lineHeight = 16.sp,
+        lineHeight = 18.sp,
     ),
 
-    // Label — small tags and annotations
+    // Button labels are written by a human, so they stay in Plex.
     labelLarge = TextStyle(
         fontFamily = IbmPlexSansFamily,
         fontWeight = FontWeight.Medium,
@@ -136,10 +172,12 @@ val OchoTypography = Typography(
         fontSize = 12.sp,
         lineHeight = 16.sp,
     ),
+    // Uppercase eyebrows and phase labels.
     labelSmall = TextStyle(
-        fontFamily = IbmPlexSansFamily,
-        fontWeight = FontWeight.Medium,
+        fontFamily = JetBrainsMonoFamily,
+        fontWeight = FontWeight.Normal,
         fontSize = 11.sp,
         lineHeight = 16.sp,
+        letterSpacing = 0.08.em,
     ),
 )

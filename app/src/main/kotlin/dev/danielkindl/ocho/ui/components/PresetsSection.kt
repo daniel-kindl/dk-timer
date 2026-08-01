@@ -9,9 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BookmarkAdd
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,6 +19,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import dev.danielkindl.ocho.R
 import androidx.compose.ui.unit.dp
 
 /**
@@ -51,7 +50,7 @@ fun <T> PresetsSection(
             Text("Presets", style = MaterialTheme.typography.titleMedium)
             TextButton(onClick = onSavePreset, enabled = saveEnabled) {
                 Icon(
-                    Icons.Default.BookmarkAdd,
+                    painterResource(R.drawable.ic_bookmark_plus),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
                 )
@@ -61,7 +60,7 @@ fun <T> PresetsSection(
         }
         if (presets.isEmpty()) {
             Text(
-                "Save a configuration above to see it here.",
+                "Presets appear here after you save a workout.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -78,7 +77,7 @@ fun <T> PresetsSection(
                                 modifier = Modifier.size(20.dp),
                             ) {
                                 Icon(
-                                    Icons.Default.Close,
+                                    painterResource(R.drawable.ic_x),
                                     contentDescription = "Delete ${getLabel(preset)}",
                                     modifier = Modifier.size(14.dp),
                                 )

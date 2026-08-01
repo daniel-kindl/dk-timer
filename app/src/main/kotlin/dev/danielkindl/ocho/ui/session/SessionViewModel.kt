@@ -7,6 +7,7 @@ import dev.danielkindl.ocho.core.format.sessionProgress
 import dev.danielkindl.ocho.data.audio.AudioPlayer
 import dev.danielkindl.ocho.data.feedback.FeedbackTrigger
 import dev.danielkindl.ocho.domain.engine.TimerEngineFactory
+import dev.danielkindl.ocho.domain.model.PREPARE_COUNTDOWN_SECONDS
 import dev.danielkindl.ocho.domain.model.SessionStatus
 import dev.danielkindl.ocho.domain.model.TimerConfig
 import dev.danielkindl.ocho.domain.model.TimerEvent
@@ -34,7 +35,7 @@ import javax.inject.Inject
  */
 data class SessionUiState(
     val status: SessionStatus = SessionStatus.CountingDown,
-    val countdownSecondsRemaining: Int = COUNTDOWN_START_SECONDS,
+    val countdownSecondsRemaining: Int = PREPARE_COUNTDOWN_SECONDS,
     val currentRound: Int = 1,
     val totalRounds: Int = 0,
     val elapsedMillis: Long = 0L,
@@ -46,7 +47,6 @@ data class SessionUiState(
         get() = sessionProgress(elapsedMillis, totalDurationMillis)
 }
 
-private const val COUNTDOWN_START_SECONDS = 3
 private const val COUNTDOWN_TICK_MS = 1_000L
 
 /**
@@ -83,7 +83,7 @@ class SessionViewModel @Inject constructor(
     init {
         observeEvents()
         countdownJob = viewModelScope.launch {
-            for (secondsLeft in COUNTDOWN_START_SECONDS - 1 downTo 0) {
+            for (secondsLeft in PREPARE_COUNTDOWN_SECONDS - 1 downTo 0) {
                 delay(COUNTDOWN_TICK_MS)
                 _uiState.update { it.copy(countdownSecondsRemaining = secondsLeft) }
             }
