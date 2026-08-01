@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to DK Timer are documented here.
+All notable changes to Ocho are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Versioning follows [Semantic Versioning](https://semver.org/).
@@ -8,6 +8,90 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ---
 
 ## [Unreleased]
+
+---
+
+## [3.0.0] - 2026-08-01
+
+### Breaking: you must reinstall
+
+The app is now **Ocho**, and its `applicationId` changed from `com.emomtimer` to
+`dev.danielkindl.ocho`. Android treats that as a different app, so:
+
+- **This build installs alongside DK Timer rather than upgrading it.** You will
+  briefly have two icons.
+- **Saved presets and settings do not carry over.** Note anything you want to keep
+  before switching; there is no migration.
+- Uninstall DK Timer once Ocho is working. The old install will not receive further
+  updates.
+
+This is the last time a rename will force a reinstall: the new `applicationId` is
+derived from a domain rather than the product name, so future renames are cosmetic.
+
+### Added
+- **A new visual system, built around the session screen's background colour.** The
+  timer has four states and each owns one full-bleed plate: prepare amber, work red,
+  rest light green, complete violet. The colour answers "what am I doing right now"
+  from across a room, before any text is read.
+- **Work and rest now differ by lightness, not just hue.** Red and mid-green sit at
+  nearly the same lightness, so under deuteranopia they converged into two similar
+  plates and the app's main signal failed for roughly 8% of men. Rest moved to a
+  light plate, which also flips the text from white to ink as a second, redundant
+  cue. Across a workout this reads as a light–dark–light–dark rhythm that is
+  catchable in peripheral vision.
+- **Run timeline** on both setup screens: a proportional preview of the configured
+  workout in the same phase colours the session will use, so its shape is visible
+  before starting.
+- **Dev update channel.** Every push to `dev` publishes a prerelease that installs
+  as *Ocho Dev*, alongside the stable app and with its own data. Lets changes be
+  tested on a real device before they reach `main`. The channels cannot see each
+  other: stable reads `releases/latest`, which excludes prereleases by definition.
+- `SemVer` now parses and orders prerelease versions per SemVer 2.0.0 §11, and
+  discards build metadata per §10.
+- Dependabot for Gradle and GitHub Actions, and a security policy documenting the
+  APK self-update flow.
+- **A licence.** Ocho is now GPL-3.0. It previously had none, which under copyright
+  law meant all rights reserved by default, so nobody could legally build it and
+  nothing stated whether that was deliberate. Daniel Kindl remains sole copyright
+  holder; the name, wordmark and numeral-8 icon are excluded from the GPL grant.
+- **Third-party licence notices**, in `THIRD-PARTY-NOTICES.md` and readable in the
+  app under Settings, then Licences. This closes an obligation the app was not
+  meeting: the APK embeds three SIL OFL 1.1 fonts and Lucide's ISC icons, and both
+  licences require their notices to accompany every copy. The XML comments
+  crediting Lucide did not count, since AAPT compiles vector XML to binary and
+  strips them.
+- Contributor terms in `CONTRIBUTING.md`. Contributions are accepted under GPL-3.0
+  plus a licence grant permitting relicensing, so that a merged pull request cannot
+  permanently foreclose commercial licensing.
+
+### Fixed
+- **In-app updates were broken in 2.3.0.** The app polled `daniel-kindl/dk-timer`,
+  which does not exist, so every check returned a 404. The repository is now read
+  from `BuildConfig` and cannot drift from the real one again.
+- `ApkInstaller` called an API 31 method from a helper whose version guard lived in
+  its caller. The code was already safe; the contract is now declared.
+- `UpdateViewModel` held a `Context` only to read its own version name.
+- `SessionProgressBar` defaulted its modifier to `Modifier.fillMaxWidth()`, which
+  any caller-supplied modifier would have silently discarded.
+- Release notes linked to the wrong comparison range, and releases were still named
+  "EMOM Timer".
+
+### Changed
+- Renamed throughout: display name, `applicationId`, Kotlin package, repository,
+  and every stale "EMOM Timer" / "DK Timer" string.
+- **The launcher icon is now the numeral 8**, set in type on brand green, replacing
+  the stopwatch.
+- The clock is set in Space Grotesk at 76sp with tabular figures, so the digits stop
+  shifting width as it counts down.
+- All icons come from Lucide. The app previously mixed a filled icon set with the
+  new stroked one, which the design system explicitly forbids.
+- Copy follows the new voice: sentence case, buttons as verbs, no emoji, and empty
+  states that describe the trigger — "Presets appear here after you save a workout"
+  rather than "no presets".
+- The build now fails on warnings — Kotlin, detekt, and Android Lint. Three lint
+  checks that report on the environment rather than the code are excluded.
+- Every public declaration in `src/main` requires KDoc, enforced by detekt. 265
+  were added, recording why decisions were made rather than restating the code.
 
 ---
 
@@ -137,6 +221,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/daniel-kindl/emom-timer/compare/v2.0.0...HEAD
-[2.0.0]: https://github.com/daniel-kindl/emom-timer/compare/v1.0.0...v2.0.0
-[1.0.0]: https://github.com/daniel-kindl/emom-timer/releases/tag/v1.0.0
+[Unreleased]: https://github.com/daniel-kindl/ocho/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/daniel-kindl/ocho/compare/v2.3.0...v3.0.0
+[2.3.0]: https://github.com/daniel-kindl/ocho/compare/v2.2.0...v2.3.0
+[2.2.0]: https://github.com/daniel-kindl/ocho/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.com/daniel-kindl/ocho/compare/v2.0.1...v2.1.0
+[2.0.1]: https://github.com/daniel-kindl/ocho/compare/v2.0.0...v2.0.1
+[2.0.0]: https://github.com/daniel-kindl/ocho/compare/v1.0.0...v2.0.0
+[1.0.0]: https://github.com/daniel-kindl/ocho/releases/tag/v1.0.0

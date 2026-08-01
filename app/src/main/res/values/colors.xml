@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Brand green. The launcher icon plate is a flat fill, so a colour drawable is
+      both smaller and sharper than a PNG of a single colour at every density.
+    -->
+    <color name="brand_green">#3D8560</color>
+</resources>

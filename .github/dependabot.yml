@@ -1,0 +1,45 @@
+version: 2
+
+updates:
+  # Gradle: Dependabot reads gradle/libs.versions.toml directly.
+  - package-ecosystem: gradle
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    # Must target dev. Dependabot defaults to the default branch, but this repo's
+    # rule is that main only advances via a release PR from dev - PRs opened against
+    # main would bypass dev CI entirely.
+    target-branch: dev
+    # Must set a type. Dependabot's default subject is "Bump x from 1.0 to 1.1",
+    # which is not a Conventional Commit, so both the commit-msg hook and
+    # commit-lint.yml would reject every PR it opens.
+    commit-message:
+      prefix: build
+      include: scope
+    open-pull-requests-limit: 5
+    groups:
+      # One PR a week for routine bumps rather than one per dependency. Majors stay
+      # separate: they are the ones that actually need reading.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # Keeps the pinned action versions in dev-ci.yml, release.yml and commit-lint.yml
+  # from silently ageing out.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    target-branch: dev
+    commit-message:
+      prefix: ci
+      include: scope
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        update-types:
+          - minor
+          - patch
