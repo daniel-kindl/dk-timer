@@ -28,6 +28,39 @@ jobs:
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
 
+      # Report-only, never gated. There is no coverage threshold anywhere in this
+      # repository on purpose: a percentage is easy to move by writing tests that
+      # touch lines without asserting anything, and gating rewards exactly that.
+      #
+      # koverLogDebug prints the per-package breakdown, copied into the job summary
+      # so it is visible during review without downloading anything. The aggregate
+      # and the per-file detail live in the uploaded HTML report. See the kover block
+      # in app/build.gradle.kts for what is excluded and why.
+      - name: Measure coverage
+        run: |
+          set -euo pipefail
+          ./gradlew koverLogDebug koverXmlReportDebug koverHtmlReportDebug --stacktrace \
+            | tee gradle-coverage.log
+          {
+            echo "## Coverage"
+            echo
+            echo '```'
+            grep -E 'Line coverage by package|line coverage:' gradle-coverage.log
+            echo '```'
+            echo
+            echo "Full report with per-file detail is in the \`coverage-report\` artifact."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: |
+            app/build/reports/kover/htmlDebug/
+            app/build/reports/kover/reportDebug.xml
+          retention-days: 7
+
       - name: Run detekt
         run: ./gradlew detekt --stacktrace
 

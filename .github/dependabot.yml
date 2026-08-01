@@ -19,6 +19,23 @@ updates:
       include: scope
     open-pull-requests-limit: 5
     groups:
+      # These are not independent. Hilt 2.60 requires AGP 9, AGP 9 requires a matching
+      # Kotlin, and the Compose BOM tracks the Kotlin compiler plugin. Split across
+      # PRs, each one merges into a dev branch that does not build. Learned the hard
+      # way in v3.1.0, where nine separate Dependabot PRs had to be folded into one
+      # branch by hand. Majors included on purpose: this is exactly the group where a
+      # major bump arrives and drags the rest with it.
+      toolchain:
+        patterns:
+          - "com.android.*"
+          - "org.jetbrains.kotlin*"
+          - "com.google.dagger*"
+          - "androidx.compose*"
+        update-types:
+          - major
+          - minor
+          - patch
+
       # One PR a week for routine bumps rather than one per dependency. Majors stay
       # separate: they are the ones that actually need reading.
       minor-and-patch:

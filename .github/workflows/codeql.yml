@@ -1,0 +1,58 @@
+name: CodeQL
+
+# Runs on dev rather than main. main only advances via a release PR, so a
+# main-triggered scan would report findings after review instead of during it.
+# The weekly schedule exists because CodeQL's query packs improve over time:
+# code that scanned clean six months ago can have a finding today without any
+# commit having touched it.
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+  schedule:
+    - cron: '17 5 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze Kotlin
+    runs-on: ubuntu-latest
+    permissions:
+      # Writes findings to the repository's code scanning alerts.
+      security-events: write
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5.6.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      # Kotlin is analysed by the `java-kotlin` pack, which needs real compilation:
+      # a source-only scan would miss anything depending on resolved types.
+      #
+      # Manual rather than autobuild. Autobuild would reach for `gradle build`, which
+      # here drags in the release variant, detekt and lint, all of which dev-ci.yml
+      # already runs. assembleDebug compiles every source file and nothing else.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: java-kotlin
+          build-mode: manual
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:java-kotlin"
