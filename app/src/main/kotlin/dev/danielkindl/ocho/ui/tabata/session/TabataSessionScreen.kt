@@ -22,6 +22,7 @@ import dev.danielkindl.ocho.core.format.formatElapsed
 import dev.danielkindl.ocho.domain.model.SessionStatus
 import dev.danielkindl.ocho.domain.model.Phase
 import dev.danielkindl.ocho.ui.components.PhaseClock
+import dev.danielkindl.ocho.ui.components.RequestNotificationPermission
 import dev.danielkindl.ocho.ui.components.PhaseLabel
 import dev.danielkindl.ocho.ui.components.PhaseScaffold
 import dev.danielkindl.ocho.ui.components.PrimarySessionControl
@@ -48,6 +49,8 @@ fun TabataSessionScreen(
     viewModel: TabataSessionViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    RequestNotificationPermission()
 
     SessionLifecycleScaffold(
         status = state.status,

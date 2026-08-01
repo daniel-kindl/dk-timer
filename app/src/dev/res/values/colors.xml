@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Amber rather than brand green, so the dev build is obvious in the launcher
+      without opening it. Both apps are installed at once and their icons are
+      otherwise identical.
+
+      This is amber-500 from the palette, the same colour the prepare phase uses.
+      It reads as work-in-progress, and it is the furthest from green of any hue
+      already in the design system.
+    -->
+    <color name="launcher_background">#E8A317</color>
+</resources>

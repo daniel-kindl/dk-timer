@@ -431,4 +431,60 @@ class TabataEngineTest {
         assertTrue("RestStarted must fire after pause/resume",
             events.any { it is TabataEvent.RestStarted })
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Countdown lead-in
+    // ──────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `countdown ticks fire once each before a phase change`() = runTest {
+        val engine = engine()
+        val events = mutableListOf<TabataEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // One 10s work phase, then stop before rest can produce its own lead-in.
+        engine.start(
+            TabataConfig(workMillis = 10_000, restMillis = 10_000, totalDurationMillis = 10_000)
+        )
+        advanceTimeBy(10_100)
+
+        engine.stop()
+        job.cancel()
+
+        val countdown = events.filterIsInstance<TabataEvent.CountdownTick>()
+        assertEquals(
+            "Expected exactly 3, 2, 1 with no repeats",
+            listOf(3, 2, 1),
+            countdown.map { it.secondsRemaining },
+        )
+    }
+
+    @Test
+    fun `countdown is evaluated per phase, so a short rest stays silent`() = runTest {
+        val engine = engine()
+        val events = mutableListOf<TabataEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // Work is long enough for a lead-in, rest is not. Only work should count down,
+        // which is why the check is per phase rather than per workout.
+        engine.start(
+            TabataConfig(workMillis = 10_000, restMillis = 2_000, totalDurationMillis = 24_000)
+        )
+        advanceTimeBy(24_100)
+
+        engine.stop()
+        job.cancel()
+
+        val countdown = events.filterIsInstance<TabataEvent.CountdownTick>()
+        assertTrue(
+            "Every tick should belong to a work phase lead-in",
+            countdown.isNotEmpty() && countdown.all { it.secondsRemaining in 1..3 },
+        )
+        // Two work phases fit in 24s (10 work, 2 rest, 10 work, 2 rest), so two lead-ins.
+        assertEquals(
+            "One lead-in per work phase, none for the short rests",
+            listOf(3, 2, 1, 3, 2, 1),
+            countdown.map { it.secondsRemaining },
+        )
+    }
 }

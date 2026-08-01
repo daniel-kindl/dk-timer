@@ -50,6 +50,74 @@ Findings in that flow are the ones most worth reporting. So is anything that all
 an unsigned or third-party APK to be installed, or lets a non-GitHub host serve the
 update.
 
+## Verifying a release download
+
+Every release and dev prerelease publishes two things next to the APK: a
+`.sha256` file, and a GitHub build provenance attestation. Both are for a human
+checking a manual download. Neither changes how the app updates itself, which
+still relies on Android's signature check as described above.
+
+### Checksum
+
+The SHA-256 digest is attached as `<apk-name>.sha256`, quoted in the release
+notes, and printed in the log of the workflow run that produced the build. To
+check a download:
+
+```
+sha256sum -c ocho-1.2.3.apk.sha256
+```
+
+Or compare by eye against the digest in the release notes:
+
+```
+sha256sum ocho-1.2.3.apk
+```
+
+On Windows: `certutil -hashfile ocho-1.2.3.apk SHA256`.
+
+What this proves is limited. It detects a corrupted download and an asset that
+does not match what the release notes claim. It does not defend against someone
+who has compromised the repository, because that person can replace the APK and
+the `.sha256` file and the release notes in one move. A checksum published by
+the same party as the artifact only ever confirms internal consistency.
+
+The workflow log is a slightly better witness than the release assets, since
+release assets can be re-uploaded after the fact while a finished run's log
+cannot be edited through the normal release UI. It is a second place to look,
+not a proof.
+
+### Build provenance attestation
+
+This is the check worth actually running. Each APK is attested with
+[actions/attest-build-provenance](https://github.com/actions/attest-build-provenance),
+which produces a signed statement binding the artifact's digest to the workflow
+run, commit, and repository that built it. The signature comes from GitHub's
+signing infrastructure using a short-lived OIDC identity for that specific run,
+so it is not something a repository write token can forge after the fact.
+
+Verify with the GitHub CLI:
+
+```
+gh attestation verify ocho-1.2.3.apk --repo daniel-kindl/ocho
+```
+
+A successful result means that exact file was built by a run of this
+repository's own workflow. A file that was modified, rebuilt elsewhere, or
+served by a third party fails, even if its accompanying checksum matches.
+
+### Signature check
+
+Android's signature check remains the guarantee that matters for installation
+itself. An APK not signed with the release key cannot upgrade an existing
+install, regardless of what any checksum or attestation says. The checks above
+are for inspecting a file before you install it, and for detecting tampering on
+a machine that has never had Ocho installed. To read the signing certificate of
+a downloaded APK directly:
+
+```
+apksigner verify --print-certs ocho-1.2.3.apk
+```
+
 ## Out of scope
 
 - The app stores no credentials, tokens, or personal data. Presets and settings are
