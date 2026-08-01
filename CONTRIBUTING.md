@@ -1,35 +1,32 @@
 # Contributing to Ocho
 
-Thank you for helping improve Ocho!
-
 ---
 
-## Branch Strategy
+## Branch strategy
 
 | Branch | Purpose |
 |--------|---------|
-| `main` | Stable production code. **Protected — no direct pushes.** |
+| `main` | Stable production code. Protected, so no direct pushes. |
 | `dev`  | Active development. All work goes here. |
 
-**All commits go to `dev`.**
-`main` is only updated via tagged releases.
+All commits go to `dev`. `main` is only updated via tagged releases.
 
-Every green push to `dev` publishes a dev-channel APK automatically — see
+Every green push to `dev` publishes a dev-channel APK automatically. See
 [Update channels](#update-channels) below.
 
 ---
 
 ## Contributor terms
 
-Ocho is licensed under **GPL-3.0**, and Daniel Kindl is its sole copyright holder.
-That second fact is deliberate, and it has a consequence worth stating plainly
-before you write any code.
+Ocho is licensed under GPL-3.0, and Daniel Kindl is its sole copyright holder. That
+second fact is deliberate, and it has a consequence worth stating plainly before you
+write any code.
 
 Copyright is automatic and attaches per author. If you send a patch, you own the
-copyright in it, and merging does not transfer that — the project would only hold a
-GPL licence to your work. A GPL licence does not permit relicensing, so a single
-merged contribution would permanently remove the ability to offer Ocho under any
-other terms without tracking you down for permission.
+copyright in it, and merging does not transfer that. The project would only hold a
+GPL licence to your work, and a GPL licence does not permit relicensing. One merged
+contribution would therefore remove the ability to offer Ocho under any other terms
+without tracking you down for permission.
 
 So, to keep that option open:
 
@@ -38,13 +35,13 @@ So, to keep that option open:
 > worldwide, royalty-free licence to use, reproduce, modify, sublicense and
 > relicense it, including under commercial terms.
 
-You keep your copyright. Nothing is assigned. You are simply granting a licence
-broad enough that the project can be dual-licensed later.
+You keep your copyright. Nothing is assigned. You are granting a licence broad
+enough that the project can be dual-licensed later.
 
-This is the same arrangement used by Qt, MySQL, GitLab and every project under the
-Apache ICLA, and it is stated up front precisely so nobody is surprised by it. If
-you would rather not grant that, please open an issue describing the change instead
-of a pull request — a good bug report is worth as much as a patch.
+Qt, MySQL, GitLab and every project under the Apache ICLA use the same arrangement,
+and it is stated up front precisely so nobody is surprised by it. If you would
+rather not grant that, open an issue describing the change instead of a pull
+request. A good bug report is worth as much as a patch.
 
 Anything already released under GPL-3.0 stays GPL-3.0 permanently. Relicensing can
 only ever apply going forward, so nothing you or anyone else has already received
@@ -52,9 +49,9 @@ can be withdrawn.
 
 ---
 
-## Commit Convention
+## Commit convention
 
-Every commit **must** follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
+Every commit must follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
 This is enforced, not just a suggestion:
 
 - A local `commit-msg` hook rejects non-conforming commits. Enable it once
@@ -75,7 +72,7 @@ This is enforced, not just a suggestion:
 
 Allowed types: `feat`, `fix`, `build`, `chore`, `ci`, `docs`, `style`,
 `refactor`, `perf`, `test`, `revert`. Scope is optional. A `!` right before
-the colon (or a `BREAKING CHANGE:` footer) marks a breaking change and
+the colon, or a `BREAKING CHANGE:` footer, marks a breaking change and
 requires a MAJOR release (see below).
 
 Examples:
@@ -88,7 +85,7 @@ feat(setup)!: remove deprecated preset import format
 
 ---
 
-## Development Workflow
+## Development workflow
 
 1. Branch off `dev`:
    ```bash
@@ -110,13 +107,13 @@ feat(setup)!: remove deprecated preset import format
 4. Open a PR targeting `dev`. `commit-lint` CI validates every commit in
    the PR.
 
-5. After your branch is merged into `dev`, delete it (locally and on
-   origin). Feature branches are disposable; `dev` and `main` are the only
+5. After your branch is merged into `dev`, delete it locally and on
+   origin. Feature branches are disposable. `dev` and `main` are the only
    long-lived branches and are never deleted.
 
 ---
 
-## Update Channels
+## Update channels
 
 Ocho ships outside Google Play and updates itself from GitHub Releases. There are
 two channels, and they are invisible to each other by construction:
@@ -131,36 +128,37 @@ install can never be offered a dev build. The differing `applicationId` means bo
 apps can be installed at once, with separate presets and settings.
 
 Dev builds are versioned `<versionName>-dev.<CI run number>`, signed with the
-release key (CI's debug keystore is regenerated per run, so dev APKs signed with it
-would refuse to install over each other), and pruned to the newest five.
+release key, and pruned to the newest five. The release key matters here: CI's debug
+keystore is regenerated per run, so dev APKs signed with it would refuse to install
+over each other.
 
-**Two guards in `release.yml` exist because dev tags contain a hyphen. Don't remove
-them:**
+Two guards in `release.yml` exist because dev tags contain a hyphen. Don't remove
+them:
 
 - The job skips any ref matching `*-*`. `release.yml` triggers on `v*`, which dev
-  tags also match, and GitHub tag filters can't express an exception — without the
+  tags also match, and GitHub tag filters can't express an exception. Without the
   guard, every push to `dev` would fail the release workflow.
 - Both `git describe` calls pass `--exclude='*-*'`, or a dev prerelease would
   resolve as the previous tag and corrupt the version checks and release notes.
 
 ---
 
-## Release Process
+## Release process
 
-Releases follow **Semantic Versioning 2.0.0** (`MAJOR.MINOR.PATCH`,
-see [semver.org](https://semver.org/)):
+Releases follow [Semantic Versioning 2.0.0](https://semver.org/)
+(`MAJOR.MINOR.PATCH`):
 
-- `MAJOR` — breaking changes (any commit with `!` or a `BREAKING CHANGE:` footer)
-- `MINOR` — new features (`feat:` commits), backwards compatible
-- `PATCH` — bug fixes and everything else
+- `MAJOR` for breaking changes: any commit with `!` or a `BREAKING CHANGE:` footer
+- `MINOR` for new features (`feat:` commits), backwards compatible
+- `PATCH` for bug fixes and everything else
 
-**Steps to release:**
+Steps to release:
 
 1. Ensure `dev` CI is green.
 2. Update `CHANGELOG.md` with the new version section.
-3. Bump `versionName` / `versionCode` in `app/build.gradle.kts`. The new
+3. Bump `versionName` and `versionCode` in `app/build.gradle.kts`. The new
    `versionName` must exactly match the tag you'll push in step 5.
-4. Merge `dev` → `main` via PR.
+4. Merge `dev` into `main` via PR.
 5. Tag the merge commit:
    ```bash
    git tag v1.0.0
@@ -170,14 +168,14 @@ see [semver.org](https://semver.org/)):
    - the tag is strict SemVer (`vMAJOR.MINOR.PATCH`),
    - it's strictly greater than the previous tag,
    - it matches `versionName` in `app/build.gradle.kts`,
-   - its bump level (major/minor/patch) is at least what the commits since
-     the last tag require under Conventional Commits (a breaking commit
-     needs a major release, a `feat:` needs at least a minor, etc.).
+   - its bump level is at least what the commits since the last tag require
+     under Conventional Commits. A breaking commit needs a major release, a
+     `feat:` needs at least a minor.
 
    If all of that passes, it builds a signed `assembleRelease` APK and
    publishes a GitHub Release automatically.
 
-**Required repository secrets** (Settings → Secrets and variables →
+Required repository secrets (Settings, then Secrets and variables, then
 Actions) for the release workflow to sign the APK:
 
 | Secret | Value |
@@ -192,9 +190,9 @@ instead of silently shipping an unsigned or debug build.
 
 ---
 
-## Code Style
+## Code style
 
 - Follow [Kotlin Coding Conventions](https://kotlinlang.org/docs/coding-conventions.html)
-- `detekt` is enforced in CI — run `./gradlew detekt` before pushing
-- No business logic in UI layer
-- Domain layer must remain Android-free (pure Kotlin)
+- `detekt` is enforced in CI, so run `./gradlew detekt` before pushing
+- No business logic in the UI layer
+- The domain layer must remain Android-free (pure Kotlin)
