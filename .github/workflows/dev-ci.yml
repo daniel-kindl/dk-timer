@@ -106,7 +106,7 @@ jobs:
       # A prerelease, which is what keeps the channels apart: the stable app reads
       # releases/latest, and GitHub excludes prereleases from that endpoint entirely.
       - name: Publish prerelease
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.TAG }}
           name: "Ocho ${{ steps.version.outputs.TAG }}"
