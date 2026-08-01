@@ -176,3 +176,26 @@ This keeps the anchoring intact across any number of pauses.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for branch rules, commit conventions, and the
 release process. Security policy: [SECURITY.md](SECURITY.md).
+
+Note the [contributor terms](CONTRIBUTING.md#contributor-terms): contributions are
+accepted under GPL-3.0 plus a licence grant that lets the project be dual-licensed
+later. You keep your copyright.
+
+---
+
+## License
+
+Ocho is free software under the **[GNU General Public License v3.0](LICENSE)**. You
+may use, study, modify and redistribute it; anything you redistribute must also be
+GPL-3.0 with source available.
+
+Copyright © 2026 Daniel Kindl, sole copyright holder. Ocho may also be offered under
+separate commercial terms.
+
+**The name "Ocho", the wordmark, and the numeral-8 icon are not covered by the GPL.**
+Fork freely — but rename and re-brand.
+
+Bundled fonts (IBM Plex Sans, JetBrains Mono, Space Grotesk — all SIL OFL 1.1) and
+icons (Lucide, ISC) keep their own licences. Full texts are in
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) and in the app under
+**Settings → Licences**.

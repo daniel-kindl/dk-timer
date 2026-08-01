@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dev.danielkindl.ocho.ui.home.HomeScreen
+import dev.danielkindl.ocho.ui.licenses.LicensesScreen
 import dev.danielkindl.ocho.ui.session.ActiveSessionScreen
 import dev.danielkindl.ocho.ui.settings.SettingsScreen
 import dev.danielkindl.ocho.ui.setup.SetupScreen
@@ -16,6 +17,7 @@ import dev.danielkindl.ocho.ui.tabata.setup.TabataSetupScreen
 private const val ROUTE_HOME = "home"
 private const val ROUTE_SETUP = "setup"
 private const val ROUTE_SETTINGS = "settings"
+private const val ROUTE_LICENSES = "licenses"
 private const val ROUTE_SESSION = "session/{totalDurationMillis}/{intervalMillis}"
 private const val ROUTE_TABATA_SETUP = "tabata-setup"
 private const val ROUTE_TABATA_SESSION = "tabata-session/{totalDurationMillis}/{workMillis}/{restMillis}"
@@ -51,7 +53,14 @@ fun AppNavigation() {
         }
 
         composable(ROUTE_SETTINGS) {
-            SettingsScreen(onNavigateUp = { navController.navigateUp() })
+            SettingsScreen(
+                onNavigateUp = { navController.navigateUp() },
+                onOpenLicenses = { navController.navigate(ROUTE_LICENSES) },
+            )
+        }
+
+        composable(ROUTE_LICENSES) {
+            LicensesScreen(onNavigateUp = { navController.navigateUp() })
         }
 
         composable(

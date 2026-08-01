@@ -19,6 +19,39 @@ Every green push to `dev` publishes a dev-channel APK automatically — see
 
 ---
 
+## Contributor terms
+
+Ocho is licensed under **GPL-3.0**, and Daniel Kindl is its sole copyright holder.
+That second fact is deliberate, and it has a consequence worth stating plainly
+before you write any code.
+
+Copyright is automatic and attaches per author. If you send a patch, you own the
+copyright in it, and merging does not transfer that — the project would only hold a
+GPL licence to your work. A GPL licence does not permit relicensing, so a single
+merged contribution would permanently remove the ability to offer Ocho under any
+other terms without tracking you down for permission.
+
+So, to keep that option open:
+
+> By submitting a contribution to this project, you agree that your contribution is
+> licensed under GPL-3.0, and you grant Daniel Kindl a perpetual, irrevocable,
+> worldwide, royalty-free licence to use, reproduce, modify, sublicense and
+> relicense it, including under commercial terms.
+
+You keep your copyright. Nothing is assigned. You are simply granting a licence
+broad enough that the project can be dual-licensed later.
+
+This is the same arrangement used by Qt, MySQL, GitLab and every project under the
+Apache ICLA, and it is stated up front precisely so nobody is surprised by it. If
+you would rather not grant that, please open an issue describing the change instead
+of a pull request — a good bug report is worth as much as a patch.
+
+Anything already released under GPL-3.0 stays GPL-3.0 permanently. Relicensing can
+only ever apply going forward, so nothing you or anyone else has already received
+can be withdrawn.
+
+---
+
 ## Commit Convention
 
 Every commit **must** follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).

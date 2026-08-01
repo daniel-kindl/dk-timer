@@ -1,6 +1,7 @@
 package dev.danielkindl.ocho.ui.settings
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -52,6 +53,7 @@ import dev.danielkindl.ocho.ui.components.SessionProgressBar
 @Composable
 fun SettingsScreen(
     onNavigateUp: () -> Unit,
+    onOpenLicenses: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
     updateViewModel: UpdateViewModel = hiltViewModel(),
 ) {
@@ -131,8 +133,21 @@ fun SettingsScreen(
                 },
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
             HorizontalDivider()
+
+            // Required, not decorative: the bundled fonts and icons are licensed on
+            // condition that their notices travel with every copy of the software,
+            // and the APK is the copy users receive.
+            ListItem(
+                headlineContent = { Text("Licences") },
+                supportingContent = {
+                    Text(
+                        "Open-source components used in Ocho",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                },
+                modifier = Modifier.clickable(onClick = onOpenLicenses),
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 
