@@ -15,7 +15,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import dev.danielkindl.ocho.R
@@ -32,12 +32,12 @@ import dev.danielkindl.ocho.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LicensesScreen(onNavigateUp: () -> Unit) {
-    val context = LocalContext.current
+    val resources = LocalResources.current
 
     // Read once and hold: the file is a few kilobytes and never changes, so
     // re-reading it on every recomposition would be pure waste.
     val notices = remember {
-        context.resources.openRawResource(R.raw.third_party_notices)
+        resources.openRawResource(R.raw.third_party_notices)
             .bufferedReader()
             .use { it.readText() }
     }

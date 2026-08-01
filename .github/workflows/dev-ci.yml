@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5.6.0
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -35,7 +35,7 @@ jobs:
         run: ./gradlew assembleDebug --stacktrace
 
       - name: Upload debug APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/*.apk
@@ -43,7 +43,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results
           path: app/build/reports/tests/
@@ -67,10 +67,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5.6.0
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -136,7 +136,7 @@ jobs:
       # A prerelease, which is what keeps the channels apart: the stable app reads
       # releases/latest, and GitHub excludes prereleases from that endpoint entirely.
       - name: Publish prerelease
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.TAG }}
           name: "Ocho ${{ steps.version.outputs.TAG }}"

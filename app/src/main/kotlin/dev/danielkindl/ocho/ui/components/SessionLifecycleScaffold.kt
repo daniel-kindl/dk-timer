@@ -1,6 +1,6 @@
 package dev.danielkindl.ocho.ui.components
 
-import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
@@ -10,7 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import dev.danielkindl.ocho.domain.model.SessionStatus
 
 /**
@@ -28,7 +27,9 @@ fun SessionLifecycleScaffold(
     onStopSession: () -> Unit,
     content: @Composable (onRequestExit: () -> Unit) -> Unit,
 ) {
-    val activity = LocalContext.current as Activity
+    // LocalActivity rather than casting LocalContext: the cast is unsafe under a
+    // ContextWrapper and Compose now provides the activity directly.
+    val activity = checkNotNull(LocalActivity.current) { "Session screens require an Activity" }
     DisposableEffect(Unit) {
         activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         onDispose {
