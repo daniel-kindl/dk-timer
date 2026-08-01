@@ -13,18 +13,31 @@ val keystoreProperties = Properties().apply {
     if (keystorePropertiesFile.exists()) load(keystorePropertiesFile.inputStream())
 }
 
+/**
+ * CI build counter for the `dev` channel, passed as `-PdevBuildNumber=<n>`.
+ *
+ * Dev builds are published on every push to `dev`, so they need a version that
+ * increases on its own without anyone editing [versionName]. The workflow passes
+ * `github.run_number`, which is monotonic for the lifetime of the repository.
+ * Absent (local builds), the variant still assembles and is marked `-dev.local`.
+ */
+val devBuildNumber = (project.findProperty("devBuildNumber") as String?)?.toIntOrNull()
+
 android {
-    namespace = "com.emomtimer"
+    namespace = "dev.danielkindl.ocho"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.emomtimer"
+        applicationId = "dev.danielkindl.ocho"
         minSdk = 26
         targetSdk = 34
-        versionCode = 6
-        versionName = "2.3.0"
+        versionCode = 7
+        versionName = "3.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
+
+        // Read only by AppModule, which turns these into a domain-level UpdateConfig.
+        buildConfigField("String", "UPDATE_REPO", "\"daniel-kindl/ocho\"")
     }
 
     signingConfigs {
@@ -47,6 +60,7 @@ android {
         debug {
             isDebuggable = true
             applicationIdSuffix = ".debug"
+            buildConfigField("String", "UPDATE_CHANNEL", "\"dev\"")
         }
         release {
             isMinifyEnabled = true
@@ -57,6 +71,22 @@ android {
             )
             val hasSigningConfig = signingConfigs.getByName("release").storeFile != null
             if (hasSigningConfig) signingConfig = signingConfigs.getByName("release")
+            buildConfigField("String", "UPDATE_CHANNEL", "\"stable\"")
+        }
+        // Testing channel: installs alongside the stable app and self-updates from
+        // GitHub prereleases. Inherits release's minification deliberately — an R8
+        // rule stripping something it shouldn't is exactly the class of bug this
+        // channel exists to catch before `main` sees it.
+        create("dev") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = devBuildNumber?.let { "-dev.$it" } ?: "-dev.local"
+            isDebuggable = false
+            buildConfigField("String", "UPDATE_CHANNEL", "\"dev\"")
+            // Must be the release key, not CI's per-run debug key: successive dev
+            // APKs signed by different keys fail with INSTALL_FAILED_UPDATE_INCOMPATIBLE.
+            val hasSigningConfig = signingConfigs.getByName("release").storeFile != null
+            if (hasSigningConfig) signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -65,10 +95,28 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
-    buildFeatures { compose = true }
+    // buildConfig is off by default from AGP 8.0 onwards; the update channel needs it.
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
     composeOptions { kotlinCompilerExtensionVersion = "1.5.8" }
     packaging {
         resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
+    }
+}
+
+/**
+ * Gives each dev build its own increasing `versionCode`.
+ *
+ * Android refuses to install an APK whose `versionCode` is not greater than the
+ * installed one, so a fixed value would let only the first dev build install.
+ * The dev channel has its own `applicationId`, so this counter is independent of
+ * the stable app's `versionCode` and cannot collide with it.
+ */
+androidComponents {
+    onVariants(selector().withBuildType("dev")) { variant ->
+        variant.outputs.forEach { it.versionCode.set(devBuildNumber ?: 1) }
     }
 }
 
