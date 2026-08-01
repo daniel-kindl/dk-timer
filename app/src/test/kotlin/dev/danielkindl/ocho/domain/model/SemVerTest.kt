@@ -51,4 +51,67 @@ class SemVerTest {
         assertNull(SemVer.parse("1.2.3.4"))
         assertNull(SemVer.parse(""))
     }
+
+    @Test
+    fun `parses a dev channel prerelease version`() {
+        // The exact shape assembleDev produces: versionName + "-dev.<run number>".
+        assertEquals(
+            SemVer(3, 0, 0, listOf("dev", "7")),
+            SemVer.parse("v3.0.0-dev.7"),
+        )
+    }
+
+    @Test
+    fun `prerelease identifiers compare numerically, not lexically`() {
+        // The bug this guards: as strings, "12" < "7", so a lexical comparison would
+        // rank build 12 as older than build 7 and the dev channel would stop
+        // offering updates after the ninth build.
+        val newer = checkNotNull(SemVer.parse("3.0.0-dev.12"))
+        val older = checkNotNull(SemVer.parse("3.0.0-dev.7"))
+        assertTrue(newer > older)
+    }
+
+    @Test
+    fun `a prerelease ranks below the release it precedes`() {
+        val release = checkNotNull(SemVer.parse("3.0.0"))
+        val preRelease = checkNotNull(SemVer.parse("3.0.0-dev.7"))
+        assertTrue(preRelease < release)
+    }
+
+    @Test
+    fun `a prerelease of a later patch outranks the current release`() {
+        val next = checkNotNull(SemVer.parse("3.0.1-dev.1"))
+        val current = checkNotNull(SemVer.parse("3.0.0"))
+        assertTrue(next > current)
+    }
+
+    @Test
+    fun `numeric identifiers rank below alphanumeric ones`() {
+        val alphanumeric = checkNotNull(SemVer.parse("3.0.0-alpha"))
+        val numeric = checkNotNull(SemVer.parse("3.0.0-1"))
+        assertTrue(numeric < alphanumeric)
+    }
+
+    @Test
+    fun `a longer identifier list outranks a shorter prefix of itself`() {
+        val longer = checkNotNull(SemVer.parse("3.0.0-dev.1"))
+        val shorter = checkNotNull(SemVer.parse("3.0.0-dev"))
+        assertTrue(longer > shorter)
+    }
+
+    @Test
+    fun `build metadata is ignored for precedence`() {
+        assertEquals(SemVer(3, 0, 0), SemVer.parse("3.0.0+build.5"))
+        assertEquals(
+            SemVer(3, 0, 0, listOf("dev", "7")),
+            SemVer.parse("3.0.0-dev.7+abc123"),
+        )
+    }
+
+    @Test
+    fun `malformed prerelease identifiers return null`() {
+        assertNull(SemVer.parse("3.0.0-"))
+        assertNull(SemVer.parse("3.0.0-dev..1"))
+        assertNull(SemVer.parse("3.0.0-dev.01"))
+    }
 }
