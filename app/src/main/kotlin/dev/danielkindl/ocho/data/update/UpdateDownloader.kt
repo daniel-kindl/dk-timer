@@ -4,6 +4,7 @@ import android.app.DownloadManager
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
+import androidx.core.net.toUri
 import android.os.Environment
 import dev.danielkindl.ocho.domain.model.AppUpdate
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -53,7 +54,7 @@ class UpdateDownloader @Inject constructor(
      *   download is queued, not when it completes.
      */
     fun enqueue(update: AppUpdate): Long {
-        val request = DownloadManager.Request(Uri.parse(update.downloadUrl))
+        val request = DownloadManager.Request(update.downloadUrl.toUri())
             .setTitle("Ocho ${update.tagName}")
             .setDestinationInExternalFilesDir(
                 context,
@@ -87,7 +88,7 @@ class UpdateDownloader @Inject constructor(
 
     private fun successfulStatus(cursor: Cursor): DownloadStatus {
         val localUri = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI))
-        val path = Uri.parse(localUri).path ?: return DownloadStatus.Failed("Missing local file path")
+        val path = localUri.toUri().path ?: return DownloadStatus.Failed("Missing local file path")
         return DownloadStatus.Successful(File(path))
     }
 

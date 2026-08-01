@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,15 +27,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.danielkindl.ocho.R
 import dev.danielkindl.ocho.ui.components.ErrorPlate
@@ -120,6 +120,29 @@ fun SettingsScreen(
                 },
             )
             HorizontalDivider()
+            ListItem(
+                leadingContent = {
+                    Icon(painterResource(R.drawable.ic_rotate_cw), contentDescription = null)
+                },
+                headlineContent = { Text("Countdown beeps") },
+                supportingContent = {
+                    Text(
+                        "Tick down the last three seconds before each interval. " +
+                            "Turned off by the sound switch above.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                },
+                trailingContent = {
+                    Switch(
+                        checked = settings.countdownBeepsEnabled,
+                        onCheckedChange = viewModel::setCountdownBeepsEnabled,
+                        // Sound is the parent switch: with it off there is nothing to
+                        // count down with, so offering the choice would be a lie.
+                        enabled = settings.soundEnabled,
+                    )
+                },
+            )
+            HorizontalDivider()
             UpdateSection(
                 state = updateState,
                 onCheck = updateViewModel::checkForUpdates,
@@ -166,32 +189,32 @@ fun SettingsScreen(
                     .padding(bottom = 8.dp),
             )
 
-            val uriHandler = LocalUriHandler.current
+            // A LinkAnnotation rather than the old ClickableText plus manual offset
+            // lookup. The framework now owns hit testing, which also means the link
+            // is exposed to accessibility services as a link instead of as plain text
+            // that happens to respond to taps.
             val authorLink = buildAnnotatedString {
                 append("Made by ")
-                pushStringAnnotation(tag = "URL", annotation = "https://daniel-kindl.github.io/")
-                withStyle(
-                    SpanStyle(
-                        color = MaterialTheme.colorScheme.primary,
-                        textDecoration = TextDecoration.Underline,
+                withLink(
+                    LinkAnnotation.Url(
+                        url = "https://daniel-kindl.github.io/",
+                        styles = TextLinkStyles(
+                            style = SpanStyle(
+                                color = MaterialTheme.colorScheme.primary,
+                                textDecoration = TextDecoration.Underline,
+                            )
+                        ),
                     )
                 ) { append("Daniel Kindl") }
-                pop()
             }
-            ClickableText(
+            Text(
                 text = authorLink,
-                style = MaterialTheme.typography.bodySmall.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(bottom = 4.dp),
-                onClick = { offset ->
-                    authorLink.getStringAnnotations("URL", offset, offset)
-                        .firstOrNull()
-                        ?.let { uriHandler.openUri(it.item) }
-                },
             )
             Text(
                 text = "v$versionName",

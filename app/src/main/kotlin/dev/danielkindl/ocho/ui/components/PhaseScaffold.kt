@@ -29,7 +29,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import dev.danielkindl.ocho.ui.theme.Phase
+import dev.danielkindl.ocho.domain.model.Phase
 import dev.danielkindl.ocho.ui.theme.PhaseTheme
 import dev.danielkindl.ocho.ui.theme.phaseTheme
 
@@ -101,8 +101,10 @@ fun PhaseScaffold(
     if (!view.isInEditMode) {
         val lightIcons = target.onPlate.luminance() < HALF
         SideEffect {
+            // The plate is drawn edge to edge behind the bars, so only the icon
+            // polarity needs setting. Tinting the bar is deprecated and would fight
+            // the plate anyway.
             val window = (view.context as Activity).window
-            window.statusBarColor = Color.Transparent.toArgb()
             WindowCompat.getInsetsController(window, view).apply {
                 isAppearanceLightStatusBars = lightIcons
                 isAppearanceLightNavigationBars = lightIcons

@@ -224,5 +224,93 @@ class TimerEngineTest {
         val intervals = events.filterIsInstance<TimerEvent.IntervalCompleted>()
         assertEquals("Exactly one interval event despite the pause", 1, intervals.size)
     }
+
+    @Test
+    fun `countdown ticks fire once each at three, two and one seconds`() = runTest {
+        val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
+        val events = mutableListOf<TimerEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // One 10s interval, so exactly one lead-in occurs.
+        engine.start(TimerConfig(intervalMillis = 10_000, totalDurationMillis = 10_000))
+        advanceTimeBy(10_100)
+
+        engine.stop()
+        job.cancel()
+
+        val countdown = events.filterIsInstance<TimerEvent.CountdownTick>()
+        assertEquals(
+            "Expected exactly 3, 2, 1 with no repeats",
+            listOf(3, 2, 1),
+            countdown.map { it.secondsRemaining },
+        )
+    }
+
+    @Test
+    fun `countdown is suppressed when the interval is no longer than the lead-in`() = runTest {
+        val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
+        val events = mutableListOf<TimerEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // A 2s interval is shorter than the 3s lead-in. Counting down continuously
+        // would convey nothing, so nothing should be emitted at all.
+        engine.start(TimerConfig(intervalMillis = 2_000, totalDurationMillis = 6_000))
+        advanceTimeBy(6_100)
+
+        engine.stop()
+        job.cancel()
+
+        assertTrue(
+            "No countdown ticks for an interval at or below the lead-in",
+            events.filterIsInstance<TimerEvent.CountdownTick>().isEmpty(),
+        )
+    }
+
+    @Test
+    fun `countdown restarts cleanly for each interval`() = runTest {
+        val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
+        val events = mutableListOf<TimerEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // Two 10s intervals: the lead-in must run once per interval, not once total.
+        engine.start(TimerConfig(intervalMillis = 10_000, totalDurationMillis = 20_000))
+        advanceTimeBy(20_100)
+
+        engine.stop()
+        job.cancel()
+
+        val countdown = events.filterIsInstance<TimerEvent.CountdownTick>()
+        assertEquals(
+            "Expected a full lead-in per interval",
+            listOf(3, 2, 1, 3, 2, 1),
+            countdown.map { it.secondsRemaining },
+        )
+    }
+
+    @Test
+    fun `countdown does not duplicate across a pause`() = runTest {
+        val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
+        val events = mutableListOf<TimerEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // Pause inside the lead-in. Resuming must continue the countdown rather than
+        // replay the second it was already on.
+        engine.start(TimerConfig(intervalMillis = 10_000, totalDurationMillis = 10_000))
+        advanceTimeBy(7_500) // 2.5s remaining, so 3 has already fired
+        engine.pause()
+        advanceTimeBy(5_000)
+        engine.resume()
+        advanceTimeBy(2_600)
+
+        engine.stop()
+        job.cancel()
+
+        val countdown = events.filterIsInstance<TimerEvent.CountdownTick>()
+        assertEquals(
+            "Each second fires exactly once across the pause",
+            listOf(3, 2, 1),
+            countdown.map { it.secondsRemaining },
+        )
+    }
 }
 

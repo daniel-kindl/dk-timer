@@ -14,4 +14,7 @@ interface SettingsRepository {
 
     /** Persists the vibration toggle; takes effect on the next timer event. */
     suspend fun setVibrationEnabled(enabled: Boolean)
+
+    /** Persists the countdown-beep toggle; takes effect on the next boundary. */
+    suspend fun setCountdownBeepsEnabled(enabled: Boolean)
 }

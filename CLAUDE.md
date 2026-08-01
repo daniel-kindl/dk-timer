@@ -4,12 +4,13 @@ Guidance for AI agents working in this repository.
 
 ## What this is
 
-**Ocho** — a native Android interval timer (Kotlin, Compose, Hilt) with two modes:
-EMOM and Tabata. Read `README.md` first for the feature list, architecture, and the
-drift-free timing explanation; it is not repeated here.
+**Ocho** is a native Android interval timer (Kotlin, Compose, Hilt) with two modes:
+EMOM and Tabata. Read `README.md` for the feature list and usage, and
+`docs/ARCHITECTURE.md` for the package layout, session ownership, and the drift-free
+timing explanation; neither is repeated here.
 
 Package root is `dev.danielkindl.ocho`. The app was previously EMOM Timer, then DK
-Timer — if you find those names anywhere, they are stale.
+Timer. If you find those names anywhere, they are stale.
 
 ## Commands
 
@@ -20,7 +21,7 @@ Timer — if you find those names anywhere, they are stale.
 ./gradlew assembleRelease              # signed; needs keystore.properties
 ```
 
-If Gradle reports an invalid `JAVA_HOME`, point it at the installed JDK 17 — the
+If Gradle reports an invalid `JAVA_HOME`, point it at the installed JDK 17. The
 path goes stale across JDK patch updates.
 
 ## Rules
@@ -29,7 +30,7 @@ path goes stale across JDK patch updates.
 Three lint checks are disabled in `app/build.gradle.kts` because they report on the
 environment, not the code; don't add to that list to make a build pass.
 
-**Everything public in `src/main` needs KDoc** — enforced by detekt. Write *why*,
+**Everything public in `src/main` needs KDoc**, enforced by detekt. Write *why*,
 not *what*: the code already says what. `TimerEngineImpl`'s header is the standard.
 Tests are exempt; their names already state intent.
 
@@ -49,8 +50,31 @@ per-tick deltas. Preserve this in `domain/engine/`.
 ## Layout
 
 `core/` clock and formatting · `domain/` model, engines, repository interfaces ·
-`data/` DataStore repos, audio, vibration, `update/` (the only network code) ·
-`ui/` screens and ViewModels · `di/` Hilt bindings.
+`data/` DataStore repos, audio, vibration, `session/` (foreground service), `update/`
+(the only network code) · `ui/` screens and ViewModels · `di/` Hilt bindings.
+
+## Parallelising with subagents
+
+You may dispatch subagents freely, and they may dispatch their own. Independent work
+should run in parallel rather than in sequence.
+
+**One hard constraint: only one agent runs Gradle.** The daemon takes an exclusive
+lock, so concurrent builds either block or fail confusingly. Tell every subagent not
+to run Gradle, keep verification on your own thread, and run `./gradlew check` once
+after their edits land.
+
+Good candidates, because they touch disjoint files and need no build:
+
+- Documentation (`README.md`, `docs/`, `CONTRIBUTING.md`, `SECURITY.md`)
+- CI workflow YAML, which validates with `py -c "import yaml; ..."`
+- Codebase exploration, where you want a conclusion rather than the file contents
+
+Poor candidates: anything editing the same file as another agent, and anything whose
+correctness only shows up in a build.
+
+Subagents start cold, so give each one the file paths, the constraints it must not
+break, and the repo's writing rules. Assume it knows nothing about this conversation.
+A subagent that has to rediscover context costs more than doing the work yourself.
 
 ## Update channels
 
@@ -70,7 +94,7 @@ excludes them from its `git describe` calls. Don't remove either guard.
 revert`.
 
 [SemVer](https://semver.org/). `release.yml` fails the build if the tag's bump level
-is smaller than the commits since the last tag require — a `feat:` needs at least a
+is smaller than the commits since the last tag require. A `feat:` needs at least a
 minor. Use `!` only when a release costs something on the device: a reinstall, or
 wiped presets.
 

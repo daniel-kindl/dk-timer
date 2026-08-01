@@ -25,6 +25,7 @@ class SettingsRepositoryImpl @Inject constructor(
             UserSettings(
                 soundEnabled = prefs[KEY_SOUND] ?: true,
                 vibrationEnabled = prefs[KEY_VIBRATION] ?: true,
+                countdownBeepsEnabled = prefs[KEY_COUNTDOWN] ?: true,
             )
         }
 
@@ -36,8 +37,13 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { it[KEY_VIBRATION] = enabled }
     }
 
+    override suspend fun setCountdownBeepsEnabled(enabled: Boolean) {
+        dataStore.edit { it[KEY_COUNTDOWN] = enabled }
+    }
+
     private companion object {
         val KEY_SOUND = booleanPreferencesKey("sound_enabled")
         val KEY_VIBRATION = booleanPreferencesKey("vibration_enabled")
+        val KEY_COUNTDOWN = booleanPreferencesKey("countdown_beeps_enabled")
     }
 }

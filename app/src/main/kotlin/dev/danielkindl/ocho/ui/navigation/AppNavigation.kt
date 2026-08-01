@@ -1,6 +1,8 @@
 package dev.danielkindl.ocho.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -22,6 +24,14 @@ private const val ROUTE_SESSION = "session/{totalDurationMillis}/{intervalMillis
 private const val ROUTE_TABATA_SETUP = "tabata-setup"
 private const val ROUTE_TABATA_SESSION = "tabata-session/{totalDurationMillis}/{workMillis}/{restMillis}"
 
+/** Builds a concrete EMOM session route. */
+internal fun sessionRoute(totalMillis: Long, intervalMillis: Long): String =
+    "session/$totalMillis/$intervalMillis"
+
+/** Builds a concrete Tabata session route. */
+internal fun tabataSessionRoute(totalMillis: Long, workMillis: Long, restMillis: Long): String =
+    "tabata-session/$totalMillis/$workMillis/$restMillis"
+
 /**
  * The whole navigation graph: home, both setup screens, both session screens, settings.
  *
@@ -30,8 +40,17 @@ private const val ROUTE_TABATA_SESSION = "tabata-session/{totalDurationMillis}/{
  * rotation without any extra save/restore code.
  */
 @Composable
-fun AppNavigation() {
+fun AppNavigation(activeSessionViewModel: ActiveSessionViewModel = hiltViewModel()) {
     val navController = rememberNavController()
+
+    // Open straight into a workout that is already running, which is what happens
+    // when the user taps the ongoing notification. Keyed on Unit so it runs once:
+    // re-navigating on every state change would trap the user on the session screen.
+    LaunchedEffect(Unit) {
+        activeSessionViewModel.activeSessionRoute()?.let { route ->
+            navController.navigate(route)
+        }
+    }
 
     NavHost(navController = navController, startDestination = ROUTE_HOME) {
 
@@ -46,7 +65,7 @@ fun AppNavigation() {
         composable(ROUTE_SETUP) {
             SetupScreen(
                 onStartSession = { totalMs, intervalMs ->
-                    navController.navigate("session/$totalMs/$intervalMs")
+                    navController.navigate(sessionRoute(totalMs, intervalMs))
                 },
                 onNavigateUp = { navController.navigateUp() },
             )
@@ -71,8 +90,11 @@ fun AppNavigation() {
             ),
         ) {
             ActiveSessionScreen(
+                // Pops the session itself rather than popping back to setup. Resuming
+                // from the notification navigates straight here from home, so setup
+                // may not be on the stack at all and targeting it would pop nothing.
                 onSessionFinished = {
-                    navController.popBackStack(ROUTE_SETUP, inclusive = false)
+                    navController.popBackStack(ROUTE_SESSION, inclusive = true)
                 },
             )
         }
@@ -80,7 +102,7 @@ fun AppNavigation() {
         composable(ROUTE_TABATA_SETUP) {
             TabataSetupScreen(
                 onStartSession = { totalMs, workMs, restMs ->
-                    navController.navigate("tabata-session/$totalMs/$workMs/$restMs")
+                    navController.navigate(tabataSessionRoute(totalMs, workMs, restMs))
                 },
                 onNavigateUp = { navController.navigateUp() },
             )
@@ -95,8 +117,9 @@ fun AppNavigation() {
             ),
         ) {
             TabataSessionScreen(
+                // See the EMOM session above: pop this destination, not its setup screen.
                 onSessionFinished = {
-                    navController.popBackStack(ROUTE_TABATA_SETUP, inclusive = false)
+                    navController.popBackStack(ROUTE_TABATA_SESSION, inclusive = true)
                 },
             )
         }

@@ -12,11 +12,15 @@ import dev.danielkindl.ocho.data.audio.ToneAudioPlayer
 import dev.danielkindl.ocho.data.repository.PresetRepositoryImpl
 import dev.danielkindl.ocho.data.repository.SettingsRepositoryImpl
 import dev.danielkindl.ocho.data.repository.TabataPresetRepositoryImpl
+import dev.danielkindl.ocho.data.session.AndroidSessionServiceLauncher
+import dev.danielkindl.ocho.data.session.SessionServiceLauncher
 import dev.danielkindl.ocho.data.update.UpdateRepositoryImpl
 import dev.danielkindl.ocho.domain.engine.DefaultTabataEngineFactory
 import dev.danielkindl.ocho.domain.engine.DefaultTimerEngineFactory
 import dev.danielkindl.ocho.domain.engine.TabataEngineFactory
 import dev.danielkindl.ocho.domain.engine.TimerEngineFactory
+import dev.danielkindl.ocho.domain.engine.DefaultWorkoutEngineFactory
+import dev.danielkindl.ocho.domain.engine.WorkoutEngineFactory
 import dev.danielkindl.ocho.domain.model.SemVer
 import dev.danielkindl.ocho.domain.model.UpdateChannel
 import dev.danielkindl.ocho.domain.model.UpdateConfig
@@ -70,6 +74,14 @@ abstract class AppModule {
     @Singleton
     abstract fun bindUpdateRepository(impl: UpdateRepositoryImpl): UpdateRepository
 
+    /** Binds the Android implementation that actually starts the foreground service. */
+    @Binds
+    @Singleton
+    abstract fun bindSessionServiceLauncher(
+        impl: AndroidSessionServiceLauncher,
+    ): SessionServiceLauncher
+
+    /** Bindings for types that have no injectable constructor. */
     companion object {
 
         /** The real system clock. Tests substitute a fake to make engine timing deterministic. */
@@ -88,6 +100,19 @@ abstract class AppModule {
         @Singleton
         fun provideTabataEngineFactory(clock: Clock): TabataEngineFactory =
             DefaultTabataEngineFactory(clock)
+
+        /**
+         * Resolves a workout request to an engine.
+         *
+         * The only binding that knows more than one kind of workout exists. Everything
+         * downstream consumes the mode-blind `WorkoutEngine` interface.
+         */
+        @Provides
+        @Singleton
+        fun provideWorkoutEngineFactory(
+            timerEngineFactory: TimerEngineFactory,
+            tabataEngineFactory: TabataEngineFactory,
+        ): WorkoutEngineFactory = DefaultWorkoutEngineFactory(timerEngineFactory, tabataEngineFactory)
 
         /** The single preferences store shared by settings and both preset repositories. */
         @Provides

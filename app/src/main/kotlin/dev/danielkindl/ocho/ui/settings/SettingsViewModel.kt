@@ -30,4 +30,9 @@ class SettingsViewModel @Inject constructor(
     fun setVibrationEnabled(enabled: Boolean) {
         viewModelScope.launch { settingsRepository.setVibrationEnabled(enabled) }
     }
+
+    /** Persists the countdown-beep toggle. The UI follows [settings], not the argument. */
+    fun setCountdownBeepsEnabled(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setCountdownBeepsEnabled(enabled) }
+    }
 }
