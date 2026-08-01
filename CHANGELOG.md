@@ -13,7 +13,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [3.0.0] - 2026-08-01
 
-### ⚠️ Breaking — you must reinstall
+### Breaking: you must reinstall
 
 The app is now **Ocho**, and its `applicationId` changed from `com.emomtimer` to
 `dev.danielkindl.ocho`. Android treats that as a different app, so:
@@ -50,6 +50,19 @@ derived from a domain rather than the product name, so future renames are cosmet
   discards build metadata per §10.
 - Dependabot for Gradle and GitHub Actions, and a security policy documenting the
   APK self-update flow.
+- **A licence.** Ocho is now GPL-3.0. It previously had none, which under copyright
+  law meant all rights reserved by default, so nobody could legally build it and
+  nothing stated whether that was deliberate. Daniel Kindl remains sole copyright
+  holder; the name, wordmark and numeral-8 icon are excluded from the GPL grant.
+- **Third-party licence notices**, in `THIRD-PARTY-NOTICES.md` and readable in the
+  app under Settings, then Licences. This closes an obligation the app was not
+  meeting: the APK embeds three SIL OFL 1.1 fonts and Lucide's ISC icons, and both
+  licences require their notices to accompany every copy. The XML comments
+  crediting Lucide did not count, since AAPT compiles vector XML to binary and
+  strips them.
+- Contributor terms in `CONTRIBUTING.md`. Contributions are accepted under GPL-3.0
+  plus a licence grant permitting relicensing, so that a merged pull request cannot
+  permanently foreclose commercial licensing.
 
 ### Fixed
 - **In-app updates were broken in 2.3.0.** The app polled `daniel-kindl/dk-timer`,
