@@ -8,36 +8,72 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import dev.danielkindl.ocho.domain.model.SessionRequest
+import dev.danielkindl.ocho.domain.model.WorkoutMode
 import dev.danielkindl.ocho.ui.home.HomeScreen
 import dev.danielkindl.ocho.ui.licenses.LicensesScreen
-import dev.danielkindl.ocho.ui.session.ActiveSessionScreen
+import dev.danielkindl.ocho.ui.session.SessionScreen
 import dev.danielkindl.ocho.ui.settings.SettingsScreen
-import dev.danielkindl.ocho.ui.setup.SetupScreen
-import dev.danielkindl.ocho.ui.tabata.session.TabataSessionScreen
-import dev.danielkindl.ocho.ui.tabata.setup.TabataSetupScreen
+import dev.danielkindl.ocho.ui.setup.WorkoutSetupScreen
 
 private const val ROUTE_HOME = "home"
-private const val ROUTE_SETUP = "setup"
 private const val ROUTE_SETTINGS = "settings"
 private const val ROUTE_LICENSES = "licenses"
-private const val ROUTE_SESSION = "session/{totalDurationMillis}/{intervalMillis}"
-private const val ROUTE_TABATA_SETUP = "tabata-setup"
-private const val ROUTE_TABATA_SESSION = "tabata-session/{totalDurationMillis}/{workMillis}/{restMillis}"
-
-/** Builds a concrete EMOM session route. */
-internal fun sessionRoute(totalMillis: Long, intervalMillis: Long): String =
-    "session/$totalMillis/$intervalMillis"
-
-/** Builds a concrete Tabata session route. */
-internal fun tabataSessionRoute(totalMillis: Long, workMillis: Long, restMillis: Long): String =
-    "tabata-session/$totalMillis/$workMillis/$restMillis"
 
 /**
- * The whole navigation graph: home, both setup screens, both session screens, settings.
+ * One setup destination for every mode, rather than one per mode.
  *
- * Session configuration travels as route arguments rather than shared state, so each
- * session view model reads its own durations from `SavedStateHandle` and survives
- * rotation without any extra save/restore code.
+ * Three modes across separate setup and session routes would have meant six
+ * destinations to keep in step. The mode travels as an argument instead.
+ */
+private const val ROUTE_SETUP = "setup/{mode}"
+
+/**
+ * One session destination for every mode.
+ *
+ * `first` and `second` carry whatever the mode needs: interval for EMOM, work and
+ * rest for Tabata, neither for AMRAP. Deliberately generic names, because naming
+ * them after one mode's meaning would mislead in the other two.
+ */
+private const val ROUTE_SESSION = "session/{mode}/{total}/{first}/{second}"
+
+/** Builds a concrete setup route. */
+internal fun setupRoute(mode: WorkoutMode): String = "setup/${mode.name}"
+
+/** Builds a concrete session route from a request, flattening it to arguments. */
+internal fun sessionRoute(request: SessionRequest): String = when (request) {
+    is SessionRequest.Emom -> sessionRoute(
+        WorkoutMode.EMOM,
+        request.config.totalDurationMillis,
+        request.config.intervalMillis,
+    )
+
+    is SessionRequest.Tabata -> sessionRoute(
+        WorkoutMode.TABATA,
+        request.config.totalDurationMillis,
+        request.config.workMillis,
+        request.config.restMillis,
+    )
+
+    is SessionRequest.Amrap -> sessionRoute(
+        WorkoutMode.AMRAP,
+        request.config.totalDurationMillis,
+    )
+}
+
+private fun sessionRoute(
+    mode: WorkoutMode,
+    total: Long,
+    first: Long = 0L,
+    second: Long = 0L,
+): String = "session/${mode.name}/$total/$first/$second"
+
+/**
+ * The whole navigation graph: home, setup, session, settings and licences.
+ *
+ * Session configuration travels as route arguments rather than shared state, so the
+ * session view model reads its durations from `SavedStateHandle` and survives
+ * rotation without any extra save and restore code.
  */
 @Composable
 fun AppNavigation(activeSessionViewModel: ActiveSessionViewModel = hiltViewModel()) {
@@ -47,8 +83,8 @@ fun AppNavigation(activeSessionViewModel: ActiveSessionViewModel = hiltViewModel
     // when the user taps the ongoing notification. Keyed on Unit so it runs once:
     // re-navigating on every state change would trap the user on the session screen.
     LaunchedEffect(Unit) {
-        activeSessionViewModel.activeSessionRoute()?.let { route ->
-            navController.navigate(route)
+        activeSessionViewModel.activeSessionRequest()?.let { request ->
+            navController.navigate(sessionRoute(request))
         }
     }
 
@@ -56,17 +92,17 @@ fun AppNavigation(activeSessionViewModel: ActiveSessionViewModel = hiltViewModel
 
         composable(ROUTE_HOME) {
             HomeScreen(
-                onOpenEmom = { navController.navigate(ROUTE_SETUP) },
-                onOpenTabata = { navController.navigate(ROUTE_TABATA_SETUP) },
+                onOpenMode = { mode -> navController.navigate(setupRoute(mode)) },
                 onOpenSettings = { navController.navigate(ROUTE_SETTINGS) },
             )
         }
 
-        composable(ROUTE_SETUP) {
-            SetupScreen(
-                onStartSession = { totalMs, intervalMs ->
-                    navController.navigate(sessionRoute(totalMs, intervalMs))
-                },
+        composable(
+            route = ROUTE_SETUP,
+            arguments = listOf(navArgument("mode") { type = NavType.StringType }),
+        ) {
+            WorkoutSetupScreen(
+                onStartSession = { request -> navController.navigate(sessionRoute(request)) },
                 onNavigateUp = { navController.navigateUp() },
             )
         }
@@ -85,41 +121,18 @@ fun AppNavigation(activeSessionViewModel: ActiveSessionViewModel = hiltViewModel
         composable(
             route = ROUTE_SESSION,
             arguments = listOf(
-                navArgument("totalDurationMillis") { type = NavType.LongType },
-                navArgument("intervalMillis") { type = NavType.LongType },
+                navArgument("mode") { type = NavType.StringType },
+                navArgument("total") { type = NavType.LongType },
+                navArgument("first") { type = NavType.LongType },
+                navArgument("second") { type = NavType.LongType },
             ),
         ) {
-            ActiveSessionScreen(
+            SessionScreen(
                 // Pops the session itself rather than popping back to setup. Resuming
                 // from the notification navigates straight here from home, so setup
                 // may not be on the stack at all and targeting it would pop nothing.
                 onSessionFinished = {
                     navController.popBackStack(ROUTE_SESSION, inclusive = true)
-                },
-            )
-        }
-
-        composable(ROUTE_TABATA_SETUP) {
-            TabataSetupScreen(
-                onStartSession = { totalMs, workMs, restMs ->
-                    navController.navigate(tabataSessionRoute(totalMs, workMs, restMs))
-                },
-                onNavigateUp = { navController.navigateUp() },
-            )
-        }
-
-        composable(
-            route = ROUTE_TABATA_SESSION,
-            arguments = listOf(
-                navArgument("totalDurationMillis") { type = NavType.LongType },
-                navArgument("workMillis") { type = NavType.LongType },
-                navArgument("restMillis") { type = NavType.LongType },
-            ),
-        ) {
-            TabataSessionScreen(
-                // See the EMOM session above: pop this destination, not its setup screen.
-                onSessionFinished = {
-                    navController.popBackStack(ROUTE_TABATA_SESSION, inclusive = true)
                 },
             )
         }

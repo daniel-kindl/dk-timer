@@ -20,31 +20,37 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.danielkindl.ocho.R
 import dev.danielkindl.ocho.core.format.formatCountdown
 import dev.danielkindl.ocho.core.format.formatElapsed
+import dev.danielkindl.ocho.domain.model.Phase
+import dev.danielkindl.ocho.domain.model.SessionSnapshot
 import dev.danielkindl.ocho.domain.model.SessionStatus
 import dev.danielkindl.ocho.ui.components.PhaseClock
-import dev.danielkindl.ocho.ui.components.RequestNotificationPermission
 import dev.danielkindl.ocho.ui.components.PhaseLabel
 import dev.danielkindl.ocho.ui.components.PhaseScaffold
 import dev.danielkindl.ocho.ui.components.PrimarySessionControl
+import dev.danielkindl.ocho.ui.components.RequestNotificationPermission
 import dev.danielkindl.ocho.ui.components.SUBDUED_ON_PLATE
 import dev.danielkindl.ocho.ui.components.SecondarySessionControl
 import dev.danielkindl.ocho.ui.components.SessionColumn
 import dev.danielkindl.ocho.ui.components.SessionLifecycleScaffold
-import dev.danielkindl.ocho.domain.model.SessionSnapshot
 
 /**
- * A running EMOM session.
+ * A running session, of any mode.
  *
- * Shares the phase colour system with Tabata, but EMOM has no rest interval — the
- * whole session is one continuous work phase, so the plate stays red between the
- * amber prepare countdown and the violet completion screen. The clock counts down to
- * the next interval beep rather than to a phase change.
+ * Replaces the separate EMOM and Tabata session screens. Nothing here is
+ * mode-specific: everything the screen draws comes from [SessionSnapshot], and the
+ * phase colour, label and clock are already derived from it. The two screens had
+ * become copies of each other once v3.1.0 moved session ownership into the
+ * controller.
+ *
+ * The full-bleed phase colour is the primary information channel. Work and rest
+ * differ by lightness as well as hue, so the distinction survives with no colour
+ * vision at all, and the uppercase label carries the same information redundantly.
  *
  * @param onSessionFinished invoked on an explicit stop, not on completion, which
  *   shows its own summary first.
  */
 @Composable
-fun ActiveSessionScreen(
+fun SessionScreen(
     onSessionFinished: () -> Unit,
     viewModel: SessionViewModel = hiltViewModel(),
 ) {
@@ -66,8 +72,7 @@ fun ActiveSessionScreen(
                 )
 
                 SessionStatus.Completed -> CompleteContent(
-                    totalElapsedMillis = state.elapsedMillis,
-                    rounds = state.totalRounds,
+                    state = state,
                     onPlate = theme.onPlate,
                     onDone = onSessionFinished,
                 )
@@ -89,7 +94,6 @@ fun ActiveSessionScreen(
     }
 }
 
-
 @Composable
 private fun PrepareContent(secondsRemaining: Int, onPlate: Color, onStop: () -> Unit) {
     SessionColumn {
@@ -105,23 +109,17 @@ private fun PrepareContent(secondsRemaining: Int, onPlate: Color, onStop: () -> 
 }
 
 @Composable
-private fun CompleteContent(
-    totalElapsedMillis: Long,
-    rounds: Int,
-    onPlate: Color,
-    onDone: () -> Unit,
-) {
+private fun CompleteContent(state: SessionSnapshot, onPlate: Color, onDone: () -> Unit) {
     SessionColumn {
         PhaseLabel("Complete", onPlate)
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            PhaseClock(totalElapsedMillis.formatElapsed(), onPlate)
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "$rounds rounds",
-                style = MaterialTheme.typography.titleMedium,
-                color = onPlate.copy(alpha = SUBDUED_ON_PLATE),
-                textAlign = TextAlign.Center,
-            )
+            PhaseClock(state.elapsedMillis.formatElapsed(), onPlate)
+            // AMRAP reports no round count, since its rounds are whatever the athlete
+            // managed. Omitted rather than shown as zero.
+            if (state.totalRounds > 0) {
+                Spacer(Modifier.height(8.dp))
+                SubduedLine("${state.totalRounds} rounds", onPlate)
+            }
         }
         SecondarySessionControl(label = "Done", onPlate = onPlate, onClick = onDone)
     }
@@ -135,26 +133,23 @@ private fun RunningContent(
     onStop: () -> Unit,
 ) {
     val isPaused = state.status == SessionStatus.Paused
+    val phaseName = if (state.phase == Phase.REST) "Rest" else "Work"
 
     SessionColumn {
-        PhaseLabel(if (isPaused) "Work · paused" else "Work", onPlate)
+        PhaseLabel(if (isPaused) "$phaseName · paused" else phaseName, onPlate)
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             PhaseClock(state.remainingInPhaseMillis.formatCountdown(), onPlate)
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = "round ${state.currentRound}/${state.totalRounds}",
-                style = MaterialTheme.typography.titleMedium,
-                color = onPlate.copy(alpha = SUBDUED_ON_PLATE),
-                textAlign = TextAlign.Center,
-            )
+            if (state.totalRounds > 0) {
+                Spacer(Modifier.height(12.dp))
+                SubduedLine(
+                    text = "round ${state.currentRound}/${state.totalRounds}",
+                    onPlate = onPlate,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
             Spacer(Modifier.height(4.dp))
-            Text(
-                text = state.elapsedMillis.formatElapsed(),
-                style = MaterialTheme.typography.labelSmall,
-                color = onPlate.copy(alpha = SUBDUED_ON_PLATE),
-                textAlign = TextAlign.Center,
-            )
+            SubduedLine(state.elapsedMillis.formatElapsed(), onPlate)
         }
 
         Column(
@@ -172,4 +167,19 @@ private fun RunningContent(
             SecondarySessionControl(label = "Stop", onPlate = onPlate, onClick = onStop)
         }
     }
+}
+
+/** Secondary text on a phase plate, at the shared subdued opacity. */
+@Composable
+private fun SubduedLine(
+    text: String,
+    onPlate: Color,
+    style: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.labelSmall,
+) {
+    Text(
+        text = text,
+        style = style,
+        color = onPlate.copy(alpha = SUBDUED_ON_PLATE),
+        textAlign = TextAlign.Center,
+    )
 }

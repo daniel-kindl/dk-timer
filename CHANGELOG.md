@@ -9,6 +9,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **AMRAP**: as many rounds as possible. One unbroken block with no interval beeps,
+  counting down to the finish with the same 3-2-1 lead-in as the other modes. The
+  round counter is omitted rather than shown as zero, since the rounds are whatever
+  you manage and the app has no way to know.
+
+### Changed
+- **Saved presets are gone.** All of them, in both modes. There is now one preset
+  format shared by every mode, and the old EMOM and Tabata presets cannot be read in
+  it. Nothing else on the device is affected, and saving a preset again works as
+  before.
+- One setup screen and one session screen now serve every mode, replacing the
+  separate EMOM and Tabata copies of each. Nothing about using the app changes; this
+  is what made AMRAP cost an afternoon rather than a week, and it is why the next
+  mode will cost less again.
+- Coverage is measured in CI and reported per package, never gated on. CodeQL scans
+  every push and pull request to `dev`, plus weekly.
+
 ---
 
 ## [3.1.0] - 2026-08-01

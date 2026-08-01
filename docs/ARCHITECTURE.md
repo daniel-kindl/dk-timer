@@ -52,12 +52,14 @@ which is what makes the timing logic testable without an emulator.
 app/src/main/kotlin/dev/danielkindl/ocho/
 ├── core/               Clock (injectable, for deterministic tests), duration formatting
 ├── domain/
-│   ├── model/          TimerConfig, TabataConfig, events, presets, SemVer, UpdateConfig,
-│   │                   SessionRequest (sealed, one variant per mode), SessionSnapshot
+│   ├── model/          TimerConfig, TabataConfig, AmrapConfig, events, WorkoutPreset,
+│   │                   SemVer, UpdateConfig, SessionRequest (sealed, one variant per
+│   │                   mode), SessionSnapshot
 │   ├── engine/         AbstractPausableEngine, TimerEngine + impl, TabataEngine + impl,
 │   │                   and a factory each. WorkoutEngine is the mode-agnostic strategy
-│   │                   interface over them, implemented by EmomWorkoutEngine and
-│   │                   TabataWorkoutEngine and resolved by WorkoutEngineFactory
+│   │                   interface over them, implemented by EmomWorkoutEngine,
+│   │                   TabataWorkoutEngine and AmrapWorkoutEngine, resolved by
+│   │                   WorkoutEngineFactory
 │   └── repository/     Repository interfaces
 ├── data/
 │   ├── audio/          ToneAudioPlayer (ToneGenerator on STREAM_ALARM)
@@ -72,11 +74,10 @@ app/src/main/kotlin/dev/danielkindl/ocho/
 │                       PackageInstaller
 ├── di/                 AppModule: Hilt bindings, and the only reader of BuildConfig
 └── ui/
-    ├── navigation/     AppNavigation
+    ├── navigation/     AppNavigation, two routes total: setup/{mode} and session/{...}
     ├── home/           Mode selection
-    ├── setup/          EMOM setup + ViewModel
-    ├── session/        EMOM session + ViewModel
-    ├── tabata/         Tabata setup and session, each with a ViewModel
+    ├── setup/          One setup screen, state and ViewModel for every mode
+    ├── session/        One session screen and ViewModel for every mode
     ├── settings/       Settings + update flow ViewModels
     ├── licenses/       Third-party licence notices
     ├── components/     WheelPicker, DurationPicker, PresetsSection, session scaffolding
@@ -106,11 +107,49 @@ silently falls behind and interval cues go missing. The service owns neither the
 nor its timing, it observes the controller and posts the ongoing notification.
 
 **`WorkoutEngine` keeps mode out of everything downstream.** It is a strategy interface
-implemented by `EmomWorkoutEngine` and `TabataWorkoutEngine`, so the controller, the
-service, and the notification never learn which mode is running. The single branch on
-mode lives in `WorkoutEngineFactory`, as a `when` over the sealed `SessionRequest`.
-Sealing the request means adding a mode turns that `when` into a compile error instead
-of a silent gap.
+implemented by `EmomWorkoutEngine`, `TabataWorkoutEngine` and `AmrapWorkoutEngine`, so
+the controller, the service, and the notification never learn which mode is running.
+The single branch on mode lives in `WorkoutEngineFactory`, as a `when` over the sealed
+`SessionRequest`. Sealing the request means adding a mode turns that `when` into a
+compile error instead of a silent gap.
+
+---
+
+## One stack for every mode
+
+Above the session layer there is one of everything: one setup screen and state, one
+session screen, one preset type and one preset store. Modes differ only in which
+duration fields they use, so a screen per mode meant copying validation, preset
+handling and session rendering for each one. Adding AMRAP under that arrangement would
+have cost roughly 300 lines of near-identical code; it cost an adapter and a card.
+
+The mode travels as a navigation argument rather than as a destination, which is why
+there are two routes rather than six:
+
+```
+setup/{mode}
+session/{mode}/{total}/{first}/{second}
+```
+
+`first` and `second` carry whatever the mode needs: interval for EMOM, work and rest
+for Tabata, neither for AMRAP. The names are deliberately generic, because naming them
+after one mode's meaning would mislead in the other two. Configuration travelling as
+route arguments is also what lets the session view model read its durations from
+`SavedStateHandle` and survive process recreation with no save and restore code.
+
+`AmrapWorkoutEngine` adds no timing at all. An AMRAP is an EMOM whose interval equals
+its total: one interval, ending exactly when the workout does. Building the request
+that way reuses `TimerEngineImpl` wholesale, including the 3-2-1 lead-in, which then
+lands on the finish rather than on a boundary, which is where an AMRAP wants it. The
+one thing it suppresses is the interval-boundary cue, since that boundary and the
+finish are the same instant and would otherwise beep twice.
+
+Still parallel, and deliberately so: `TimerEngineImpl` and `TabataEngineImpl` remain
+two implementations rather than one engine walking a list of labelled segments. That
+rewrite is deferred without a version attached. It would disturb timing verified on
+hardware, and it buys nothing visible until a feature actually needs segments. Warmup
+and cooldown blocks, or custom circuits with per-block labels, would be such features.
+Neither is planned.
 
 ---
 
@@ -149,6 +188,26 @@ effectiveElapsed = now - startTime - totalPausedMs
 ```
 
 This keeps the anchoring intact across any number of pauses.
+
+---
+
+## Testing and coverage
+
+`domain/` and `data/` carry the unit tests, because they carry the logic. Composables
+and view models are thin by design and verified by reading, which is also the only
+option here: the development environment has no emulator.
+
+`./gradlew koverLogDebug` prints line coverage per package. Coverage is reported and
+never gated, in CI or locally. A percentage is easy to move by writing tests that
+touch lines without asserting anything, so a threshold would reward exactly the tests
+worth least. It is grouped by package rather than shown as one figure for the same
+reason: the aggregate mixes code tested deliberately with code left untested
+deliberately, and only the breakdown distinguishes them.
+
+The exclusions in the `kover` block of `app/build.gradle.kts` decide whether the
+number means anything. Composables are excluded by annotation rather than by package,
+so plain logic that happens to live under `ui/`, the setup state in particular, still
+counts.
 
 ---
 
