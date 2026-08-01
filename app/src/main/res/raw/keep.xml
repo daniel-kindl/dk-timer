@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Assets kept deliberately despite having no current reference.
+
+  ic_notification is the status-bar icon for the ongoing session notification that
+  arrives with the foreground service in the reliability release. It ships now
+  because it came from the same design handoff as the launcher icon, and
+  regenerating it later would risk drifting from the mark.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_notification"
+    tools:shrinkMode="safe" />

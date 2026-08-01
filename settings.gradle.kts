@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "emom-timer"
+rootProject.name = "ocho"
 include(":app")

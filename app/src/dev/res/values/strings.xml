@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Distinguishes the testing build from the stable app in the launcher,
+         since both are installed at once. -->
+    <string name="app_name">Ocho Dev</string>
+</resources>

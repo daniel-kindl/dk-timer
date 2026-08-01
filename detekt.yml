@@ -1,8 +1,26 @@
 config:
-  warningsAsErrors: false
+  warningsAsErrors: true
 
 output-reports:
   active: true
+
+comments:
+  # Applies to the whole of src/main. Tests are excluded: their backtick names
+  # already state intent, and a KDoc above `fun \`pauses mid interval\`()` would
+  # only restate it.
+  UndocumentedPublicClass:
+    active: true
+    searchInNestedClass: true
+    searchInInnerClass: true
+    searchInInnerObject: true
+    searchInInnerInterface: true
+    searchInProtectedClass: true
+  UndocumentedPublicFunction:
+    active: true
+    searchProtectedFunction: true
+  UndocumentedPublicProperty:
+    active: true
+    searchProtectedProperty: true
 
 complexity:
   LongMethod:

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The mark is the numeral 8 in Space Grotesk 700, white on brand green. It is
+  typographic, not artwork: one glyph and nothing else, which is why it stays
+  legible at 48dp. The glyph sits inside the centre 72dp safe zone so square,
+  squircle and circle launcher masks all crop cleanly.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/brand_green" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+    <monochrome android:drawable="@mipmap/ic_launcher_monochrome" />
+</adaptive-icon>

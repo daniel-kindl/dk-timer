@@ -1,0 +1,39 @@
+package dev.danielkindl.ocho.domain.model
+
+/** The two halves of a Tabata round; drives both the beep pitch and the background colour. */
+enum class TabataPhase { Work, Rest }
+
+/**
+ * Everything a Tabata session reports as it runs.
+ *
+ * Phase changes are announced as their own events rather than inferred from
+ * consecutive [Tick]s, so the beep fires exactly once per transition even if a tick
+ * is dropped or delivered late.
+ */
+sealed class TabataEvent {
+    /**
+     * Emitted ~every 100 ms to drive UI updates.
+     *
+     * @param phase                 current phase (Work or Rest)
+     * @param remainingInPhaseMillis ms until this phase ends
+     * @param elapsedMillis         total effective elapsed time (excluding pauses)
+     * @param currentRound          1-based round number (a round starts at each Work phase)
+     * @param totalRounds           total number of rounds this workout will run
+     */
+    data class Tick(
+        val phase: TabataPhase,
+        val remainingInPhaseMillis: Long,
+        val elapsedMillis: Long,
+        val currentRound: Int,
+        val totalRounds: Int,
+    ) : TabataEvent()
+
+    /** Emitted at every work-phase start (after the first rest). Triggers high-pitch beep. */
+    data object WorkStarted : TabataEvent()
+
+    /** Emitted at every rest-phase start. Triggers low-pitch beep. */
+    data object RestStarted : TabataEvent()
+
+    /** Emitted once the workout is done (after the last phase finishes). */
+    data object WorkoutCompleted : TabataEvent()
+}

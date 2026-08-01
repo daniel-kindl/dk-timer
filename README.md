@@ -1,8 +1,12 @@
-# DK Timer
+# Ocho
 
-A minimal, production-quality Android workout interval timer — built for reliability during physical exercise.
+A minimal, production-quality Android workout interval timer — built to be reliable
+while you're mid-effort and not looking at the screen.
 
-[![Dev CI](https://github.com/daniel-kindl/emom-timer/actions/workflows/dev-ci.yml/badge.svg?branch=dev)](https://github.com/daniel-kindl/emom-timer/actions/workflows/dev-ci.yml)
+[![Dev CI](https://github.com/daniel-kindl/ocho/actions/workflows/dev-ci.yml/badge.svg?branch=dev)](https://github.com/daniel-kindl/ocho/actions/workflows/dev-ci.yml)
+
+*An **ocho** is a figure-eight step in tango. It's also Spanish for **eight** — the
+round count of a classic Tabata.*
 
 ---
 
@@ -10,27 +14,44 @@ A minimal, production-quality Android workout interval timer — built for relia
 
 | Feature | Detail |
 |---------|--------|
-| ⏱ EMOM timer | Set total duration and interval length (mm:ss drum-roll pickers) |
-| 🔁 Tabata timer | Set total, work, and rest durations; automatic phase alternation |
-| 🔴🟢 Phase colours | Full-screen red (work) / green (rest) background in Tabata sessions |
-| 🔔 Sound feedback | Beep at every interval — uses alarm stream, ignores silent mode |
-| 📳 Vibration feedback | Vibrates at every interval and on workout completion |
-| ⏸ Pause & resume | Pause mid-session without losing progress or drifting |
-| 💾 Presets | Save, name, and load your favourite configurations for both timers |
+| ⏱ EMOM timer | Total duration and interval length, set with drum-roll mm:ss pickers |
+| 🔁 Tabata timer | Total, work, and rest durations; phases alternate automatically |
+| 🎨 Phase colours | Full-screen amber / red / green / violet plate per phase, readable across a room and distinguishable without colour vision |
+| 📊 Run timeline | Proportional preview of a workout's shape before you start it |
+| 🔔 Sound feedback | Distinct tones per event, on the alarm stream so silent mode can't mute them |
+| 📳 Vibration feedback | Different patterns for intervals and for completion |
+| ⏸ Pause & resume | Freeze mid-session without drift or losing interval alignment |
+| 3️⃣ Pre-start countdown | 3-2-1 before the first interval, to get into position |
+| 💾 Presets | Save, name, load, and delete configurations, separately per mode |
+| 📊 Progress & summary | Overall progress bar during, and a recap on completion |
+| 🛡 Exit confirmation | Back gesture or STOP asks before ending a running session |
+| ⬆️ In-app updates | Checks GitHub Releases and installs updates without a store |
 | 🖥 Workout-first UI | Large high-contrast display, screen stays on, one-hand friendly |
-| 🔇 Toggleable feedback | Sound and vibration each independently on/off |
 
 ---
 
-## Screenshots
+## Install
 
-> _Coming soon_
+Download the APK from the [latest release](https://github.com/daniel-kindl/ocho/releases/latest).
+
+Ocho is not on Google Play, so Android will ask you to allow installing unknown
+apps. Once installed it updates itself: Settings → Check for updates.
+
+### Update channels
+
+| Channel | Installs as | Source | Published |
+|---------|-------------|--------|-----------|
+| **Stable** | `Ocho` | `releases/latest` | On each tagged release from `main` |
+| **Dev** | `Ocho Dev` | Newest prerelease | On every push to `dev` |
+
+The two are separate apps with separate `applicationId`s and separate data, so a dev
+build can be installed alongside the stable one and neither will offer the other's
+updates. Dev builds are for testing changes before they reach `main` — expect them
+to break.
 
 ---
 
-## Setup
-
-### Requirements
+## Build
 
 | Tool | Version |
 |------|---------|
@@ -39,144 +60,119 @@ A minimal, production-quality Android workout interval timer — built for relia
 | Min Android SDK | 26 (Android 8.0) |
 | Target SDK | 34 |
 
-### Build
-
 ```bash
-# Debug build
-./gradlew assembleDebug
-
-# Run unit tests
-./gradlew testDebugUnitTest
-
-# Static analysis (detekt)
-./gradlew detekt
+./gradlew check                            # tests + detekt + lint
+./gradlew assembleDebug                    # debug APK
+./gradlew assembleDev -PdevBuildNumber=1   # dev-channel APK
+./gradlew assembleRelease                  # signed release APK
 ```
+
+Warnings fail the build — Kotlin, detekt, and Android Lint all run with
+warnings-as-errors, and every public declaration in `src/main` must have KDoc.
 
 ### Release signing
 
-Create `keystore.properties` in the project root (not committed):
+Create `keystore.properties` in the project root (gitignored):
 
 ```properties
-storeFile=/path/to/keystore.jks
+storeFile=release.keystore
 storePassword=yourStorePassword
 keyAlias=yourKeyAlias
 keyPassword=yourKeyPassword
 ```
 
-Or set environment variables `KEYSTORE_FILE`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` (used by CI/CD).
+CI uses the environment variables `KEYSTORE_FILE`, `KEYSTORE_PASSWORD`,
+`KEY_ALIAS`, and `KEY_PASSWORD` instead.
 
 ---
 
 ## Usage
 
-### Starting a timer
+**EMOM** — set total duration and interval, tap START. The app beeps and vibrates at
+every interval boundary. PAUSE freezes without drift; STOP ends early after
+confirming.
 
-1. Launch the app — you'll see the **DK Timer** home screen
-2. Tap **EMOM** or **Tabata** to open that timer's setup screen
+**Tabata** — set total, work, and rest. Phases alternate automatically with distinct
+high and low beeps, and the whole background switches red for work, green for rest.
 
-### EMOM
+**Presets** — tap Save in the Presets row to store the current configuration. The
+name is pre-filled from the durations; edit it or accept it. Tap a chip to load,
+✕ to delete.
 
-1. Set **Total Duration** and **Interval** using the drum-roll pickers
-2. Tap **START** — the app beeps + vibrates at every interval boundary
-3. Tap **PAUSE** to freeze mid-session; tap **RESUME** to continue
-4. Tap **STOP** at any time to end early
-
-### Tabata
-
-1. Set **Total Duration**, **Work Time**, and **Rest Time**
-2. Tap **START** — phases alternate automatically with distinct high/low beeps
-3. Background turns red during work phases, green during rest
-4. Tap **PAUSE** / **RESUME** to freeze and continue; tap **STOP** to end early
-
-### Presets
-
-- Tap **Save** in the Presets row on either setup screen to save the current config
-- A name is auto-generated — edit it in the dialog if you prefer
-- Tap any preset chip to instantly load those values
-- Tap ✕ on a chip and confirm to delete a preset
-
-### Settings
-
-Tap the gear icon ⚙ on the **home screen** to toggle sound or vibration independently.
+**Settings** — the gear icon on the home screen toggles sound and vibration
+independently, and holds the update checker.
 
 ---
 
 ## Architecture
 
+Clean Architecture with MVVM. The domain layer contains no `android.*` imports,
+which is what makes the timing logic testable without an emulator.
+
 ```
-app/src/main/kotlin/com/emomtimer/
-├── core/               Clock interface (injectable for deterministic tests)
+app/src/main/kotlin/dev/danielkindl/ocho/
+├── core/               Clock (injectable, for deterministic tests), duration formatting
 ├── domain/
-│   ├── model/          TimerConfig, TimerEvent, SessionStatus, Preset
-│   │                   TabataConfig, TabataEvent, TabataPreset
-│   ├── engine/         AbstractPausableEngine (base), TimerEngine + impl,
-│   │                   TabataEngine + impl + factory
-│   └── repository/     SettingsRepository, PresetRepository,
-│                       TabataPresetRepository interfaces
+│   ├── model/          TimerConfig, TabataConfig, events, presets, SemVer, UpdateConfig
+│   ├── engine/         AbstractPausableEngine, TimerEngine + impl, TabataEngine + impl,
+│   │                   and a factory each so engines are scoped to their view model
+│   └── repository/     Repository interfaces
 ├── data/
-│   ├── audio/          AudioPlayer (ToneGenerator / STREAM_ALARM)
+│   ├── audio/          ToneAudioPlayer (ToneGenerator on STREAM_ALARM)
 │   ├── vibration/      VibrationManager
-│   └── repository/     SettingsRepositoryImpl, PresetRepositoryImpl,
-│                       TabataPresetRepositoryImpl (DataStore)
-├── di/                 Hilt AppModule
+│   ├── feedback/       FeedbackTrigger — settings-gated sound + vibration, shared by both modes
+│   ├── repository/     DataStore implementations over a shared JsonListDataStore
+│   └── update/         The only network code: GitHub Releases API, DownloadManager,
+│                       PackageInstaller
+├── di/                 AppModule — Hilt bindings, and the only reader of BuildConfig
 └── ui/
-    ├── navigation/     AppNavigation (Compose Nav)
-    ├── home/           HomeScreen (timer type selection + settings entry)
-    ├── setup/          SetupScreen + ViewModel  (EMOM pickers, presets)
-    ├── session/        ActiveSessionScreen + ViewModel  (timer display, pause/stop)
-    ├── tabata/
-    │   ├── setup/      TabataSetupScreen + ViewModel
-    │   └── session/    TabataSessionScreen + ViewModel
-    ├── settings/       SettingsScreen + ViewModel
-    ├── components/     DurationPicker, WheelPicker, PresetsSection
-    └── theme/          Material 3 theme (complete 15-slot typography)
+    ├── navigation/     AppNavigation
+    ├── home/           Mode selection
+    ├── setup/          EMOM setup + ViewModel
+    ├── session/        EMOM session + ViewModel
+    ├── tabata/         Tabata setup and session, each with a ViewModel
+    ├── settings/       Settings + update flow ViewModels
+    ├── components/     WheelPicker, DurationPicker, PresetsSection, session scaffolding
+    └── theme/          Colour ramp, three-typeface system, Material 3 scale
 ```
 
-### Timer engine
+### The phase colour system
 
-All interval boundaries are anchored to `startTime` (system clock) and computed as `startTime + N × intervalMillis`. Delays are recalculated on every iteration — this prevents drift and handles missed ticks safely.
+The session screen's background is the primary information channel, not decoration.
+Four states, each owning one full-bleed plate — prepare amber, work red, rest light
+green, complete violet — resolved in `ui/theme/PhaseColors.kt`.
 
-**Pause/resume** works by accumulating total paused duration and subtracting it from elapsed time:
+Rest is a **light** plate on purpose. Red and mid-green sit at nearly the same
+lightness, so under deuteranopia they collapse into two similar mid-tone plates and
+the signal fails. Separating them by lightness as well as hue keeps them distinct
+with no colour vision at all, and flips the on-plate text from white to ink as a
+second, redundant cue.
+
+Phase is never carried by colour alone: the plate, the uppercase label, the audio
+cue, and the haptic all say the same thing. Material You dynamic colour is
+deliberately disabled — work must be red on every device.
+
+The full specification lives in `ocho-design-system/`.
+
+### Drift-free timing
+
+Interval boundaries are absolute timestamps computed from the session start —
+`startTime + N × intervalMillis` — never a sum of `delay()` calls. Each loop
+iteration recalculates from the real clock, so a late or missed tick self-corrects
+instead of compounding. Over a 20-minute workout the difference is the gap between
+finishing on the minute and finishing several seconds late.
+
+Pause works by accumulating total paused time and subtracting it:
 
 ```
 effectiveElapsed = now - startTime - totalPausedMs
 ```
 
-This preserves drift-free accuracy across any number of pauses.
-
-### State flow
-
-```
-SetupScreen ──(totalDurationMillis, intervalMillis)──► SessionViewModel
-                                                              │
-                                                       TimerEngineImpl
-                                                              │
-                                                       TimerEvent (Flow)
-                                                              │
-                                          ┌───────────────────┘
-                                          ▼
-                                   SessionUiState (StateFlow)
-                                          │
-                                   ActiveSessionScreen
-```
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Language | Kotlin |
-| UI | Jetpack Compose + Material 3 |
-| Architecture | MVVM + Clean Architecture |
-| DI | Hilt |
-| Concurrency | Kotlin Coroutines + Flow |
-| Persistence | DataStore Preferences |
-| Audio | ToneGenerator (STREAM_ALARM) |
-| CI/CD | GitHub Actions |
+This keeps the anchoring intact across any number of pauses.
 
 ---
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for branch rules, commit conventions, and the release process.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branch rules, commit conventions, and the
+release process. Security policy: [SECURITY.md](SECURITY.md).

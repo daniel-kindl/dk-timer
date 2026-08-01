@@ -48,3 +48,88 @@ jobs:
           name: test-results
           path: app/build/reports/tests/
           retention-days: 7
+
+  # Publishes a dev-channel build for every green push to `dev`, so changes can be
+  # tested on a real device before they reach `main`. Lives in this workflow rather
+  # than its own so it reuses the test and lint run above instead of repeating it.
+  publish-dev:
+    name: Publish Dev Prerelease
+    needs: build-and-test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # The dev build is signed with the release key on purpose. CI's debug keystore
+      # is regenerated per run, so consecutive dev APKs would be signed by different
+      # keys and refuse to install over each other.
+      - name: Decode signing keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${KEYSTORE_BASE64:-}" ]]; then
+            echo "::error::Secret KEYSTORE_BASE64 is not set. Dev builds are signed with the release key so they can install over each other; see CONTRIBUTING.md."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "${{ runner.temp }}/release.keystore"
+          echo "KEYSTORE_FILE=${{ runner.temp }}/release.keystore" >> "$GITHUB_ENV"
+
+      - name: Build signed dev APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleDev -PdevBuildNumber=${{ github.run_number }} --stacktrace
+
+      - name: Resolve dev version
+        id: version
+        run: |
+          set -euo pipefail
+          BASE=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
+          echo "TAG=v${BASE}-dev.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      # A prerelease, which is what keeps the channels apart: the stable app reads
+      # releases/latest, and GitHub excludes prereleases from that endpoint entirely.
+      - name: Publish prerelease
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.TAG }}
+          name: "Ocho ${{ steps.version.outputs.TAG }}"
+          body: |
+            Development build from `dev` @ ${{ github.sha }}.
+
+            Installs alongside the stable app as **Ocho Dev**. Not a supported
+            release: expect it to be broken, and expect it to be replaced within
+            the day.
+          files: app/build/outputs/apk/dev/*.apk
+          prerelease: true
+          make_latest: false
+
+      # Without this the release list grows by one entry per push, forever.
+      - name: Prune old dev prereleases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release list --limit 100 --json tagName,isPrerelease \
+            --jq '.[] | select(.isPrerelease) | select(.tagName | test("-dev\\.")) | .tagName' \
+            | tail -n +6 \
+            | while read -r tag; do
+                echo "Deleting old dev prerelease $tag"
+                gh release delete "$tag" --cleanup-tag --yes
+              done
