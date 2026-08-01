@@ -58,6 +58,17 @@ class SessionController @Inject constructor(
 
     private var sessionJob: Job? = null
     private var engine: WorkoutEngine? = null
+    private var focusReleaseJob: Job? = null
+
+    /**
+     * What the running session was started with, or null if none is running.
+     *
+     * Exists so the app can navigate back into a session it is already running, for
+     * instance when the user taps the ongoing notification. Without it the session
+     * would keep going with no way to reach its screen.
+     */
+    var activeRequest: SessionRequest? = null
+        private set
 
     /**
      * Begins a workout, replacing any session already running.
@@ -72,6 +83,7 @@ class SessionController @Inject constructor(
 
         val newEngine = engineFactory.create(request, scope)
         engine = newEngine
+        activeRequest = request
 
         _snapshot.value = SessionSnapshot(
             mode = request.mode(),
@@ -80,7 +92,6 @@ class SessionController @Inject constructor(
             totalDurationMillis = request.totalDurationMillis(),
         )
 
-        audioPlayer.requestAudioFocus()
         serviceLauncher.start()
 
         sessionJob = scope.launch {
@@ -140,23 +151,44 @@ class SessionController @Inject constructor(
     private suspend fun fireCue(cue: SessionCue) {
         when (cue) {
             SessionCue.IntervalBoundary ->
-                feedbackTrigger.trigger(isCompletion = false) { audioPlayer.playIntervalBeep() }
+                feedbackTrigger.trigger(isCompletion = false) { duck(audioPlayer::playIntervalBeep) }
 
             is SessionCue.PhaseChanged -> feedbackTrigger.trigger(isCompletion = false) {
-                if (cue.phase == Phase.WORK) {
-                    audioPlayer.playWorkStartBeep()
-                } else {
-                    audioPlayer.playRestStartBeep()
+                duck {
+                    if (cue.phase == Phase.WORK) {
+                        audioPlayer.playWorkStartBeep()
+                    } else {
+                        audioPlayer.playRestStartBeep()
+                    }
                 }
             }
 
             is SessionCue.Countdown ->
-                feedbackTrigger.triggerCountdown { audioPlayer.playCountdownBeep() }
+                feedbackTrigger.triggerCountdown { duck(audioPlayer::playCountdownBeep) }
 
             SessionCue.Completed -> {
-                feedbackTrigger.trigger(isCompletion = true) { audioPlayer.playCompletionSound() }
+                feedbackTrigger.trigger(isCompletion = true) { duck(audioPlayer::playCompletionSound) }
                 releaseResources()
             }
+        }
+    }
+
+    /**
+     * Plays a cue with music ducked around it, then hands focus back.
+     *
+     * Focus is released on a debounce rather than immediately or at session end.
+     * Holding it for the whole workout leaves music quiet for twenty minutes, which
+     * is worse than not ducking at all; releasing it the instant a beep finishes
+     * makes music surge back between the three ticks of a lead-in. Waiting for a
+     * short gap after the last cue covers a whole burst as one dip.
+     */
+    private fun duck(playSound: () -> Unit) {
+        audioPlayer.requestAudioFocus()
+        playSound()
+        focusReleaseJob?.cancel()
+        focusReleaseJob = scope.launch {
+            delay(FOCUS_RELEASE_DELAY_MS)
+            audioPlayer.abandonAudioFocus()
         }
     }
 
@@ -167,6 +199,8 @@ class SessionController @Inject constructor(
      * indefinitely after the workout ends.
      */
     private fun releaseResources() {
+        activeRequest = null
+        focusReleaseJob?.cancel()
         audioPlayer.abandonAudioFocus()
         serviceLauncher.stop()
     }
@@ -183,5 +217,13 @@ class SessionController @Inject constructor(
 
     private companion object {
         const val COUNTDOWN_TICK_MS = 1_000L
+
+        /**
+         * Quiet gap after a cue before music is allowed back.
+         *
+         * Longer than the gap between countdown ticks, so a 3-2-1 lead-in and the
+         * boundary beep that follows it read as a single dip rather than four.
+         */
+        const val FOCUS_RELEASE_DELAY_MS = 1_500L
     }
 }
