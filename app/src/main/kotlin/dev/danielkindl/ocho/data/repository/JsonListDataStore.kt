@@ -10,8 +10,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Generic JSON-array-in-a-string-preference CRUD store, shared by the EMOM and Tabata
- * preset repositories (which differ only in item shape and DataStore key).
+ * Generic JSON-array-in-a-string-preference CRUD store, parameterised by item shape
+ * and DataStore key.
  *
  * Unparseable stored JSON yields an empty list rather than throwing. Presets are
  * disposable convenience data, so a corrupt blob should cost the user their saved
@@ -54,9 +54,19 @@ class JsonListDataStore<T>(
         }
     }
 
+    /**
+     * Reads the stored list, skipping entries that will not parse.
+     *
+     * Two levels of tolerance, and the inner one matters: a single unreadable entry
+     * drops only itself rather than taking every other preset with it. That became
+     * reachable once presets carried a mode name, since an unrecognised mode is a
+     * parse failure for one item.
+     */
     private fun parseItems(json: String): List<T> = runCatching {
         val array = JSONArray(json)
-        (0 until array.length()).map { i -> parseItem(array.getJSONObject(i)) }
+        (0 until array.length()).mapNotNull { index ->
+            runCatching { parseItem(array.getJSONObject(index)) }.getOrNull()
+        }
     }.getOrDefault(emptyList())
 
     private fun serializeItems(items: List<T>): String {

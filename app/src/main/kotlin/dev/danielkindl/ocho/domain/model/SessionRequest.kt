@@ -15,4 +15,7 @@ sealed interface SessionRequest {
 
     /** @property config the validated Tabata durations. */
     data class Tabata(val config: TabataConfig) : SessionRequest
+
+    /** @property config the validated AMRAP duration. */
+    data class Amrap(val config: AmrapConfig) : SessionRequest
 }

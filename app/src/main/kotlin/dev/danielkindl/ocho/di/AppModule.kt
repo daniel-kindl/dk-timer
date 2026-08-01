@@ -9,9 +9,8 @@ import dev.danielkindl.ocho.core.Clock
 import dev.danielkindl.ocho.core.SystemClock
 import dev.danielkindl.ocho.data.audio.AudioPlayer
 import dev.danielkindl.ocho.data.audio.ToneAudioPlayer
-import dev.danielkindl.ocho.data.repository.PresetRepositoryImpl
 import dev.danielkindl.ocho.data.repository.SettingsRepositoryImpl
-import dev.danielkindl.ocho.data.repository.TabataPresetRepositoryImpl
+import dev.danielkindl.ocho.data.repository.WorkoutPresetRepositoryImpl
 import dev.danielkindl.ocho.data.session.AndroidSessionServiceLauncher
 import dev.danielkindl.ocho.data.session.SessionServiceLauncher
 import dev.danielkindl.ocho.data.update.UpdateRepositoryImpl
@@ -24,10 +23,9 @@ import dev.danielkindl.ocho.domain.engine.WorkoutEngineFactory
 import dev.danielkindl.ocho.domain.model.SemVer
 import dev.danielkindl.ocho.domain.model.UpdateChannel
 import dev.danielkindl.ocho.domain.model.UpdateConfig
-import dev.danielkindl.ocho.domain.repository.PresetRepository
 import dev.danielkindl.ocho.domain.repository.SettingsRepository
-import dev.danielkindl.ocho.domain.repository.TabataPresetRepository
 import dev.danielkindl.ocho.domain.repository.UpdateRepository
+import dev.danielkindl.ocho.domain.repository.WorkoutPresetRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -54,15 +52,12 @@ abstract class AppModule {
     @Singleton
     abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
 
-    /** Binds the DataStore-backed EMOM preset store. */
+    /** Binds the DataStore-backed preset store, shared by every mode. */
     @Binds
     @Singleton
-    abstract fun bindPresetRepository(impl: PresetRepositoryImpl): PresetRepository
-
-    /** Binds the DataStore-backed Tabata preset store. */
-    @Binds
-    @Singleton
-    abstract fun bindTabataPresetRepository(impl: TabataPresetRepositoryImpl): TabataPresetRepository
+    abstract fun bindWorkoutPresetRepository(
+        impl: WorkoutPresetRepositoryImpl,
+    ): WorkoutPresetRepository
 
     /** Binds the `ToneGenerator` player. Singleton because it owns a native audio handle. */
     @Binds

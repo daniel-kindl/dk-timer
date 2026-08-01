@@ -130,6 +130,16 @@ fun tabataSegments(
 }
 
 /**
+ * Builds the segment list for an AMRAP, which is a single unbroken effort.
+ *
+ * Identical in shape to an EMOM preview, because from the timeline's point of view
+ * they are the same picture: one work block. The difference is that an AMRAP has no
+ * interval boundaries inside it, which the timeline never drew anyway.
+ */
+fun amrapSegments(prepareMillis: Long, totalMillis: Long): List<RunSegment> =
+    emomSegments(prepareMillis, totalMillis)
+
+/**
  * Builds the segment list for an EMOM workout, which is one unbroken work phase
  * between the prepare countdown and the completion cap.
  */
