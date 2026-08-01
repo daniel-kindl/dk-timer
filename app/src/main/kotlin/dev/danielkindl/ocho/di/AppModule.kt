@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import dev.danielkindl.ocho.BuildConfig
 import dev.danielkindl.ocho.core.Clock
 import dev.danielkindl.ocho.core.SystemClock
 import dev.danielkindl.ocho.data.audio.AudioPlayer
@@ -16,6 +17,8 @@ import dev.danielkindl.ocho.domain.engine.DefaultTabataEngineFactory
 import dev.danielkindl.ocho.domain.engine.DefaultTimerEngineFactory
 import dev.danielkindl.ocho.domain.engine.TabataEngineFactory
 import dev.danielkindl.ocho.domain.engine.TimerEngineFactory
+import dev.danielkindl.ocho.domain.model.UpdateChannel
+import dev.danielkindl.ocho.domain.model.UpdateConfig
 import dev.danielkindl.ocho.domain.repository.PresetRepository
 import dev.danielkindl.ocho.domain.repository.SettingsRepository
 import dev.danielkindl.ocho.domain.repository.TabataPresetRepository
@@ -74,5 +77,19 @@ abstract class AppModule {
         @Singleton
         fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
             context.dataStore
+
+        /**
+         * The only place `BuildConfig` is read.
+         *
+         * Keeps the generated Android class out of the domain and data layers, which
+         * work with the plain [UpdateConfig] value instead. The fields are set per
+         * build type in `app/build.gradle.kts`.
+         */
+        @Provides
+        @Singleton
+        fun provideUpdateConfig(): UpdateConfig = UpdateConfig(
+            repoSlug = BuildConfig.UPDATE_REPO,
+            channel = UpdateChannel.fromId(BuildConfig.UPDATE_CHANNEL),
+        )
     }
 }
