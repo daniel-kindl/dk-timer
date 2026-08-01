@@ -11,6 +11,53 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [3.1.0] - 2026-08-01
+
+### Added
+- **Workouts now survive a locked screen and a backgrounded app.** This was the one
+  failure that actually ruined a session. Previously the timer only kept time while
+  the app was in the foreground: press the power button or switch to a music app,
+  and the clock silently fell behind while interval beeps went missing.
+
+  Two separate things were wrong, and both had to be fixed. A foreground service
+  stops Android freezing or killing the process. A partial wake lock stops the CPU
+  sleeping, which is what stalled the engine's timing between beeps. A foreground
+  service alone does not prevent that, which is why this is one release rather than
+  two.
+- **An ongoing notification** showing the phase, round and remaining time, with
+  pause, resume and stop controls, so a session can be driven from the lock screen
+  without reopening the app. Tapping it returns you to the running workout.
+- **Countdown beeps**: the last three seconds before each interval or phase change
+  tick down, using a shorter, quieter tone than the boundary itself. They have their
+  own setting, since opinion on them divides sharply, and the sound switch silences
+  them along with everything else.
+- **Music now ducks for cues** instead of drowning them. Audio focus is held across
+  a burst, so a three-second lead-in and the beep that follows read as one dip
+  rather than four, and music returns between intervals.
+- The dev build's launcher icon is amber, so it is distinguishable at a glance from
+  the stable app sitting next to it.
+
+### Changed
+- A session no longer belongs to the screen that started it. It lives in a singleton
+  on its own scope, which is what allows it to outlive the screen at all, and the
+  session view models became observers.
+- Toolchain upgraded: AGP 9.3.1, Gradle 9.6.1, Kotlin 2.4.10, Hilt 2.60.1, Compose
+  BOM 2026.06.01, compileSdk 37, targetSdk 36. These were not separable. Hilt 2.60.1
+  refuses to apply below AGP 9, and the newer AndroidX libraries then require a
+  compile SDK that AGP 8 could not provide.
+- Release and prerelease downloads now carry a SHA-256 checksum and a GitHub build
+  provenance attestation. `SECURITY.md` explains what each does and does not prove.
+- Documentation split by audience: `README.md` is for installing and using Ocho,
+  with build instructions and internals moved to `docs/ARCHITECTURE.md`.
+
+### Fixed
+- Notification permission is requested when a session starts rather than at launch,
+  and denying it costs only the notification. Timing stays exact.
+- An unsafe cast of the Compose context to an `Activity`, replaced with
+  `LocalActivity`.
+
+---
+
 ## [3.0.0] - 2026-08-01
 
 ### Breaking: you must reinstall
@@ -221,7 +268,8 @@ derived from a domain rather than the product name, so future renames are cosmet
 
 ---
 
-[Unreleased]: https://github.com/daniel-kindl/ocho/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/daniel-kindl/ocho/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/daniel-kindl/ocho/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/daniel-kindl/ocho/compare/v2.3.0...v3.0.0
 [2.3.0]: https://github.com/daniel-kindl/ocho/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/daniel-kindl/ocho/compare/v2.1.0...v2.2.0
