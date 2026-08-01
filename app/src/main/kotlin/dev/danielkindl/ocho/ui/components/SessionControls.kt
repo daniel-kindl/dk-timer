@@ -34,11 +34,26 @@ private val PRIMARY_CONTROL_HEIGHT = 96.dp
 /** Floor for every other interactive target. */
 private val MIN_TOUCH_TARGET = 48.dp
 
+/** Comfortably above [MIN_TOUCH_TARGET] without competing with the primary control. */
+private val SECONDARY_CONTROL_HEIGHT = 56.dp
+
 /** `radius-2` from the token scale: controls, buttons, inputs. */
 private val ControlShape = RoundedCornerShape(6.dp)
 
+/** Glyph size in controls, per the iconography rules. */
+private val CONTROL_ICON_SIZE = 20.dp
+
+/** Gap between a control's glyph and its label. */
+private val ICON_LABEL_GAP = 10.dp
+
+/** Hairline border, matching the card treatment. */
+private val CONTROL_BORDER_WIDTH = 1.dp
+
 /** Fill opacity for a control sitting on a phase plate. */
 private const val ON_PLATE_FILL = 0.18f
+
+/** Border opacity for an outlined control on a phase plate. */
+private const val ON_PLATE_BORDER = 0.35f
 
 /**
  * The pause/resume control: the one button a user hits without looking.
@@ -65,8 +80,8 @@ fun PrimarySessionControl(
             contentColor = onPlate,
         ),
     ) {
-        Icon(painter = icon, contentDescription = null, modifier = Modifier.size(20.dp))
-        Spacer(Modifier.width(10.dp))
+        Icon(painter = icon, contentDescription = null, modifier = Modifier.size(CONTROL_ICON_SIZE))
+        Spacer(Modifier.width(ICON_LABEL_GAP))
         Text(text = label, style = MaterialTheme.typography.titleLarge)
     }
 }
@@ -90,18 +105,21 @@ fun SecondarySessionControl(
         modifier = modifier
             .fillMaxWidth()
             .sizeIn(minHeight = MIN_TOUCH_TARGET)
-            .height(56.dp),
+            .height(SECONDARY_CONTROL_HEIGHT),
         shape = ControlShape,
-        border = BorderStroke(1.dp, SolidColor(onPlate.copy(alpha = 0.35f))),
+        border = BorderStroke(CONTROL_BORDER_WIDTH, SolidColor(onPlate.copy(alpha = ON_PLATE_BORDER))),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = onPlate),
     ) {
         if (icon != null) {
-            Icon(painter = icon, contentDescription = null, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(10.dp))
+            Icon(painter = icon, contentDescription = null, modifier = Modifier.size(CONTROL_ICON_SIZE))
+            Spacer(Modifier.width(ICON_LABEL_GAP))
         }
         Text(text = label, style = MaterialTheme.typography.labelLarge)
     }
 }
+
+/** Gap between adjacent session controls, from the spacing scale. */
+private val CONTROL_GAP = 12.dp
 
 /** Lays out session controls with the spacing the token scale calls for. */
 @Composable
@@ -111,7 +129,7 @@ fun SessionControlRow(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
     ) {
         content()
     }

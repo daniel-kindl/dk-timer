@@ -1,32 +1,7 @@
 package dev.danielkindl.ocho.ui.theme
 
 import androidx.compose.ui.graphics.Color
-
-/**
- * The four states a session can be in, each owning exactly one full-bleed
- * background colour.
- *
- * This is the app's primary information channel. The session screen is meant to be
- * readable by someone three metres away, out of breath, not looking directly at the
- * phone — the colour answers "what am I doing right now" before any text is read.
- *
- * Deliberately separate from `SessionStatus`, which tracks lifecycle (paused,
- * stopped) rather than what the user is doing. Pausing does not change the phase:
- * you are still in the work interval, just frozen in it.
- */
-enum class Phase {
-    /** Countdown before the first round. */
-    PREPARE,
-
-    /** A work interval. */
-    WORK,
-
-    /** A rest interval. Tabata only — EMOM has no rest phase. */
-    REST,
-
-    /** The session has finished. */
-    COMPLETE,
-}
+import dev.danielkindl.ocho.domain.model.Phase
 
 /**
  * A phase's background plate and the text colour that goes on it.

@@ -59,6 +59,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      # Required by actions/attest-build-provenance: it mints an OIDC token to
+      # prove the run's identity and writes the resulting attestation back to the
+      # repository's attestation store.
+      id-token: write
+      attestations: write
 
     steps:
       - name: Checkout
@@ -96,6 +101,31 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew assembleDev -PdevBuildNumber=${{ github.run_number }} --stacktrace
 
+      - name: Compute SHA-256 checksum
+        id: checksum
+        run: |
+          set -euo pipefail
+          APK=$(ls app/build/outputs/apk/dev/*.apk | head -n 1)
+          # `sha256sum -c` resolves the path in the file relative to the working
+          # directory, so the digest is generated from inside the APK's own
+          # directory to keep the recorded name bare.
+          (cd "$(dirname "$APK")" && sha256sum "$(basename "$APK")" > "$(basename "$APK").sha256")
+          echo "SHA256_LINE=$(cat "${APK}.sha256")" >> "$GITHUB_OUTPUT"
+          # Printed here on purpose. The job log is a second, independent record of
+          # the digest: it is public, immutable once the run finishes, and not
+          # editable the way a release asset is.
+          echo "===== SHA-256 of the published APK ====="
+          cat "${APK}.sha256"
+          echo "========================================"
+
+      # Ties the APK to this workflow run, this commit and this repository with a
+      # signature users can check via `gh attestation verify`. Unlike the checksum,
+      # this cannot be reproduced by someone who only controls the release assets.
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: app/build/outputs/apk/dev/*.apk
+
       - name: Resolve dev version
         id: version
         run: |
@@ -116,7 +146,27 @@ jobs:
             Installs alongside the stable app as **Ocho Dev**. Not a supported
             release: expect it to be broken, and expect it to be replaced within
             the day.
-          files: app/build/outputs/apk/dev/*.apk
+
+            ## Verifying this download
+
+            SHA-256 of the APK, also attached as a `.sha256` file and printed in
+            the build log for [run ${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}):
+
+            ```
+            ${{ steps.checksum.outputs.SHA256_LINE }}
+            ```
+
+            Build provenance is attested. Verify it with:
+
+            ```
+            gh attestation verify <apk> --repo ${{ github.repository }}
+            ```
+
+            See [SECURITY.md](https://github.com/${{ github.repository }}/blob/main/SECURITY.md)
+            for what each check does and does not prove.
+          files: |
+            app/build/outputs/apk/dev/*.apk
+            app/build/outputs/apk/dev/*.apk.sha256
           prerelease: true
           make_latest: false
 

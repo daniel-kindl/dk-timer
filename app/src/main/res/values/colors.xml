@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--
-      Brand green. The launcher icon plate is a flat fill, so a colour drawable is
-      both smaller and sharper than a PNG of a single colour at every density.
+      The launcher icon plate. A flat fill, so a colour drawable is both smaller and
+      sharper than a PNG of a single colour at every density.
+
+      Named for its role rather than its hue, because the dev build overrides it in
+      src/dev to distinguish the two installed apps at a glance.
     -->
-    <color name="brand_green">#3D8560</color>
+    <color name="launcher_background">#3D8560</color>
 </resources>

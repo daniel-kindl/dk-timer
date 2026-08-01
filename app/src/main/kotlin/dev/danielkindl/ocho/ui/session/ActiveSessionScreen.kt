@@ -22,6 +22,7 @@ import dev.danielkindl.ocho.core.format.formatCountdown
 import dev.danielkindl.ocho.core.format.formatElapsed
 import dev.danielkindl.ocho.domain.model.SessionStatus
 import dev.danielkindl.ocho.ui.components.PhaseClock
+import dev.danielkindl.ocho.ui.components.RequestNotificationPermission
 import dev.danielkindl.ocho.ui.components.PhaseLabel
 import dev.danielkindl.ocho.ui.components.PhaseScaffold
 import dev.danielkindl.ocho.ui.components.PrimarySessionControl
@@ -29,7 +30,7 @@ import dev.danielkindl.ocho.ui.components.SUBDUED_ON_PLATE
 import dev.danielkindl.ocho.ui.components.SecondarySessionControl
 import dev.danielkindl.ocho.ui.components.SessionColumn
 import dev.danielkindl.ocho.ui.components.SessionLifecycleScaffold
-import dev.danielkindl.ocho.ui.theme.Phase
+import dev.danielkindl.ocho.domain.model.SessionSnapshot
 
 /**
  * A running EMOM session.
@@ -49,12 +50,14 @@ fun ActiveSessionScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
+    RequestNotificationPermission()
+
     SessionLifecycleScaffold(
         status = state.status,
         onSessionFinished = onSessionFinished,
         onStopSession = viewModel::stopSession,
     ) { onRequestExit ->
-        PhaseScaffold(phase = state.phaseColour()) { theme ->
+        PhaseScaffold(phase = state.phase) { theme ->
             when (state.status) {
                 SessionStatus.CountingDown -> PrepareContent(
                     secondsRemaining = state.countdownSecondsRemaining,
@@ -86,18 +89,6 @@ fun ActiveSessionScreen(
     }
 }
 
-/**
- * Maps session lifecycle onto the phase colour model.
- *
- * EMOM never reports [Phase.REST]: every interval is work. Pausing keeps the work
- * plate, because the user is still inside the work interval — the stopped clock and
- * the changed control label carry that state instead.
- */
-private fun SessionUiState.phaseColour(): Phase = when (status) {
-    SessionStatus.CountingDown -> Phase.PREPARE
-    SessionStatus.Completed -> Phase.COMPLETE
-    else -> Phase.WORK
-}
 
 @Composable
 private fun PrepareContent(secondsRemaining: Int, onPlate: Color, onStop: () -> Unit) {
@@ -138,7 +129,7 @@ private fun CompleteContent(
 
 @Composable
 private fun RunningContent(
-    state: SessionUiState,
+    state: SessionSnapshot,
     onPlate: Color,
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
@@ -149,7 +140,7 @@ private fun RunningContent(
         PhaseLabel(if (isPaused) "Work · paused" else "Work", onPlate)
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            PhaseClock(state.remainingInIntervalMillis.formatCountdown(), onPlate)
+            PhaseClock(state.remainingInPhaseMillis.formatCountdown(), onPlate)
             Spacer(Modifier.height(12.dp))
             Text(
                 text = "round ${state.currentRound}/${state.totalRounds}",

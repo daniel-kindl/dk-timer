@@ -51,7 +51,7 @@ val Green950 = Color(0xFF0E1D16)
  * All four hues below are spent on session phases, which is why an error can no
  * longer be "the red one". Errors are separated structurally instead: a phase
  * colour is only ever a full-bleed background, an error is only ever a tinted plate
- * inside the layout. See PhaseColors.kt.
+ * inside the layout. See PhaseTheme.kt.
  */
 
 /** Prepare phase, light theme. */

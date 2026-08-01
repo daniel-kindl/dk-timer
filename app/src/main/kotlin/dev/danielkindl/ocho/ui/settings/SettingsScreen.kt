@@ -120,6 +120,29 @@ fun SettingsScreen(
                 },
             )
             HorizontalDivider()
+            ListItem(
+                leadingContent = {
+                    Icon(painterResource(R.drawable.ic_rotate_cw), contentDescription = null)
+                },
+                headlineContent = { Text("Countdown beeps") },
+                supportingContent = {
+                    Text(
+                        "Tick down the last three seconds before each interval. " +
+                            "Turned off by the sound switch above.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                },
+                trailingContent = {
+                    Switch(
+                        checked = settings.countdownBeepsEnabled,
+                        onCheckedChange = viewModel::setCountdownBeepsEnabled,
+                        // Sound is the parent switch: with it off there is nothing to
+                        // count down with, so offering the choice would be a lie.
+                        enabled = settings.soundEnabled,
+                    )
+                },
+            )
+            HorizontalDivider()
             UpdateSection(
                 state = updateState,
                 onCheck = updateViewModel::checkForUpdates,
