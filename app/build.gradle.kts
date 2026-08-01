@@ -45,7 +45,12 @@ android {
             val keyFile = System.getenv("KEYSTORE_FILE")
                 ?: keystoreProperties["storeFile"]?.toString()
             if (keyFile != null) {
-                storeFile = file(keyFile)
+                // rootProject.file, not file: the latter resolves relative paths
+                // against app/ rather than the repository root. Absolute paths, which
+                // is what CI passes, are returned unchanged either way. This lets
+                // keystore.properties hold a relative path, so moving the checkout
+                // cannot break signing.
+                storeFile = rootProject.file(keyFile)
                 storePassword = System.getenv("KEYSTORE_PASSWORD")
                     ?: keystoreProperties["storePassword"]?.toString()
                 keyAlias = System.getenv("KEY_ALIAS")
