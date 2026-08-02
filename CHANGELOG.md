@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [3.2.0] - 2026-08-02
+
 ### Added
 - **AMRAP**: as many rounds as possible. One unbroken block with no interval beeps,
   counting down to the finish with the same 3-2-1 lead-in as the other modes. The
@@ -26,6 +30,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   mode will cost less again.
 - Coverage is measured in CI and reported per package, never gated on. CodeQL scans
   every push and pull request to `dev`, plus weekly.
+
+### Fixed
+- **The completion screen reported the workout a second short.** A 10 second workout
+  finished showing 9. The summary was reading the last screen refresh rather than the
+  end of the workout, and the two are up to a tenth of a second apart, which is
+  enough to lose a whole second once the display rounds down. Every mode was
+  affected, and always had been: a 20 minute EMOM said 19:59.
+
+  A Tabata whose final phase runs past the total now reports the longer, true figure.
+  A 1:30 workout of 40s work and 20s rest says 1:40, because that is how long it ran.
+  Phases are never cut short, so that is not an error.
+- Releases are now assembled as drafts before publishing. GitHub began making
+  published releases immutable, which meant a release could be created with its
+  downloads missing.
 
 ---
 
@@ -286,7 +304,8 @@ derived from a domain rather than the product name, so future renames are cosmet
 
 ---
 
-[Unreleased]: https://github.com/daniel-kindl/ocho/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/daniel-kindl/ocho/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/daniel-kindl/ocho/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/daniel-kindl/ocho/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/daniel-kindl/ocho/compare/v2.3.0...v3.0.0
 [2.3.0]: https://github.com/daniel-kindl/ocho/compare/v2.2.0...v2.3.0
