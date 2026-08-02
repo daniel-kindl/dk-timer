@@ -20,6 +20,8 @@ import dev.danielkindl.ocho.domain.engine.TabataEngineFactory
 import dev.danielkindl.ocho.domain.engine.TimerEngineFactory
 import dev.danielkindl.ocho.domain.engine.DefaultWorkoutEngineFactory
 import dev.danielkindl.ocho.domain.engine.WorkoutEngineFactory
+import dev.danielkindl.ocho.domain.model.BuiltInPresets
+import dev.danielkindl.ocho.domain.model.DEVICE_CHECK_PRESETS
 import dev.danielkindl.ocho.domain.model.SemVer
 import dev.danielkindl.ocho.domain.model.UpdateChannel
 import dev.danielkindl.ocho.domain.model.UpdateConfig
@@ -108,6 +110,20 @@ abstract class AppModule {
             timerEngineFactory: TimerEngineFactory,
             tabataEngineFactory: TabataEngineFactory,
         ): WorkoutEngineFactory = DefaultWorkoutEngineFactory(timerEngineFactory, tabataEngineFactory)
+
+        /**
+         * Presets a testing build ships with, so a device check costs no picker work.
+         *
+         * Empty on the stable channel, which is what keeps them invisible to anyone but
+         * a tester. Deciding it here rather than in the repository means the repository
+         * never learns which build it is running in, and the channel stays read in one
+         * place like every other build fact.
+         */
+        @Provides
+        @Singleton
+        fun provideBuiltInPresets(updateConfig: UpdateConfig): BuiltInPresets = BuiltInPresets(
+            if (updateConfig.channel == UpdateChannel.Dev) DEVICE_CHECK_PRESETS else emptyList()
+        )
 
         /** The single preferences store shared by settings and both preset repositories. */
         @Provides

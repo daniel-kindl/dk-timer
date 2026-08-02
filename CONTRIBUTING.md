@@ -132,6 +132,19 @@ release key, and pruned to the newest five. The release key matters here: CI's d
 keystore is regenerated per run, so dev APKs signed with it would refuse to install
 over each other.
 
+Dev and debug builds also ship a handful of built-in presets, so a device check is one
+tap rather than four picker wheels. They live in `DEVICE_CHECK_PRESETS`, are merged in
+on read by `WorkoutPresetRepositoryImpl` and never written, and carry no delete control.
+The EMOM entries are deliberately the awkward cases rather than realistic workouts: an
+exact multiple of the interval, a remainder longer than the 3s lead-in, a remainder
+shorter than it, and an interval that outlasts the whole workout. Those four are where
+the lead-in and the final numeral are decided.
+
+`di/AppModule` hands the repository an empty list on the stable channel, so the presets
+never appear there. The definitions are still compiled into the stable APK as unused
+data; keeping them in the shared source set is what lets them be unit-tested, and a few
+hundred bytes is a fair price.
+
 Two guards in `release.yml` exist because dev tags contain a hyphen. Don't remove
 them:
 
