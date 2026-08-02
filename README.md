@@ -15,6 +15,30 @@ round count of a classic Tabata.*
 
 ---
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/home.png" width="24%" alt="Home screen with cards for EMOM, Tabata and AMRAP.">
+  <img src="docs/screenshots/setup.png" width="24%" alt="Tabata setup: pickers at 4:00 total, 20 seconds work and 10 seconds rest, above a bar previewing 8 rounds as alternating red and green blocks.">
+  <img src="docs/screenshots/work.png" width="24%" alt="Work phase: a full-screen red plate reading 0:13, round 3 of 8.">
+  <img src="docs/screenshots/rest.png" width="24%" alt="Rest phase: a full-screen green plate reading 0:08, round 3 of 8.">
+</p>
+
+Choosing a mode, a Tabata set to the classic 4:00 of 20 seconds work and 10 seconds
+rest, then the work and rest plates mid-session. The bar above Start previews the
+shape of the workout before it begins.
+
+While a session runs the plate is the entire interface, which is what makes it
+readable across a room. Work and rest are separated by lightness as well as hue, so
+they stay distinct with no colour vision at all. The same two screens again, with
+every trace of colour removed:
+
+<p align="center">
+  <img src="docs/screenshots/colour-vision.png" width="88%" alt="The work and rest screens side by side in greyscale. The work plate is clearly darker than the rest plate, and its text is white where the rest plate's text is black.">
+</p>
+
+---
+
 ## Features
 
 | Feature | Detail |
