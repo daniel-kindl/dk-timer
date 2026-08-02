@@ -41,10 +41,6 @@ class TimerEngineImpl(
                 config.totalDurationMillis.toDouble() / config.intervalMillis
             ).toInt()
             var lastCompletedInterval = 0
-
-            // A lead-in only means something if the interval is longer than it is.
-            // At or below it the countdown would run continuously and convey nothing.
-            val countdownEnabled = config.intervalMillis > COUNTDOWN_LEAD_MILLIS
             var lastCountdownSecond = 0
 
             while (isActive) {
@@ -82,9 +78,22 @@ class TimerEngineImpl(
                     return@launch
                 }
 
-                val nextIntervalAt = startTime + totalPausedMs + (completedIntervals + 1) * config.intervalMillis
+                // The boundary the user is counting toward is whichever comes first: the
+                // next interval, or the end of the workout. They differ whenever the total
+                // is not a multiple of the interval, and whenever the interval is longer
+                // than the whole workout, whose boundary never arrives at all.
+                val workoutEnd = startTime + totalPausedMs + config.totalDurationMillis
+                val intervalStart =
+                    startTime + totalPausedMs + completedIntervals * config.intervalMillis
+                val nextIntervalAt = minOf(intervalStart + config.intervalMillis, workoutEnd)
                 val remainingInInterval = (nextIntervalAt - now).coerceAtLeast(0L)
 
+                // A lead-in only means something if the stretch it precedes is longer than
+                // it is; at or below it the countdown would run continuously and convey
+                // nothing. Measured per interval rather than from the configured length,
+                // because a truncated final one can fall below the lead-in while every
+                // full interval before it sits well above.
+                val countdownEnabled = (nextIntervalAt - intervalStart) > COUNTDOWN_LEAD_MILLIS
                 lastCountdownSecond =
                     emitCountdownIfDue(countdownEnabled, remainingInInterval, lastCountdownSecond)
 
@@ -97,9 +106,10 @@ class TimerEngineImpl(
                     )
                 )
 
-                val workoutEnd = startTime + totalPausedMs + config.totalDurationMillis
+                // nextIntervalAt is already capped at the workout's end, so it stands in
+                // for both boundaries here.
                 val nextUiTick = now + TICK_MS
-                val sleepUntil = minOf(nextIntervalAt, nextUiTick, workoutEnd)
+                val sleepUntil = minOf(nextIntervalAt, nextUiTick)
                 val sleepMs = (sleepUntil - clock.currentTimeMillis()).coerceAtLeast(0L)
                 if (sleepMs > 0) delay(sleepMs)
             }

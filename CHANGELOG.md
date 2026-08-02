@@ -9,6 +9,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- **An EMOM whose total is not a multiple of its interval finished unannounced.** A 65
+  second workout at 20 second intervals spent its last five seconds counting toward a
+  boundary at 80 seconds that never arrived: the numeral read 0:15 as the workout ended,
+  and there was no 3-2-1 before it. The lead-in and the numeral now count toward
+  whichever comes first, the next interval or the end of the workout.
+
+  Two related cases move with it, both reachable because the setup screen warns about an
+  interval longer than the workout but still allows it. A 5 second interval on a 3 second
+  workout used to fire a lone countdown beep with no 2 and no 1, and is now silent. A 10
+  second interval on a 5 second workout was silent, and now gets a full lead-in. A final
+  stretch of three seconds or less stays silent, as any stretch at or below the lead-in
+  does.
+
 ---
 
 ## [3.2.0] - 2026-08-02
