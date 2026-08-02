@@ -104,20 +104,38 @@ class WorkoutPlanTest {
     }
 
     @Test
-    fun `a Tabata that cannot run plans nothing rather than looping forever`() {
-        // TabataConfig does not validate itself, so the planner has to. A zero-length
-        // phase would advance the alternation by nothing, forever.
-        val cases = listOf(
-            TabataConfig(workMillis = 0, restMillis = 10_000, totalDurationMillis = 60_000),
-            TabataConfig(workMillis = 20_000, restMillis = 0, totalDurationMillis = 60_000),
-            TabataConfig(workMillis = 20_000, restMillis = 10_000, totalDurationMillis = 0),
-            TabataConfig(workMillis = 0, restMillis = 0, totalDurationMillis = 0),
-        )
+    fun `a Tabata with a zero target still runs its opening work phase`() {
+        // The phase check comes after the phase, not before it. A workout that ended
+        // before emitting anything would leave the session screen on an empty timer.
+        val plan = SessionRequest.Tabata(
+            TabataConfig(workMillis = 1_000, restMillis = 500, totalDurationMillis = 0)
+        ).toPlan()
 
-        cases.forEach { config ->
-            val plan = SessionRequest.Tabata(config).toPlan()
-            assertEquals(config.toString(), emptyList<PlannedSegment>(), plan.segments)
-            assertEquals(config.toString(), 0, plan.totalRounds)
-        }
+        assertEquals(listOf(PlannedSegment(Phase.WORK, 1_000)), plan.segments)
+        assertEquals(1, plan.totalRounds)
+    }
+
+    @Test
+    fun `a Tabata with one zero-length phase still reaches its target`() {
+        // Work passes straight through while rest carries the workout forward. The
+        // empty phase is kept rather than dropped, because it still announces itself.
+        val plan = SessionRequest.Tabata(
+            TabataConfig(workMillis = 0, restMillis = 500, totalDurationMillis = 1_500)
+        ).toPlan()
+
+        assertEquals(3, plan.totalRounds)
+        assertEquals(1_500L, plan.segments.sumOf { it.durationMillis })
+    }
+
+    @Test
+    fun `a Tabata with two zero-length phases terminates instead of hanging`() {
+        // Unreachable from the UI, which requires both phases to be positive. Left
+        // to alternate freely it would never advance, so the planner stops it here.
+        val plan = SessionRequest.Tabata(
+            TabataConfig(workMillis = 0, restMillis = 0, totalDurationMillis = 60_000)
+        ).toPlan()
+
+        assertEquals(listOf(PlannedSegment(Phase.WORK, 0)), plan.segments)
+        assertEquals(1, plan.totalRounds)
     }
 }

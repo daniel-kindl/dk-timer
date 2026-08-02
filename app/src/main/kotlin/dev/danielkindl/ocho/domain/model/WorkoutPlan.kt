@@ -12,8 +12,9 @@ import kotlin.math.ceil
  * split a continuous effort into pieces that exist only in the data structure.
  *
  * @property phase what the athlete is doing for the length of this segment.
- * @property durationMillis how long it runs. Always positive; the planner drops
- *   empty segments rather than emitting them.
+ * @property durationMillis how long it runs. Zero is allowed and deliberately not
+ *   filtered out: a degenerate config still announces the phase it skips through,
+ *   and dropping the segment would silently change what the engine emits.
  * @property boundaryEveryMillis spacing of interval beeps within the segment, or
  *   zero for a segment that runs unbroken. A final partial interval still beeps,
  *   which is why the count rounds up rather than down.
@@ -39,8 +40,9 @@ data class PlannedSegment(
  * with the session it previews is no longer expressible.
  *
  * @property segments the workout in running order, excluding the pre-start
- *   countdown. Empty when the configuration is not yet runnable, which the setup
- *   screen relies on while the pickers are mid-edit.
+ *   countdown. Never empty: every runnable configuration has at least one phase,
+ *   and so does every degenerate one, which is what stops a zero-length workout
+ *   from ending before it emits anything.
  * @property totalDurationMillis the configured target. Tabata can overrun it, since
  *   a phase is never cut short, so this is what progress is measured against rather
  *   than what the segments necessarily sum to.
@@ -107,18 +109,24 @@ fun SessionRequest.toPlan(): WorkoutPlan = when (this) {
  * end: an interval timer that cut the final work phase short would be worse than one
  * that ran a few seconds long.
  *
- * Returns nothing at all for a configuration that cannot run. [TabataConfig] does not
- * validate its own durations, and a zero-length phase would advance the loop below by
- * nothing forever, so the guard is what makes the loop provably terminate rather than
- * merely unreachable in practice.
+ * Tests before the check, so a workout always gets at least its opening work phase.
+ * A zero-length target is the case that makes this visible — it still runs one phase
+ * and completes there, rather than finishing before it has begun.
+ *
+ * [TabataConfig] does not validate its own durations, and two zero-length phases
+ * would alternate forever without advancing. The guard makes that terminate instead
+ * of hanging. It is unreachable from the UI, which requires both phases to be
+ * positive before it will build a request at all.
  */
 private fun TabataConfig.alternatingPhases(): List<PlannedSegment> {
-    if (workMillis <= 0 || restMillis <= 0 || totalDurationMillis <= 0) return emptyList()
+    if (workMillis <= 0 && restMillis <= 0) {
+        return listOf(PlannedSegment(Phase.WORK, durationMillis = 0))
+    }
 
     val segments = mutableListOf<PlannedSegment>()
     var planned = 0L
     var working = true
-    while (planned < totalDurationMillis) {
+    do {
         val duration = if (working) workMillis else restMillis
         segments += PlannedSegment(
             phase = if (working) Phase.WORK else Phase.REST,
@@ -126,6 +134,6 @@ private fun TabataConfig.alternatingPhases(): List<PlannedSegment> {
         )
         planned += duration
         working = !working
-    }
+    } while (planned < totalDurationMillis)
     return segments
 }

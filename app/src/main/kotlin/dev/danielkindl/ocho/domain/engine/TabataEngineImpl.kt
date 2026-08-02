@@ -1,9 +1,12 @@
 package dev.danielkindl.ocho.domain.engine
 
 import dev.danielkindl.ocho.core.Clock
+import dev.danielkindl.ocho.domain.model.Phase
+import dev.danielkindl.ocho.domain.model.SessionRequest
 import dev.danielkindl.ocho.domain.model.TabataConfig
 import dev.danielkindl.ocho.domain.model.TabataEvent
 import dev.danielkindl.ocho.domain.model.TabataPhase
+import dev.danielkindl.ocho.domain.model.toPlan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -20,10 +23,10 @@ import kotlin.math.ceil
  * same pause-safe approach as [TimerEngineImpl]: effective elapsed time is
  * `now - startTime - totalPausedMs`.
  *
- * **Completion policy**: the workout ends only at a phase boundary. When
- * accumulated phase time reaches or exceeds [TabataConfig.totalDurationMillis],
- * [TabataEvent.WorkoutCompleted] is emitted and the engine stops — it never
- * cuts a phase short mid-way.
+ * **Completion policy**: the workout ends only at a phase boundary, never mid-phase.
+ * The plan already encodes that rule — it stops alternating at the first phase whose
+ * end reaches [TabataConfig.totalDurationMillis] — so this engine simply runs out of
+ * segments and reports the time they actually took.
  */
 class TabataEngineImpl(
     clock: Clock,
@@ -38,10 +41,13 @@ class TabataEngineImpl(
     override fun start(config: TabataConfig) {
         job?.cancel()
         resetPauseState()
-        val totalRounds = computeTotalRounds(config)
+        val plan = SessionRequest.Tabata(config).toPlan()
+        val segments = plan.segments
         job = scope.launch {
             val startTime = clock.currentTimeMillis()
-            var phase = TabataPhase.Work
+            // Which planned phase is running. The plan is never empty, so this always
+            // indexes something, and running off its end is what completion means.
+            var index = 0
             // Effective elapsed at the start of the current phase (excludes pauses).
             var phaseStartElapsed = 0L
             // A round starts at each Work phase; the initial Work phase is round 1.
@@ -60,7 +66,8 @@ class TabataEngineImpl(
                 if (isActive) {
                     val now = clock.currentTimeMillis()
                     val elapsed = now - startTime - totalPausedMs
-                    val phaseDuration = if (phase == TabataPhase.Work) config.workMillis else config.restMillis
+                    val segment = segments[index]
+                    val phaseDuration = segment.durationMillis
                     val phaseEnd = phaseStartElapsed + phaseDuration
                     val remainingInPhase = (phaseEnd - elapsed).coerceAtLeast(0L)
 
@@ -69,11 +76,11 @@ class TabataEngineImpl(
 
                     _events.emit(
                         TabataEvent.Tick(
-                            phase = phase,
+                            phase = segment.phase.toTabataPhase(),
                             remainingInPhaseMillis = remainingInPhase,
                             elapsedMillis = elapsed,
                             currentRound = currentRound,
-                            totalRounds = totalRounds,
+                            totalRounds = plan.totalRounds,
                         )
                     )
 
@@ -84,7 +91,8 @@ class TabataEngineImpl(
                         lastCountdownSecond = 0
 
                         // Check for workout completion BEFORE starting the next phase.
-                        if (phaseStartElapsed >= config.totalDurationMillis) {
+                        index++
+                        if (index == segments.size) {
                             // phaseStartElapsed, not the configured total: phases run to
                             // their end, so a workout whose last phase crosses the total
                             // genuinely lasts longer than configured, and the summary
@@ -93,9 +101,8 @@ class TabataEngineImpl(
                             return@launch
                         }
 
-                        // Switch phase and announce it.
-                        phase = if (phase == TabataPhase.Work) TabataPhase.Rest else TabataPhase.Work
-                        if (phase == TabataPhase.Work) {
+                        // Announce whatever the plan says comes next.
+                        if (segments[index].phase == Phase.WORK) {
                             currentRound++
                             _events.emit(TabataEvent.WorkStarted)
                         } else {
@@ -140,25 +147,14 @@ class TabataEngineImpl(
     }
 
     /**
-     * Mirrors the phase-alternation loop above (without real-time delays) to determine
-     * how many Work phases (rounds) this workout will run, consistent with the engine's
-     * own "never cut a phase short" completion policy.
+     * Narrows the domain-wide phase to the two this engine can be in.
+     *
+     * The plan speaks in [Phase] because every consumer of it does; [TabataEvent]
+     * keeps [TabataPhase] because that is what a Tabata tick has always carried. Only
+     * WORK and REST are ever planned, so nothing is lost across the boundary.
      */
-    // workMillis == 0 && restMillis == 0 together never advances phaseStartElapsed,
-    // looping forever; unreachable via the UI since TabataSetupUiState.isValid requires
-    // both workMillis and restMillis > 0.
-    private fun computeTotalRounds(config: TabataConfig): Int {
-        var phase = TabataPhase.Work
-        var phaseStartElapsed = 0L
-        var rounds = 0
-        while (true) {
-            if (phase == TabataPhase.Work) rounds++
-            phaseStartElapsed += if (phase == TabataPhase.Work) config.workMillis else config.restMillis
-            if (phaseStartElapsed >= config.totalDurationMillis) break
-            phase = if (phase == TabataPhase.Work) TabataPhase.Rest else TabataPhase.Work
-        }
-        return rounds
-    }
+    private fun Phase.toTabataPhase(): TabataPhase =
+        if (this == Phase.WORK) TabataPhase.Work else TabataPhase.Rest
 
     private companion object {
         const val TICK_MS = 100L
