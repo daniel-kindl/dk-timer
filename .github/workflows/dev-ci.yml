@@ -155,7 +155,7 @@ jobs:
       # signature users can check via `gh attestation verify`. Unlike the checksum,
       # this cannot be reproduced by someone who only controls the release assets.
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: app/build/outputs/apk/dev/*.apk
 
