@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import dev.danielkindl.ocho.core.format.formatElapsed
 import dev.danielkindl.ocho.domain.model.Phase
+import dev.danielkindl.ocho.domain.model.WorkoutPlan
 import dev.danielkindl.ocho.ui.theme.phaseTheme
 
 /** Height of the timeline strip. */
@@ -103,53 +104,23 @@ private fun TimelineCaption(text: String) {
 }
 
 /**
- * Builds the segment list for a Tabata workout.
+ * Draws a planned workout as the strip the setup screen previews.
  *
- * Mirrors the engine's completion policy — a phase always runs to its end, so the
- * preview rounds up to the final boundary exactly as the session will.
- */
-fun tabataSegments(
-    prepareMillis: Long,
-    workMillis: Long,
-    restMillis: Long,
-    totalMillis: Long,
-): List<RunSegment> {
-    val segments = mutableListOf(RunSegment(Phase.PREPARE, prepareMillis))
-    if (workMillis <= 0 || restMillis <= 0 || totalMillis <= 0) return segments
-
-    var elapsed = 0L
-    var isWork = true
-    while (elapsed < totalMillis) {
-        val duration = if (isWork) workMillis else restMillis
-        segments += RunSegment(if (isWork) Phase.WORK else Phase.REST, duration)
-        elapsed += duration
-        isWork = !isWork
-    }
-    segments += RunSegment(Phase.COMPLETE, completeCapMillis(totalMillis))
-    return segments
-}
-
-/**
- * Builds the segment list for an AMRAP, which is a single unbroken effort.
+ * The preview used to rebuild the workout's structure itself, from a copy of the
+ * engine's rules that was correct only for as long as nobody edited either side.
+ * Reading the plan the session will actually run makes a preview that lies about its
+ * workout unrepresentable rather than merely unlikely.
  *
- * Identical in shape to an EMOM preview, because from the timeline's point of view
- * they are the same picture: one work block. The difference is that an AMRAP has no
- * interval boundaries inside it, which the timeline never drew anyway.
+ * Adds the two segments that are drawing concerns rather than workout structure: the
+ * amber prepare lead, which the session controller counts in, and the violet cap that
+ * gives the finish somewhere to be.
+ *
+ * @param prepareMillis length of the pre-start countdown.
  */
-fun amrapSegments(prepareMillis: Long, totalMillis: Long): List<RunSegment> =
-    emomSegments(prepareMillis, totalMillis)
-
-/**
- * Builds the segment list for an EMOM workout, which is one unbroken work phase
- * between the prepare countdown and the completion cap.
- */
-fun emomSegments(prepareMillis: Long, totalMillis: Long): List<RunSegment> {
-    if (totalMillis <= 0) return listOf(RunSegment(Phase.PREPARE, prepareMillis))
-    return listOf(
-        RunSegment(Phase.PREPARE, prepareMillis),
-        RunSegment(Phase.WORK, totalMillis),
-        RunSegment(Phase.COMPLETE, completeCapMillis(totalMillis)),
-    )
+fun WorkoutPlan.toRunSegments(prepareMillis: Long): List<RunSegment> = buildList {
+    add(RunSegment(Phase.PREPARE, prepareMillis))
+    segments.forEach { add(RunSegment(it.phase, it.durationMillis)) }
+    add(RunSegment(Phase.COMPLETE, completeCapMillis(totalDurationMillis)))
 }
 
 /**
