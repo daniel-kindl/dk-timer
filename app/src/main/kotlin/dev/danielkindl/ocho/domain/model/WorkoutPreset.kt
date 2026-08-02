@@ -23,6 +23,11 @@ package dev.danielkindl.ocho.domain.model
  * @property workSeconds seconds component of the Tabata work phase. Zero otherwise.
  * @property restMinutes minutes component of the Tabata rest phase. Zero otherwise.
  * @property restSeconds seconds component of the Tabata rest phase. Zero otherwise.
+ * @property builtIn true for a preset the build ships with rather than one the user
+ *   saved. Deliberately absent from the stored JSON on both sides: built-ins never
+ *   reach the store, and anything read back out of it is by definition the user's.
+ *   Setup screens use it to withhold the delete control, since removing something the
+ *   build supplies would only have it reappear on the next launch.
  */
 data class WorkoutPreset(
     val id: String,
@@ -36,4 +41,5 @@ data class WorkoutPreset(
     val workSeconds: Int = 0,
     val restMinutes: Int = 0,
     val restSeconds: Int = 0,
+    val builtIn: Boolean = false,
 )

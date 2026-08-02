@@ -11,6 +11,31 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [3.3.0] - 2026-08-02
+
+### Added
+- **Six device-check presets, on dev builds only.** Verifying a fix by hand meant
+  dialling four picker wheels to reach a 63 second EMOM, which is how a check gets
+  skipped. The EMOM entries are deliberately awkward rather than realistic: an exact
+  multiple of the interval, a remainder longer than the lead-in, a remainder shorter
+  than it, and an interval that outlasts the workout. Those are the cases where the
+  lead-in and the final numeral are decided, so they are what a regression breaks
+  unheard. Nothing changes on the stable channel, where the list is empty.
+
+### Changed
+- The shape of a workout — how many rounds, how long each one runs, what follows
+  what — is now worked out in one place and read everywhere else. Five parts of the
+  app used to figure it out separately: each engine, a second pass inside the Tabata
+  engine just to count rounds, the round count under the setup pickers, and the
+  preview bar. Every copy carried a comment promising it matched the others.
+
+  Nothing about using the app changes, and the timing itself was not touched. What
+  changes is that the bar you see before starting is now the same plan the session
+  runs, so the two can no longer drift apart — which is the bug class that produced
+  the last two releases' fixes.
+
+---
+
 ## [3.2.1] - 2026-08-02
 
 ### Fixed

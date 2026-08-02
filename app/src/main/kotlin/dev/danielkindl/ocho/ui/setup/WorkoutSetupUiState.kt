@@ -8,7 +8,7 @@ import dev.danielkindl.ocho.domain.model.WorkoutMode
 import dev.danielkindl.ocho.domain.model.WorkoutPreset
 import dev.danielkindl.ocho.domain.model.formatDuration
 import dev.danielkindl.ocho.domain.model.minutesSecondsToMillis
-import kotlin.math.ceil
+import dev.danielkindl.ocho.domain.model.toPlan
 
 /**
  * Picker state for every workout mode.
@@ -80,31 +80,14 @@ data class WorkoutSetupUiState(
     /**
      * Rounds this configuration will run.
      *
-     * Rounds up in both counted modes, matching the engines: a partial final interval
-     * still gets a beep, and a phase is never cut short. AMRAP reports zero, because
-     * its rounds are whatever the athlete manages and the app cannot know that.
+     * Asks the plan rather than counting again. This screen used to derive the figure
+     * from its own copy of each mode's rules, which meant the number under the pickers
+     * and the number on the session screen agreed only by coincidence.
+     *
+     * Zero for a configuration that cannot start, since [toRequest] rejects one.
      */
     val roundCount: Int
-        get() {
-            if (!isValid) return 0
-            return when (mode) {
-                WorkoutMode.EMOM ->
-                    ceil(totalDurationMillis.toDouble() / intervalMillis).toInt()
-
-                WorkoutMode.TABATA -> {
-                    val cycle = workMillis + restMillis
-                    var elapsed = 0L
-                    var rounds = 0
-                    while (elapsed < totalDurationMillis) {
-                        rounds++
-                        elapsed += cycle
-                    }
-                    rounds
-                }
-
-                WorkoutMode.AMRAP -> 0
-            }
-        }
+        get() = if (isValid) toRequest().toPlan().totalRounds else 0
 
     /** Structure summary for the run timeline. */
     val patternLabel: String
