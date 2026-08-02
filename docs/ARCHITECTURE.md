@@ -144,12 +144,38 @@ lands on the finish rather than on a boundary, which is where an AMRAP wants it.
 one thing it suppresses is the interval-boundary cue, since that boundary and the
 finish are the same instant and would otherwise beep twice.
 
+## One answer to "what shape is this workout?"
+
+`SessionRequest.toPlan()` derives a `WorkoutPlan`: a list of labelled `PlannedSegment`s
+plus the round count. It is the only place that structure is expressed. Five places
+used to derive it independently — both engines, a second pass inside the Tabata engine
+that existed purely to count rounds, the round count under the setup pickers, and the
+timeline preview — each carrying a comment asserting it agreed with the others. Two of
+the last three releases fixed bugs that were exactly that agreement lapsing.
+
+Boundaries live inside a segment rather than between segments. An EMOM is one
+twenty-minute work block with `boundaryEveryMillis` set, not twenty one-minute blocks:
+the athlete does not stop at the beep, and the timeline draws one bar. Splitting it
+would have invented a structure that exists only in the data.
+
+The preview is the strongest case for the plan. `RunTimeline` renders the plan the
+session will run rather than a reconstruction of it, so a bar that misrepresents its
+own workout is no longer expressible.
+
 Still parallel, and deliberately so: `TimerEngineImpl` and `TabataEngineImpl` remain
-two implementations rather than one engine walking a list of labelled segments. That
-rewrite is deferred without a version attached. It would disturb timing verified on
-hardware, and it buys nothing visible until a feature actually needs segments. Warmup
-and cooldown blocks, or custom circuits with per-block labels, would be such features.
-Neither is planned.
+two timing loops rather than one. The Tabata engine now walks the plan's segments, but
+the EMOM engine keeps its own boundary arithmetic, because that is the code the 3.2.1
+lead-in fix landed in and it is verified on hardware. Collapsing the two loops is
+deferred without a version attached; it buys nothing visible until a feature needs
+segments the plan cannot already describe. Warmup and cooldown blocks, or custom
+circuits with per-block labels, would be such features. Neither is planned.
+
+The pre-start countdown is the one piece of workout shape the plan does not own.
+`SessionController.runPrepareCountdown()` still runs it, and the timeline still draws
+its amber lead as a segment the plan did not supply. Moving it in would change
+behaviour rather than preserve it — the prepare beeps deliberately do not duck other
+audio, while every in-workout cue does — so it was left for a release that can carry a
+behaviour change.
 
 ---
 

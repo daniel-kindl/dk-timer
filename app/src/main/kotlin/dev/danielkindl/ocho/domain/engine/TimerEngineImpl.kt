@@ -1,8 +1,10 @@
 package dev.danielkindl.ocho.domain.engine
 
 import dev.danielkindl.ocho.core.Clock
+import dev.danielkindl.ocho.domain.model.SessionRequest
 import dev.danielkindl.ocho.domain.model.TimerConfig
 import dev.danielkindl.ocho.domain.model.TimerEvent
+import dev.danielkindl.ocho.domain.model.toPlan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -35,11 +37,12 @@ class TimerEngineImpl(
     override fun start(config: TimerConfig) {
         job?.cancel()
         resetPauseState()
+        // The setup screen labels its pickers with this same count. Reading it from
+        // the plan is what stops the preview and the session disagreeing about how
+        // many rounds a workout has.
+        val totalIntervals = SessionRequest.Emom(config).toPlan().totalRounds
         job = scope.launch {
             val startTime = clock.currentTimeMillis()
-            val totalIntervals = ceil(
-                config.totalDurationMillis.toDouble() / config.intervalMillis
-            ).toInt()
             var lastCompletedInterval = 0
             var lastCountdownSecond = 0
 

@@ -35,15 +35,14 @@ import dev.danielkindl.ocho.domain.model.PREPARE_COUNTDOWN_MILLIS
 import dev.danielkindl.ocho.domain.model.SessionRequest
 import dev.danielkindl.ocho.domain.model.WorkoutMode
 import dev.danielkindl.ocho.domain.model.WorkoutPreset
+import dev.danielkindl.ocho.domain.model.toPlan
 import dev.danielkindl.ocho.ui.components.DeletePresetDialog
 import dev.danielkindl.ocho.ui.components.DurationPicker
 import dev.danielkindl.ocho.ui.components.ErrorPlate
 import dev.danielkindl.ocho.ui.components.PresetsSection
 import dev.danielkindl.ocho.ui.components.RunTimeline
 import dev.danielkindl.ocho.ui.components.SavePresetDialog
-import dev.danielkindl.ocho.ui.components.amrapSegments
-import dev.danielkindl.ocho.ui.components.emomSegments
-import dev.danielkindl.ocho.ui.components.tabataSegments
+import dev.danielkindl.ocho.ui.components.toRunSegments
 
 /**
  * Configures a workout of any mode.
@@ -205,22 +204,12 @@ private fun WorkoutMode.title(): String = when (this) {
     WorkoutMode.AMRAP -> "AMRAP"
 }
 
-/** Builds the run timeline preview for whichever mode is configured. */
-private fun WorkoutSetupUiState.timelineSegments() = when (mode) {
-    WorkoutMode.EMOM -> emomSegments(
-        prepareMillis = PREPARE_COUNTDOWN_MILLIS,
-        totalMillis = totalDurationMillis,
-    )
-
-    WorkoutMode.TABATA -> tabataSegments(
-        prepareMillis = PREPARE_COUNTDOWN_MILLIS,
-        workMillis = workMillis,
-        restMillis = restMillis,
-        totalMillis = totalDurationMillis,
-    )
-
-    WorkoutMode.AMRAP -> amrapSegments(
-        prepareMillis = PREPARE_COUNTDOWN_MILLIS,
-        totalMillis = totalDurationMillis,
-    )
-}
+/**
+ * Builds the run timeline preview.
+ *
+ * No longer branches on mode: the plan already knows the shape of every workout, and
+ * the caller has checked [WorkoutSetupUiState.isValid], which is what makes building
+ * a request here safe.
+ */
+private fun WorkoutSetupUiState.timelineSegments() =
+    toRequest().toPlan().toRunSegments(PREPARE_COUNTDOWN_MILLIS)
