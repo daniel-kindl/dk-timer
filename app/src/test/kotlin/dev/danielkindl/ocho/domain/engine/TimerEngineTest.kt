@@ -61,6 +61,30 @@ class TimerEngineTest {
     }
 
     @Test
+    fun `WorkoutCompleted carries the configured total, not the last tick`() = runTest {
+        // Ticks are samples and the last one lands up to a tick before the end, so a
+        // summary built from it reports the workout a second short once truncated.
+        val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
+        val events = mutableListOf<TimerEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        engine.start(TimerConfig(intervalMillis = 1_000, totalDurationMillis = 10_000))
+        advanceTimeBy(10_500)
+
+        engine.stop()
+        job.cancel()
+
+        val completed = events.filterIsInstance<TimerEvent.WorkoutCompleted>().single()
+        assertEquals(10_000L, completed.elapsedMillis)
+
+        val lastTick = events.filterIsInstance<TimerEvent.Tick>().last()
+        assertTrue(
+            "the last tick must fall short of the end, or this test proves nothing",
+            lastTick.elapsedMillis < 10_000L,
+        )
+    }
+
+    @Test
     fun `no interval events when interval exceeds total duration`() = runTest {
         val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
         val events = mutableListOf<TimerEvent>()

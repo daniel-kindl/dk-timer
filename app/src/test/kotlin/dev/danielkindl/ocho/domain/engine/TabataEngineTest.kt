@@ -169,6 +169,25 @@ class TabataEngineTest {
     }
 
     @Test
+    fun `WorkoutCompleted carries the summed phase duration, not the last tick`() = runTest {
+        val engine = engine()
+        val events = mutableListOf<TabataEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // 1.5s per cycle against a 2s total: the second work phase starts before the
+        // total and runs to its end, so the workout genuinely lasts 2.5s. The summary
+        // must say 2.5s rather than either the configured 2s or the last sampled tick.
+        engine.start(TabataConfig(workMillis = 1_000, restMillis = 500, totalDurationMillis = 2_000))
+        advanceTimeBy(4_000)
+
+        engine.stop()
+        job.cancel()
+
+        val completed = events.filterIsInstance<TabataEvent.WorkoutCompleted>().single()
+        assertEquals(2_500L, completed.elapsedMillis)
+    }
+
+    @Test
     fun `workout always finishes at a phase boundary not mid-phase`() = runTest {
         val engine = engine()
         val events = mutableListOf<TabataEvent>()

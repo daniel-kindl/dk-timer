@@ -121,6 +121,22 @@ class AmrapWorkoutEngineTest {
         assertEquals(SessionStatus.Completed, engine.snapshots.value.status)
     }
 
+    @Test
+    fun `reports the full duration on completion, not the last sampled tick`() = runTest {
+        // Regression: the completion summary read whatever the final Tick happened to
+        // carry, and ticks land up to one tick before the end. Truncated to whole
+        // seconds that made a 10 second workout report 9. Ten seconds is in the table
+        // because that is the length at which a sub-second error becomes a whole
+        // number the user can see.
+        val totals = listOf(10_000L, 60_000L, 20 * 60 * 1_000L)
+        val engines = totals.map { amrapEngine(totalMillis = it) }
+
+        engines.forEach { it.start() }
+        advanceTimeBy(totals.max() + 500)
+
+        assertEquals(totals, engines.map { it.snapshots.value.elapsedMillis })
+    }
+
     private companion object {
         const val TOTAL_MILLIS = 10_000L
 

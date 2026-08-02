@@ -85,7 +85,11 @@ class TabataEngineImpl(
 
                         // Check for workout completion BEFORE starting the next phase.
                         if (phaseStartElapsed >= config.totalDurationMillis) {
-                            _events.emit(TabataEvent.WorkoutCompleted)
+                            // phaseStartElapsed, not the configured total: phases run to
+                            // their end, so a workout whose last phase crosses the total
+                            // genuinely lasts longer than configured, and the summary
+                            // should say so. It is also exact rather than sampled.
+                            _events.emit(TabataEvent.WorkoutCompleted(phaseStartElapsed))
                             return@launch
                         }
 

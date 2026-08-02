@@ -79,7 +79,11 @@ class EmomWorkoutEngine(
 
             is TimerEvent.WorkoutCompleted -> {
                 _snapshots.update {
-                    it.copy(status = SessionStatus.Completed, phase = Phase.COMPLETE)
+                    it.copy(
+                        status = SessionStatus.Completed,
+                        phase = Phase.COMPLETE,
+                        elapsedMillis = event.elapsedMillis,
+                    )
                 }
                 _cues.emit(SessionCue.Completed)
             }
