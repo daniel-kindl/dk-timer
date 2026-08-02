@@ -277,7 +277,7 @@ class TabataEngineTest {
     }
 
     @Test
-    fun `computeTotalRounds does not hang when only the work phase is zero-length`() = runTest {
+    fun `the engine does not hang when only the work phase is zero-length`() = runTest {
         val engine = engine()
         val events = mutableListOf<TabataEvent>()
         val job = launch { engine.events.toList(events) }
@@ -292,7 +292,7 @@ class TabataEngineTest {
     }
 
     @Test
-    fun `computeTotalRounds does not hang when only the rest phase is zero-length`() = runTest {
+    fun `the engine does not hang when only the rest phase is zero-length`() = runTest {
         val engine = engine()
         val events = mutableListOf<TabataEvent>()
         val job = launch { engine.events.toList(events) }
