@@ -45,6 +45,13 @@ sealed class TimerEvent {
      */
     data class CountdownTick(val secondsRemaining: Int) : TimerEvent()
 
-    /** Emitted once when totalDurationMillis is reached. */
-    object WorkoutCompleted : TimerEvent()
+    /**
+     * Emitted once when totalDurationMillis is reached.
+     *
+     * @property elapsedMillis how long the workout actually ran, which is the
+     *   configured total. It is carried here rather than left to the last [Tick]
+     *   because ticks are samples: the final one lands up to a tick before the end,
+     *   and a summary built from it reports a workout a second shorter than it was.
+     */
+    data class WorkoutCompleted(val elapsedMillis: Long) : TimerEvent()
 }

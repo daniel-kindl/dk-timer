@@ -28,6 +28,39 @@ jobs:
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
 
+      # Report-only, never gated. There is no coverage threshold anywhere in this
+      # repository on purpose: a percentage is easy to move by writing tests that
+      # touch lines without asserting anything, and gating rewards exactly that.
+      #
+      # koverLogDebug prints the per-package breakdown, copied into the job summary
+      # so it is visible during review without downloading anything. The aggregate
+      # and the per-file detail live in the uploaded HTML report. See the kover block
+      # in app/build.gradle.kts for what is excluded and why.
+      - name: Measure coverage
+        run: |
+          set -euo pipefail
+          ./gradlew koverLogDebug koverXmlReportDebug koverHtmlReportDebug --stacktrace \
+            | tee gradle-coverage.log
+          {
+            echo "## Coverage"
+            echo
+            echo '```'
+            grep -E 'Line coverage by package|line coverage:' gradle-coverage.log
+            echo '```'
+            echo
+            echo "Full report with per-file detail is in the \`coverage-report\` artifact."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: |
+            app/build/reports/kover/htmlDebug/
+            app/build/reports/kover/reportDebug.xml
+          retention-days: 7
+
       - name: Run detekt
         run: ./gradlew detekt --stacktrace
 
@@ -135,7 +168,12 @@ jobs:
 
       # A prerelease, which is what keeps the channels apart: the stable app reads
       # releases/latest, and GitHub excludes prereleases from that endpoint entirely.
-      - name: Publish prerelease
+      #
+      # Created as a draft and published in the next step, not in one go. GitHub makes
+      # a release immutable the moment it is published, so a single-step publish
+      # uploads the first asset and then fails on the second, leaving a release with
+      # no downloads attached. Drafts stay writable, so all assets land first.
+      - name: Create draft prerelease
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.TAG }}
@@ -167,8 +205,17 @@ jobs:
           files: |
             app/build/outputs/apk/dev/*.apk
             app/build/outputs/apk/dev/*.apk.sha256
+          draft: true
           prerelease: true
           make_latest: false
+
+      # Publishing is what creates the tag and makes the APK downloadable. Kept
+      # separate from the step above so every asset is attached before the release
+      # becomes immutable.
+      - name: Publish the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit "${{ steps.version.outputs.TAG }}" --draft=false --prerelease
 
       # Without this the release list grows by one entry per push, forever.
       - name: Prune old dev prereleases

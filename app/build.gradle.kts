@@ -1,4 +1,7 @@
 import java.util.Properties
+import kotlinx.kover.gradle.plugin.dsl.AggregationType
+import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
+import kotlinx.kover.gradle.plugin.dsl.GroupingEntityType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -8,6 +11,7 @@ plugins {
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.kover)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -33,8 +37,8 @@ android {
         applicationId = "dev.danielkindl.ocho"
         minSdk = 26
         targetSdk = 36
-        versionCode = 8
-        versionName = "3.1.0"
+        versionCode = 9
+        versionName = "3.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
 
@@ -189,4 +193,84 @@ detekt {
     config.setFrom(rootProject.file("detekt.yml"))
     buildUponDefaultConfig = true
     source.setFrom("src/main/kotlin", "src/test/kotlin")
+}
+
+/**
+ * Coverage, reported but never gated on.
+ *
+ * A coverage percentage is easy to move dishonestly, so it is published as
+ * information rather than enforced as a threshold. There is no `verify` rule here on
+ * purpose: gating would reward tests written to touch lines over tests that assert
+ * something.
+ *
+ * Only the `debug` variant is measured, because `testDebugUnitTest` is the only suite
+ * that runs. The exclusions below decide whether the number means anything at all:
+ * measured across every class it would mostly describe Compose, which this project
+ * verifies by reading rather than by running.
+ */
+kover {
+    reports {
+        filters {
+            excludes {
+                // Composables, wherever they live. Excluded by annotation rather than
+                // by package so plain logic that happens to sit under `ui/`, the setup
+                // state in particular, still counts.
+                annotatedBy("androidx.compose.runtime.Composable")
+
+                // Thin by design: view models wire flows together and hold no logic of
+                // their own. Documented in CLAUDE.md as deliberately untested.
+                classes("*ViewModel")
+
+                // Colour and type tokens. Declarations, nothing to execute.
+                packages("dev.danielkindl.ocho.ui.theme")
+
+                // Android entry points, which a unit test cannot instantiate. The
+                // `$*` forms matter: patterns are anchored at the start of the
+                // fully-qualified name, so without them the lambdas Kotlin compiles
+                // into nested classes stay in the count.
+                classes(
+                    "dev.danielkindl.ocho.MainActivity",
+                    "dev.danielkindl.ocho.MainActivity\$*",
+                    "dev.danielkindl.ocho.OchoApp",
+                    "dev.danielkindl.ocho.OchoApp\$*",
+                    "dev.danielkindl.ocho.BuildConfig",
+                )
+
+                // Generated code. Counting it would measure Dagger and the Compose
+                // compiler rather than anything written here.
+                annotatedBy("*Generated*")
+                classes(
+                    "*.Hilt_*",
+                    "*_Factory",
+                    "*_Factory\$*",
+                    "*_MembersInjector",
+                    "*_HiltModules*",
+                    "*_GeneratedInjector",
+                    "*ComposableSingletons*",
+                    "dagger.hilt.*",
+                    "hilt_aggregated_deps.*",
+                )
+            }
+        }
+
+        // Off during `check`: the reports are produced by an explicit CI step so a
+        // local `./gradlew check` stays as fast as it was.
+        variant("debug") {
+            xml { onCheck = false }
+            html { onCheck = false }
+
+            // Grouped by package rather than reported as one figure. A single number
+            // here would be a blend of two things measured for different reasons, and
+            // it invites the wrong reaction; split by package it is obvious which
+            // packages the tests are actually meant to cover. The aggregate and the
+            // per-file detail are both in the HTML report.
+            log {
+                onCheck = false
+                header = "Line coverage by package (reported, never gated):"
+                groupBy = GroupingEntityType.PACKAGE
+                coverageUnits = CoverageUnit.LINE
+                aggregationForGroup = AggregationType.COVERED_PERCENTAGE
+            }
+        }
+    }
 }

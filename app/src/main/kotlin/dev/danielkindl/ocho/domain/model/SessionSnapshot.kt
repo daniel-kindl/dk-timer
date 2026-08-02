@@ -53,4 +53,7 @@ enum class WorkoutMode {
 
     /** Alternating work and rest phases. */
     TABATA,
+
+    /** As many rounds as possible: one unbroken effort with no interval beeps. */
+    AMRAP,
 }

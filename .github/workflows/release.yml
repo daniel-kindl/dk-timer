@@ -182,7 +182,11 @@ jobs:
           echo "$CHANGES" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub Release
+      # Created as a draft and published in the next step. GitHub makes a release
+      # immutable the moment it is published, so a single-step publish uploads the
+      # first asset and then fails on the second, leaving a release users cannot
+      # download anything from. Drafts stay writable, so all assets land first.
+      - name: Create draft release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.VERSION }}
@@ -214,5 +218,14 @@ jobs:
           files: |
             app/build/outputs/apk/release/*.apk
             app/build/outputs/apk/release/*.apk.sha256
-          draft: false
+          draft: true
           prerelease: false
+
+      # Publishing creates the tag's release entry and marks it latest, which is the
+      # endpoint the stable channel's updater reads.
+      - name: Publish the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release edit "${{ steps.version.outputs.VERSION }}" \
+            --draft=false --prerelease=false --latest

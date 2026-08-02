@@ -73,7 +73,12 @@ class TimerEngineImpl(
                 lastCompletedInterval = completedIntervals
 
                 if (elapsed >= config.totalDurationMillis) {
-                    _events.emit(TimerEvent.WorkoutCompleted)
+                    // Reports the configured total, not the sampled `elapsed`. The loop
+                    // wakes at or just after the end, so `elapsed` carries whatever
+                    // scheduling jitter the device contributed, and a summary should not
+                    // vary by device. The workout ran its full length; that is what
+                    // completing means.
+                    _events.emit(TimerEvent.WorkoutCompleted(config.totalDurationMillis))
                     return@launch
                 }
 

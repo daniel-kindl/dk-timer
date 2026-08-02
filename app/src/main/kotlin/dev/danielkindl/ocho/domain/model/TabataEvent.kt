@@ -55,6 +55,13 @@ sealed class TabataEvent {
      */
     data class CountdownTick(val secondsRemaining: Int) : TabataEvent()
 
-    /** Emitted once the workout is done (after the last phase finishes). */
-    data object WorkoutCompleted : TabataEvent()
+    /**
+     * Emitted once the workout is done (after the last phase finishes).
+     *
+     * @property elapsedMillis how long the workout actually ran, which is the sum of
+     *   the phases and so can exceed the configured total, since a phase is never cut
+     *   short. Carried here rather than left to the last [Tick] because ticks are
+     *   samples and the final one lands before the true end.
+     */
+    data class WorkoutCompleted(val elapsedMillis: Long) : TabataEvent()
 }

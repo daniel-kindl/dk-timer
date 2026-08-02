@@ -29,13 +29,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.danielkindl.ocho.R
+import dev.danielkindl.ocho.domain.model.WorkoutMode
 
-/** Entry point: pick a timer mode, or open settings. */
+/**
+ * Entry point: pick a timer mode, or open settings.
+ *
+ * @param onOpenMode takes the mode rather than one callback per card, so adding a
+ *   fourth mode is a card here and nothing in the navigation graph.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onOpenEmom: () -> Unit,
-    onOpenTabata: () -> Unit,
+    onOpenMode: (WorkoutMode) -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     Scaffold(
@@ -72,7 +77,7 @@ fun HomeScreen(
                 subtitle = "Every minute on the minute",
                 description = "One continuous work phase with a beep at every interval boundary.",
                 icon = painterResource(R.drawable.ic_activity),
-                onClick = onOpenEmom,
+                onClick = { onOpenMode(WorkoutMode.EMOM) },
             )
 
             TimerTypeCard(
@@ -80,7 +85,15 @@ fun HomeScreen(
                 subtitle = "Alternating work and rest",
                 description = "Work and rest phases alternate, each with its own colour and beep.",
                 icon = painterResource(R.drawable.ic_rotate_cw),
-                onClick = onOpenTabata,
+                onClick = { onOpenMode(WorkoutMode.TABATA) },
+            )
+
+            TimerTypeCard(
+                title = "AMRAP",
+                subtitle = "As many rounds as possible",
+                description = "One unbroken block with no interval beeps, counting down to the finish.",
+                icon = painterResource(R.drawable.ic_zap),
+                onClick = { onOpenMode(WorkoutMode.AMRAP) },
             )
         }
     }
