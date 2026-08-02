@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [3.2.1] - 2026-08-02
+
 ### Fixed
 - **An EMOM whose total is not a multiple of its interval finished unannounced.** A 65
   second workout at 20 second intervals spent its last five seconds counting toward a
@@ -318,7 +322,8 @@ derived from a domain rather than the product name, so future renames are cosmet
 
 ---
 
-[Unreleased]: https://github.com/daniel-kindl/ocho/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/daniel-kindl/ocho/compare/v3.2.1...HEAD
+[3.2.1]: https://github.com/daniel-kindl/ocho/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/daniel-kindl/ocho/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/daniel-kindl/ocho/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/daniel-kindl/ocho/compare/v2.3.0...v3.0.0
