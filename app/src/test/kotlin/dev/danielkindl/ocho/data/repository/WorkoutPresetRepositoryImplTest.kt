@@ -1,7 +1,11 @@
 package dev.danielkindl.ocho.data.repository
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import dev.danielkindl.ocho.domain.model.BuiltInPresets
+import dev.danielkindl.ocho.domain.model.DEVICE_CHECK_PRESETS
 import dev.danielkindl.ocho.domain.model.WorkoutMode
 import dev.danielkindl.ocho.domain.model.WorkoutPreset
 import kotlinx.coroutines.flow.first
@@ -19,6 +23,12 @@ import org.junit.Test
  */
 class WorkoutPresetRepositoryImplTest {
 
+    /** Built-ins default to none, which is the stable channel's configuration. */
+    private fun repository(
+        dataStore: DataStore<Preferences> = FakeDataStore(),
+        builtIn: List<WorkoutPreset> = emptyList(),
+    ) = WorkoutPresetRepositoryImpl(dataStore, BuiltInPresets(builtIn))
+
     private fun emomPreset(id: String, name: String = "test") = WorkoutPreset(
         id = id,
         name = name,
@@ -31,13 +41,13 @@ class WorkoutPresetRepositoryImplTest {
 
     @Test
     fun `getPresets returns empty list when nothing has been saved`() = runTest {
-        val repository = WorkoutPresetRepositoryImpl(FakeDataStore())
+        val repository = repository()
         assertTrue(repository.getPresets(WorkoutMode.EMOM).first().isEmpty())
     }
 
     @Test
     fun `savePreset then getPresets round-trips a single preset`() = runTest {
-        val repository = WorkoutPresetRepositoryImpl(FakeDataStore())
+        val repository = repository()
         val saved = emomPreset("1", "My Preset")
 
         repository.savePreset(saved)
@@ -47,7 +57,7 @@ class WorkoutPresetRepositoryImplTest {
 
     @Test
     fun `savePreset with an existing id replaces rather than duplicates`() = runTest {
-        val repository = WorkoutPresetRepositoryImpl(FakeDataStore())
+        val repository = repository()
         repository.savePreset(emomPreset("1", "Original"))
         repository.savePreset(emomPreset("1", "Updated"))
 
@@ -59,7 +69,7 @@ class WorkoutPresetRepositoryImplTest {
 
     @Test
     fun `deletePreset removes only the matching id`() = runTest {
-        val repository = WorkoutPresetRepositoryImpl(FakeDataStore())
+        val repository = repository()
         repository.savePreset(emomPreset("1"))
         repository.savePreset(emomPreset("2"))
 
@@ -70,7 +80,7 @@ class WorkoutPresetRepositoryImplTest {
 
     @Test
     fun `multiple presets round-trip in save order`() = runTest {
-        val repository = WorkoutPresetRepositoryImpl(FakeDataStore())
+        val repository = repository()
         repository.savePreset(emomPreset("1"))
         repository.savePreset(emomPreset("2"))
         repository.savePreset(emomPreset("3"))
@@ -85,14 +95,14 @@ class WorkoutPresetRepositoryImplTest {
     fun `corrupt stored JSON falls back to an empty list`() = runTest {
         val dataStore = FakeDataStore()
         dataStore.edit { it[stringPreferencesKey("workout_presets")] = "not valid json" }
-        val repository = WorkoutPresetRepositoryImpl(dataStore)
+        val repository = repository(dataStore)
 
         assertTrue(repository.getPresets(WorkoutMode.EMOM).first().isEmpty())
     }
 
     @Test
     fun `every mode round-trips its own duration fields`() = runTest {
-        val repository = WorkoutPresetRepositoryImpl(FakeDataStore())
+        val repository = repository()
         val presets = listOf(
             WorkoutPreset(
                 id = "emom", name = "EMOM", mode = WorkoutMode.EMOM,
@@ -122,7 +132,7 @@ class WorkoutPresetRepositoryImplTest {
     fun `getPresets never leaks another mode's configuration`() = runTest {
         // The reason filtering lives in the repository rather than the caller: a setup
         // screen must not be able to offer a preset it has no pickers for.
-        val repository = WorkoutPresetRepositoryImpl(FakeDataStore())
+        val repository = repository()
         repository.savePreset(emomPreset("1"))
 
         assertTrue(repository.getPresets(WorkoutMode.TABATA).first().isEmpty())
@@ -134,7 +144,7 @@ class WorkoutPresetRepositoryImplTest {
         // A future mode's preset read back by an older build. Dropping just that one
         // entry is why JsonListDataStore parses items individually.
         val dataStore = FakeDataStore()
-        val repository = WorkoutPresetRepositoryImpl(dataStore)
+        val repository = repository(dataStore)
         repository.savePreset(emomPreset("1"))
 
         val stored = dataStore.data.first()[stringPreferencesKey("workout_presets")]!!
@@ -144,5 +154,78 @@ class WorkoutPresetRepositoryImplTest {
         }
 
         assertEquals(listOf("1"), repository.getPresets(WorkoutMode.EMOM).first().map { it.id })
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Built-in presets
+    // ──────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `built-in presets are served without ever being written to the store`() = runTest {
+        // The whole point of merging them on read: a build that ships presets must not
+        // leave them behind on a device that later installs one that does not.
+        val dataStore = FakeDataStore()
+        val repository = repository(dataStore, DEVICE_CHECK_PRESETS)
+
+        val emom = repository.getPresets(WorkoutMode.EMOM).first()
+
+        assertTrue("Built-ins must be offered", emom.isNotEmpty())
+        assertTrue("Every one of them is marked built-in", emom.all { it.builtIn })
+        assertEquals(
+            "Nothing may be persisted",
+            null,
+            dataStore.data.first()[stringPreferencesKey("workout_presets")],
+        )
+    }
+
+    @Test
+    fun `built-in presets lead, and the user's own keep their save order after them`() = runTest {
+        val repository = repository(builtIn = DEVICE_CHECK_PRESETS)
+        repository.savePreset(emomPreset("mine-1"))
+        repository.savePreset(emomPreset("mine-2"))
+
+        val ids = repository.getPresets(WorkoutMode.EMOM).first().map { it.id }
+        val builtInIds = DEVICE_CHECK_PRESETS.filter { it.mode == WorkoutMode.EMOM }.map { it.id }
+
+        assertEquals(builtInIds + listOf("mine-1", "mine-2"), ids)
+    }
+
+    @Test
+    fun `built-in presets obey the mode filter like any other`() = runTest {
+        val repository = repository(builtIn = DEVICE_CHECK_PRESETS)
+
+        WorkoutMode.entries.forEach { mode ->
+            assertTrue(
+                "A $mode screen must see only $mode presets",
+                repository.getPresets(mode).first().all { it.mode == mode },
+            )
+        }
+    }
+
+    @Test
+    fun `deleting a built-in id leaves it in place`() = runTest {
+        // It is not in the store, so there is nothing to remove. The setup screen
+        // withholds the delete control for that reason; this pins that the repository
+        // is unharmed should some other caller try anyway.
+        val repository = repository(builtIn = DEVICE_CHECK_PRESETS)
+        val target = DEVICE_CHECK_PRESETS.first { it.mode == WorkoutMode.EMOM }
+
+        repository.deletePreset(target.id)
+
+        assertTrue(
+            "A built-in survives a delete of its id",
+            repository.getPresets(WorkoutMode.EMOM).first().any { it.id == target.id },
+        )
+    }
+
+    @Test
+    fun `the stable configuration offers no built-ins at all`() = runTest {
+        // Stable is handed an empty list by DI, so this is shipped behaviour rather
+        // than merely the test default.
+        val repository = repository()
+        repository.savePreset(emomPreset("mine"))
+
+        assertEquals(listOf("mine"), repository.getPresets(WorkoutMode.EMOM).first().map { it.id })
+        assertTrue(repository.getPresets(WorkoutMode.AMRAP).first().isEmpty())
     }
 }

@@ -176,6 +176,7 @@ fun WorkoutSetupScreen(
                     showSaveDialog = true
                 },
                 saveEnabled = state.isValid,
+                canDelete = { !it.builtIn },
             )
 
             Button(

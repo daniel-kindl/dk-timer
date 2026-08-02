@@ -28,6 +28,10 @@ import androidx.compose.ui.unit.dp
  *
  * Generic so it works with any preset type — callers supply [getKey] and
  * [getLabel] to extract display information without coupling to a specific model.
+ *
+ * @param canDelete whether a given preset offers its delete control. Defaults to all of
+ *   them; a build's own presets say no, since deleting one would only bring it back on
+ *   the next launch and an X that does nothing reads as a bug.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +44,7 @@ fun <T> PresetsSection(
     onSavePreset: () -> Unit,
     saveEnabled: Boolean,
     modifier: Modifier = Modifier,
+    canDelete: (T) -> Boolean = { true },
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -71,21 +76,30 @@ fun <T> PresetsSection(
                         selected = false,
                         onClick = { onPresetClick(preset) },
                         label = { Text(getLabel(preset)) },
-                        trailingIcon = {
-                            IconButton(
-                                onClick = { onDeleteClick(preset) },
-                                modifier = Modifier.size(20.dp),
-                            ) {
-                                Icon(
-                                    painterResource(R.drawable.ic_x),
-                                    contentDescription = "Delete ${getLabel(preset)}",
-                                    modifier = Modifier.size(14.dp),
+                        trailingIcon = if (canDelete(preset)) {
+                            {
+                                DeletePresetIcon(
+                                    label = getLabel(preset),
+                                    onClick = { onDeleteClick(preset) },
                                 )
                             }
+                        } else {
+                            null
                         },
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DeletePresetIcon(label: String, onClick: () -> Unit) {
+    IconButton(onClick = onClick, modifier = Modifier.size(20.dp)) {
+        Icon(
+            painterResource(R.drawable.ic_x),
+            contentDescription = "Delete $label",
+            modifier = Modifier.size(14.dp),
+        )
     }
 }

@@ -2,6 +2,7 @@ package dev.danielkindl.ocho.data.repository
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import dev.danielkindl.ocho.domain.model.BuiltInPresets
 import dev.danielkindl.ocho.domain.model.WorkoutMode
 import dev.danielkindl.ocho.domain.model.WorkoutPreset
 import dev.danielkindl.ocho.domain.repository.WorkoutPresetRepository
@@ -16,9 +17,14 @@ import javax.inject.Inject
  * A preset whose stored mode is unrecognised is dropped rather than defaulted. A
  * default would put it on the wrong setup screen, which is more confusing than it
  * simply not being there.
+ *
+ * [builtIn] presets are merged in on read and never written. That keeps the store
+ * holding only what the user saved, so a build that ships presets cannot leave them
+ * behind on a device that later moves to one that does not.
  */
 class WorkoutPresetRepositoryImpl @Inject constructor(
     dataStore: DataStore<Preferences>,
+    private val builtIn: BuiltInPresets,
 ) : WorkoutPresetRepository {
 
     private val store = JsonListDataStore(
@@ -55,8 +61,12 @@ class WorkoutPresetRepositoryImpl @Inject constructor(
         idOf = { it.id },
     )
 
+    // Built-ins lead, so the chips a tester wants sit at the near end of the row and the
+    // user's own presets keep their save order after them.
     override fun getPresets(mode: WorkoutMode): Flow<List<WorkoutPreset>> =
-        store.observe().map { presets -> presets.filter { it.mode == mode } }
+        store.observe().map { stored ->
+            builtIn.presets.filter { it.mode == mode } + stored.filter { it.mode == mode }
+        }
 
     override suspend fun savePreset(preset: WorkoutPreset) = store.upsert(preset)
 
