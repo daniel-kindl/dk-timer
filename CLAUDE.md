@@ -22,8 +22,11 @@ Timer. If you find those names anywhere, they are stale.
 ./gradlew assembleRelease              # signed; needs keystore.properties
 ```
 
-If Gradle reports an invalid `JAVA_HOME`, point it at the installed JDK 17. The
-path goes stale across JDK patch updates.
+If Gradle reports an invalid `JAVA_HOME`, do not repoint it. The machine-scope
+variable is maintained by the JDK installer and is correct; a stale *user*-scope
+copy shadowing it is what breaks, and repointing that only defers the next break to
+the following patch release. Delete the user-scope `JAVA_HOME`, and any user-scope
+`PATH` entry naming a specific JDK version, so the machine values apply again.
 
 ## Rules
 

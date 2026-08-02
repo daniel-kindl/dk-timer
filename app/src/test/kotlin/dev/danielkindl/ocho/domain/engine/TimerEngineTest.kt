@@ -312,6 +312,114 @@ class TimerEngineTest {
     }
 
     @Test
+    fun `the lead-in counts toward the end of a truncated final interval`() = runTest {
+        val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
+        val events = mutableListOf<TimerEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // 65s at 20s: boundaries at 20, 40 and 60, then a 5s remainder. The lead-in used
+        // to be measured against the boundary at 80s, which this workout never reaches,
+        // so the finish arrived unannounced. The remainder is longer than the lead-in and
+        // gets one of its own.
+        engine.start(TimerConfig(intervalMillis = 20_000, totalDurationMillis = 65_000))
+        advanceTimeBy(65_100)
+
+        engine.stop()
+        job.cancel()
+
+        val countdown = events.filterIsInstance<TimerEvent.CountdownTick>()
+        assertEquals(
+            "Three boundaries plus the finish, each with a full lead-in",
+            listOf(3, 2, 1, 3, 2, 1, 3, 2, 1, 3, 2, 1),
+            countdown.map { it.secondsRemaining },
+        )
+    }
+
+    @Test
+    fun `the remaining figure counts toward the end, not toward a boundary beyond it`() = runTest {
+        val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
+        val events = mutableListOf<TimerEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // Same 65s at 20s. The numeral used to read 0:15 as the workout ended, counting
+        // toward the boundary at 80s. It must count the 5s that actually remain.
+        engine.start(TimerConfig(intervalMillis = 20_000, totalDurationMillis = 65_000))
+        advanceTimeBy(65_100)
+
+        engine.stop()
+        job.cancel()
+
+        val lastTick = events.filterIsInstance<TimerEvent.Tick>().last()
+        assertTrue(
+            "The last tick must be counting down the remainder, got ${lastTick.remainingInInterval}",
+            lastTick.remainingInInterval <= 1_000L,
+        )
+    }
+
+    @Test
+    fun `a final interval no longer than the lead-in stays silent`() = runTest {
+        val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
+        val events = mutableListOf<TimerEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // 63s at 20s leaves a 3s remainder, which is not longer than the lead-in. This is
+        // the row that proves the gate is evaluated per interval: capping the boundary
+        // alone would leave it keyed to the configured 20s and count this one down.
+        engine.start(TimerConfig(intervalMillis = 20_000, totalDurationMillis = 63_000))
+        advanceTimeBy(63_100)
+
+        engine.stop()
+        job.cancel()
+
+        val countdown = events.filterIsInstance<TimerEvent.CountdownTick>()
+        assertEquals(
+            "Three boundaries count down; the 3s remainder does not",
+            listOf(3, 2, 1, 3, 2, 1, 3, 2, 1),
+            countdown.map { it.secondsRemaining },
+        )
+    }
+
+    @Test
+    fun `no lead-in when the whole workout is no longer than it`() = runTest {
+        val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
+        val events = mutableListOf<TimerEvent>()
+        val job = launch { engine.events.toList(events) }
+
+        // A 5s interval against a 3s total: the interval never completes, so the workout
+        // is one 3s stretch. It used to emit a lone 3 with no 2 and no 1, because the
+        // gate read the configured 5s while the remainder was measured to the boundary.
+        engine.start(TimerConfig(intervalMillis = 5_000, totalDurationMillis = 3_000))
+        advanceTimeBy(3_100)
+
+        engine.stop()
+        job.cancel()
+
+        assertTrue(
+            "A workout at or below the lead-in counts down not at all",
+            events.filterIsInstance<TimerEvent.CountdownTick>().isEmpty(),
+        )
+    }
+
+    @Test
+    fun `the lead-in fires when the interval outlasts the workout but the workout is long enough`() =
+        runTest {
+            val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
+            val events = mutableListOf<TimerEvent>()
+            val job = launch { engine.events.toList(events) }
+
+            // A 10s interval against a 5s total. The boundary never arrives, but 5s is
+            // longer than the lead-in, so the finish is announced. This was silent before.
+            engine.start(TimerConfig(intervalMillis = 10_000, totalDurationMillis = 5_000))
+            advanceTimeBy(5_100)
+
+            engine.stop()
+            job.cancel()
+
+            val countdown = events.filterIsInstance<TimerEvent.CountdownTick>()
+            assertEquals(listOf(3, 2, 1), countdown.map { it.secondsRemaining })
+        }
+
+    @Test
     fun `countdown does not duplicate across a pause`() = runTest {
         val engine = TimerEngineImpl(Clock { testScheduler.currentTime }, this)
         val events = mutableListOf<TimerEvent>()
