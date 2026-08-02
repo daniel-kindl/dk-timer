@@ -37,8 +37,8 @@ android {
         applicationId = "dev.danielkindl.ocho"
         minSdk = 26
         targetSdk = 36
-        versionCode = 10
-        versionName = "3.2.1"
+        versionCode = 11
+        versionName = "3.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
 
