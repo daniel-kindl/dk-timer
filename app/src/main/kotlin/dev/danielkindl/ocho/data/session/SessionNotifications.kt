@@ -112,19 +112,27 @@ class SessionNotifications @Inject constructor(
         return if (paused) "$phase · paused$rounds" else "$phase$rounds"
     }
 
+    // Both factories pass FLAG_IMMUTABLE on its own. FLAG_UPDATE_CURRENT used to be
+    // or-ed in, and did nothing: it refreshes the extras of a matching PendingIntent,
+    // these carry none, and PendingIntent matching ignores extras anyway. Every
+    // request code here already maps to one fixed intent, so there is nothing to
+    // update. Passing the flag alone also keeps the immutability legible to static
+    // analysis, which reads through a bitwise `|` but not through Kotlin's infix
+    // `or` — that gap is what made CodeQL treat these as mutable.
     private fun openAppIntent(): PendingIntent {
         val intent = Intent(context, MainActivity::class.java)
-            .setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        return PendingIntent.getActivity(context, 0, intent, IMMUTABLE_UPDATE)
+        intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
     }
 
     private fun servicePendingIntent(action: String): PendingIntent {
-        val intent = Intent(context, SessionService::class.java).setAction(action)
-        return PendingIntent.getService(context, action.hashCode(), intent, IMMUTABLE_UPDATE)
-    }
-
-    private companion object {
-        const val IMMUTABLE_UPDATE =
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        val intent = Intent(context, SessionService::class.java)
+        intent.action = action
+        return PendingIntent.getService(
+            context,
+            action.hashCode(),
+            intent,
+            PendingIntent.FLAG_IMMUTABLE,
+        )
     }
 }

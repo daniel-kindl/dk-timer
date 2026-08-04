@@ -55,6 +55,12 @@ updates:
       prefix: ci
       include: scope
     open-pull-requests-limit: 5
+    # codeql-action is deliberately tracked at its floating major tag. It ships a
+    # patch every week or two, mostly to advance the bundled query pack, and the
+    # major tag picks those up without a PR each time. Left alone, Dependabot
+    # rewrites `@v4` to an exact patch and then churns on it forever.
+    ignore:
+      - dependency-name: "github/codeql-action"
     groups:
       actions:
         update-types:
