@@ -112,19 +112,31 @@ class SessionNotifications @Inject constructor(
         return if (paused) "$phase · paused$rounds" else "$phase$rounds"
     }
 
+    // Both factories below spell out the destination component and the flags at the
+    // PendingIntent call site rather than sharing them through a constant or a fluent
+    // chain. A PendingIntent that is mutable and has no component can be filled in by
+    // whoever receives the notification, so static analysis checks for both here; it
+    // reads a named flag constant or a builder's return value as neither. Folding
+    // these back into something tidier reintroduces a false positive, not a bug.
     private fun openAppIntent(): PendingIntent {
         val intent = Intent(context, MainActivity::class.java)
-            .setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        return PendingIntent.getActivity(context, 0, intent, IMMUTABLE_UPDATE)
+        intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        return PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
     }
 
     private fun servicePendingIntent(action: String): PendingIntent {
-        val intent = Intent(context, SessionService::class.java).setAction(action)
-        return PendingIntent.getService(context, action.hashCode(), intent, IMMUTABLE_UPDATE)
-    }
-
-    private companion object {
-        const val IMMUTABLE_UPDATE =
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        val intent = Intent(context, SessionService::class.java)
+        intent.action = action
+        return PendingIntent.getService(
+            context,
+            action.hashCode(),
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
     }
 }
