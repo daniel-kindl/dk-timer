@@ -112,21 +112,17 @@ class SessionNotifications @Inject constructor(
         return if (paused) "$phase · paused$rounds" else "$phase$rounds"
     }
 
-    // Both factories below spell out the destination component and the flags at the
-    // PendingIntent call site rather than sharing them through a constant or a fluent
-    // chain. A PendingIntent that is mutable and has no component can be filled in by
-    // whoever receives the notification, so static analysis checks for both here; it
-    // reads a named flag constant or a builder's return value as neither. Folding
-    // these back into something tidier reintroduces a false positive, not a bug.
+    // Both factories pass FLAG_IMMUTABLE on its own. FLAG_UPDATE_CURRENT used to be
+    // or-ed in, and did nothing: it refreshes the extras of a matching PendingIntent,
+    // these carry none, and PendingIntent matching ignores extras anyway. Every
+    // request code here already maps to one fixed intent, so there is nothing to
+    // update. Passing the flag alone also keeps the immutability legible to static
+    // analysis, which reads through a bitwise `|` but not through Kotlin's infix
+    // `or` — that gap is what made CodeQL treat these as mutable.
     private fun openAppIntent(): PendingIntent {
         val intent = Intent(context, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        return PendingIntent.getActivity(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-        )
+        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
     }
 
     private fun servicePendingIntent(action: String): PendingIntent {
@@ -136,7 +132,7 @@ class SessionNotifications @Inject constructor(
             context,
             action.hashCode(),
             intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            PendingIntent.FLAG_IMMUTABLE,
         )
     }
 }
