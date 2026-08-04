@@ -9,6 +9,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- A privacy policy in `PRIVACY.md`, and a Privacy section in the README. Ocho already
+  collected nothing, but the only place that was written down was SECURITY.md, which
+  almost nobody opens. The policy names every permission and why it exists, and is
+  explicit about the one thing the app cannot promise away: GitHub, as the host of the
+  update check, sees the request's IP the way any website does.
+- `docs/METRICS.md`, explaining how usage is estimated from GitHub's public download
+  counts, why stable APK downloads approximate active installs given how the in-app
+  updater fetches them, and what the figure deliberately cannot show.
+
+### CI
+- A daily `stats` workflow snapshots release download counts, repository traffic, and
+  the headline counters to an orphan `stats` branch. GitHub's traffic data expires
+  after fourteen days and `download_count` is cumulative, so the shape of growth exists
+  only if something records it. Nothing is collected from the app or its users.
+
 ---
 
 ## [3.3.1] - 2026-08-04

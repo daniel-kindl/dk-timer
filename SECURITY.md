@@ -25,6 +25,8 @@ rather than hours.
 Ocho is a workout timer with no accounts, no backend, no analytics, and no
 telemetry. It makes exactly one kind of network request, and that request is also
 its entire meaningful attack surface, so it's worth being specific about it.
+([PRIVACY.md](PRIVACY.md) covers the same ground from the user's side; this section
+is about what an attacker would go after.)
 
 The app updates itself by downloading and installing an APK. It holds `INTERNET`
 and `REQUEST_INSTALL_PACKAGES`, polls the GitHub Releases API for

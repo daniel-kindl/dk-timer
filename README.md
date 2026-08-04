@@ -57,6 +57,7 @@ every trace of colour removed:
 | Exit confirmation | The back gesture and Stop both ask before ending a running session |
 | In-app updates | Checks GitHub Releases and installs updates without a store |
 | Workout-first UI | Large high-contrast display, screen stays on, one-hand friendly |
+| No ads, no tracking | No accounts, no backend, no analytics, no telemetry; one network request, and it's the update check |
 
 ---
 
@@ -104,6 +105,26 @@ independently, and holds the update checker and the licence notices.
 
 ---
 
+## Privacy
+
+Ocho collects nothing. No ads, no accounts, no backend, no analytics, no telemetry, no
+advertising ID. Your presets and settings live in the app's private storage and are
+deleted when you uninstall it.
+
+The app makes exactly one kind of network request: it asks `api.github.com` whether a
+newer release exists, and downloads the APK from `objects.githubusercontent.com` if you
+tap Update. No request body, no identifier, no cookie, no account.
+
+The one thing that can't be promised away is that GitHub, as host, sees the IP address
+of that request the way any website does. Full detail, including every permission and
+why it exists, is in [PRIVACY.md](PRIVACY.md).
+
+Usage is estimated from GitHub's public download counts rather than from anything on
+your device; how that works, and what it deliberately cannot tell us, is in
+[docs/METRICS.md](docs/METRICS.md).
+
+---
+
 ## Building from source
 
 Build requirements, the Gradle commands, release signing, the package layout, and the
@@ -116,7 +137,7 @@ reasoning behind the timing, session, and colour design are in
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for branch rules, commit conventions, the
 release process, and the [contributor terms](CONTRIBUTING.md#contributor-terms).
-Security policy: [SECURITY.md](SECURITY.md).
+Security policy: [SECURITY.md](SECURITY.md). Privacy policy: [PRIVACY.md](PRIVACY.md).
 
 ---
 

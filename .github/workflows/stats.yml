@@ -1,0 +1,107 @@
+name: Stats
+
+# Records the usage numbers GitHub already keeps, because they expire: asset
+# download counts are cumulative and never say when a download happened, and the
+# traffic endpoints retain fourteen days. Snapshots land on the orphan `stats`
+# branch rather than in the tree, so that release.yml's Conventional Commits
+# analysis and every release diff stay free of daily bot commits.
+
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: stats
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    name: Snapshot repository stats
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Prepare the stats branch
+        run: |
+          set -euo pipefail
+
+          if git ls-remote --exit-code --heads origin stats >/dev/null 2>&1; then
+            git fetch --depth=1 origin stats
+            git worktree add stats-data FETCH_HEAD
+            git -C stats-data switch -C stats
+          else
+            echo "No stats branch yet, creating it as an orphan."
+            git worktree add --detach stats-data
+            git -C stats-data checkout --orphan stats
+            git -C stats-data rm -rf --quiet . 2>/dev/null || true
+          fi
+
+          if [[ ! -f stats-data/README.md ]]; then
+            cat > stats-data/README.md <<'EOF'
+          # Ocho stats
+
+          Daily snapshots of the counters GitHub keeps about this repository,
+          written by `.github/workflows/stats.yml`. No data is collected from
+          the app or its users.
+
+          How to read these numbers, and what they cannot tell you, is in
+          [docs/METRICS.md](https://github.com/daniel-kindl/ocho/blob/main/docs/METRICS.md).
+          EOF
+          fi
+
+      - name: Collect
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python3 .github/scripts/collect_stats.py --out stats-data
+
+      - name: Summarise
+        run: |
+          set -euo pipefail
+          {
+            echo "## Stats snapshot"
+            echo
+            python3 - <<'PY'
+          import csv, pathlib
+          root = pathlib.Path("stats-data")
+
+          downloads = list(csv.DictReader((root / "downloads.csv").open(encoding="utf-8")))
+          latest = max((r["date"] for r in downloads), default=None)
+          today = [r for r in downloads if r["date"] == latest]
+          stable = [r for r in today if r["prerelease"] == "false" and r["asset"].endswith(".apk")]
+          print(f"- Snapshot date: `{latest}`")
+          print(f"- Stable APK downloads to date: **{sum(int(r['download_count']) for r in stable)}**")
+          print(f"- Assets tracked: {len(today)}")
+
+          traffic = root / "traffic.csv"
+          if traffic.exists():
+              rows = sorted(csv.DictReader(traffic.open(encoding="utf-8")), key=lambda r: r["date"])[-14:]
+              print(f"- Unique visitors, last 14 days: {sum(int(r['unique_views']) for r in rows)}")
+              print(f"- Unique cloners, last 14 days: {sum(int(r['unique_clones']) for r in rows)}")
+          else:
+              print("- Traffic: not collected (token lacks push access)")
+          PY
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+
+          cd stats-data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "Nothing changed since the last snapshot."
+            exit 0
+          fi
+
+          git commit -m "chore(stats): snapshot $(date -u +%Y-%m-%d)"
+          git push -u origin stats
