@@ -1,13 +1,18 @@
 name: CodeQL
 
-# Runs on dev rather than main. main only advances via a release PR, so a
-# main-triggered scan would report findings after review instead of during it.
+# dev is where findings are meant to surface: it is scanned on every push and
+# every PR, so a finding lands during review rather than after it. main is
+# scanned as well, for a different reason — it is the default branch, which is
+# the one the security tab reports against. Scanned only by the weekly cron, an
+# alert fixed on dev stayed open on main for up to a week after the fix reached
+# it, which is indistinguishable from a fix that did not work.
+#
 # The weekly schedule exists because CodeQL's query packs improve over time:
 # code that scanned clean six months ago can have a finding today without any
 # commit having touched it.
 on:
   push:
-    branches: [ dev ]
+    branches: [ dev, main ]
   pull_request:
     branches: [ dev ]
   schedule:

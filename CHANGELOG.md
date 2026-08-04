@@ -24,6 +24,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - `actions/setup-java` pinned to 5.7.0
 - `github/codeql-action` excluded from Dependabot, which had started rewriting the
   floating `@v4` tag to exact patches
+- CodeQL now scans `main` on push as well as `dev`. `main` is the default branch and
+  so the one the security tab reports against, but it was only ever reached by the
+  weekly schedule, which left an alert already fixed on `dev` showing as open for
+  up to a week
 
 ---
 
