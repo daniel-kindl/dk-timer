@@ -112,19 +112,35 @@ class SessionNotifications @Inject constructor(
         return if (paused) "$phase · paused$rounds" else "$phase$rounds"
     }
 
+    // Both factories set the destination with setClass rather than the two-argument
+    // Intent(Context, Class) constructor. The two are the same assignment — the
+    // constructor's whole body is the ComponentName setClass builds — but only the
+    // setter form is legible to CodeQL, whose explicit-intent check matches the
+    // setClass/setClassName/setComponent/setPackage names directly and otherwise
+    // looks for a Java class literal it does not find in Kotlin's `X::class.java`.
+    // Written the obvious way, these read as component-less intents wrapped in a
+    // PendingIntent and handed to whoever receives the notification, which is a real
+    // vulnerability and is why the query is worth keeping quiet honestly.
+    //
+    // FLAG_IMMUTABLE is passed alone. FLAG_UPDATE_CURRENT was dropped as a no-op:
+    // it refreshes the extras of a matching PendingIntent, these carry none, and
+    // PendingIntent matching ignores extras regardless.
     private fun openAppIntent(): PendingIntent {
-        val intent = Intent(context, MainActivity::class.java)
-            .setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        return PendingIntent.getActivity(context, 0, intent, IMMUTABLE_UPDATE)
+        val intent = Intent()
+        intent.setClass(context, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
     }
 
     private fun servicePendingIntent(action: String): PendingIntent {
-        val intent = Intent(context, SessionService::class.java).setAction(action)
-        return PendingIntent.getService(context, action.hashCode(), intent, IMMUTABLE_UPDATE)
-    }
-
-    private companion object {
-        const val IMMUTABLE_UPDATE =
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        val intent = Intent()
+        intent.setClass(context, SessionService::class.java)
+        intent.action = action
+        return PendingIntent.getService(
+            context,
+            action.hashCode(),
+            intent,
+            PendingIntent.FLAG_IMMUTABLE,
+        )
     }
 }

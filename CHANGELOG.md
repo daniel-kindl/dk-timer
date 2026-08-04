@@ -11,6 +11,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [3.3.1] - 2026-08-04
+
+### Internal
+- The ongoing session notification's pending intents now set their destination with
+  `setClass` and pass `FLAG_IMMUTABLE` alone. Both were already explicit and immutable,
+  so the notification behaves exactly as before; the rewrite is what makes that visible
+  to CodeQL, which does not read Kotlin's `X::class.java` as a class literal and so took
+  `Intent(context, X::class.java)` for a component-less intent
+
+### CI
+- `actions/setup-java` pinned to 5.7.0
+- `github/codeql-action` excluded from Dependabot, which had started rewriting the
+  floating `@v4` tag to exact patches
+
+---
+
 ## [3.3.0] - 2026-08-02
 
 ### Added
@@ -347,7 +363,9 @@ derived from a domain rather than the product name, so future renames are cosmet
 
 ---
 
-[Unreleased]: https://github.com/daniel-kindl/ocho/compare/v3.2.1...HEAD
+[Unreleased]: https://github.com/daniel-kindl/ocho/compare/v3.3.1...HEAD
+[3.3.1]: https://github.com/daniel-kindl/ocho/compare/v3.3.0...v3.3.1
+[3.3.0]: https://github.com/daniel-kindl/ocho/compare/v3.2.1...v3.3.0
 [3.2.1]: https://github.com/daniel-kindl/ocho/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/daniel-kindl/ocho/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/daniel-kindl/ocho/compare/v3.0.0...v3.1.0
